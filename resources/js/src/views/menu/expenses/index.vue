@@ -51,7 +51,7 @@
             <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
-                        <h4 class="modal-title">Add Expense</h4>
+                        <h4 class="modal-title">{{ modal.title }}</h4>
                         <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
@@ -160,7 +160,7 @@
                                     <div class="invalid-feedback">Please provide a valid invoice number</div>
                                 </div>
                             </div>
-                            <button class="btn btn-primary mt-3" type="submit">Add</button>
+                            <button class="btn btn-primary mt-3" type="submit">{{modal.button}}</button>
                         </form>
 
 
@@ -186,6 +186,7 @@ const items = ref([]);
 const cases = ref([]); // List of advocates
 const users = ref([]);
 const code_arr = ref([]);
+const modal = ref({title: "", button: ""});
 const table_option = ref({
     perPage: 10,
     perPageValues: [5, 10, 20, 50],
@@ -253,11 +254,15 @@ const submit_form4 = () => {
         }
 
         client.value.id = "";
+        modal.value.title = "Add Expense";
+        modal.value.button = "Add";
 
     }
 };
 
 const fetchData = () => {
+    modal.value.title = "Add Expense";
+    modal.value.button = "Add";
     // Fetch list of clients
     axios.get('/api/expenses')
         .then(response => {
@@ -295,6 +300,9 @@ const update_row = (item) => {
     client.value.payment_method = item.payment_method;
     client.value.invoice_number = item.invoice_number;
     client.value.user_id = item.user_id;
+
+    modal.value.title = "Update Expense";
+    modal.value.button = "Update";
 
 };
 </script>

@@ -51,7 +51,7 @@
             <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
-                        <h4 class="modal-title">Add User</h4>
+                        <h4 class="modal-title">{{ modal.title }}</h4>
                         <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
@@ -132,7 +132,7 @@
                                 </div>
 
                             </div>
-                            <button class="btn btn-primary mt-3" type="submit">Add</button>
+                            <button class="btn btn-primary mt-3" type="submit">{{ modal.button }}</button>
                         </form>
 
                     </div>
@@ -156,6 +156,7 @@ const columns = ref(['name', 'email', 'phone_number', 'department', 'hire_date',
 const items = ref([]);
 const roles = ref([]); // List of advocates
 const code_arr = ref([]);
+const modal = ref({title: "", button: ""});
 const table_option = ref({
     perPage: 10,
     perPageValues: [5, 10, 20, 50],
@@ -223,11 +224,15 @@ const submit_form4 = () => {
         }
 
         client.value.id = "";
+        modal.value.title = "Add User";
+        modal.value.button = "Add";
 
     }
 };
 
 const fetchData = () => {
+    modal.value.title = "Add User";
+    modal.value.button = "Add";
     // Fetch list of clients
     axios.get('/api/users')
         .then(response => {
@@ -254,6 +259,9 @@ const update_row = (item) => {
     client.value.role = item.role_id;
     client.value.department = item.department;
     client.value.hire_date = item.hire_date;
+
+    modal.value.title = "Update User";
+    modal.value.button = "Update";
 
 };
 </script>
