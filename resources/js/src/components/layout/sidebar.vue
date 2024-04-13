@@ -57,6 +57,203 @@
                     </ul>
                 </li>
 
+                <!-- Start Users Menu -->
+                <li class="menu">
+                    <router-link to="/users" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-users"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Users') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Users Menu -->
+
+                <!-- Start Clients Menu -->
+                <li class="menu">
+                    <router-link to="/clients" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-pie-chart"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Clients') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Clients Menu -->
+
+                <!-- Start Cases Menu -->
+                <li class="menu">
+                    <router-link to="/cases" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-pie-chart"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Cases') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Cases Menu -->
+
+                <!-- Start Court Type Menu -->
+                <li class="menu">
+                    <router-link to="/courttypes" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-users"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Court Types') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Court Type Menu -->
+
+                <!-- Start Courts Menu -->
+                <li class="menu">
+                    <router-link to="/courts" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-users"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Courts') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Courts Menu -->
+
+                <!-- Start Expenses Menu -->
+                <li class="menu">
+                    <router-link to="/expenses" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-users"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Expenses') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Expenses Menu -->
+                <!-- Start Task Menu -->
+                <li class="menu">
+                    <router-link to="/tasks" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-users"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Tasks') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Task Menu -->
+                <!-- Start Hearings Menu -->
+                <li class="menu">
+                    <router-link to="/hearings" class="dropdown-toggle" @click="toggleMobileMenu">
+                        <div class="">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-users"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                            <span>{{ $t('Hearings') }}</span>
+                        </div>
+                    </router-link>
+                </li>
+                <!-- End Hearings Menu -->
                 <li class="menu">
                     <a class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#apps" aria-controls="apps" aria-expanded="false">
                         <div class="">

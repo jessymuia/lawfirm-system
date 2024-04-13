@@ -18,6 +18,76 @@ const routes = [
         component: () => import(/* webpackChunkName: "index2" */ '../views/index2.vue'),
     },
 
+    //users
+    {
+        path: '/users',
+        name: 'users',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/users/index.vue'),
+    },
+
+    //court types
+    {
+        path: '/courttypes',
+        name: 'court-types',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/types.vue'),
+    },
+
+    //court types
+    {
+        path: '/courts',
+        name: 'courts',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/index.vue'),
+    },
+
+    //court types
+    {
+        path: '/expenses',
+        name: 'expenses',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/expenses/index.vue'),
+    },
+    //heearings types
+    {
+        path: '/hearings',
+        name: 'hearings',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/hearings/index.vue'),
+    },
+    //tasks types
+    {
+        path: '/tasks',
+        name: 'tasks',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/tasks/index.vue'),
+    },
+
+    // clients menu
+    {
+        path: "/clients",
+        name: "clients",
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/clients/list-clients.vue'),
+    },
+    // view client details
+    {
+        path: "/clients/:id",
+        name: "client-details",
+        component: () => import(/* webpackChunkName: "client" */ '../views/menu/clients/view-client.vue'),
+    },
+
+    // cases
+    {
+        path: "/cases",
+        name: "cases",
+        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/list-cases.vue'),
+    },
+    {
+        path: "/cases/:id",
+        name: "case-details",
+        component: () => import(/* webpackChunkName: "case" */ '../views/menu/cases/view-case.vue'),
+    },
+    {
+        path: "/cases/create",
+        name: "create-case",
+        component: () => import(/* webpackChunkName: "create-case" */ '../views/menu/cases/create-case.vue'),
+    },
+
     //components
     {
         path: '/components/tabs',
