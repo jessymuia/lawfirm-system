@@ -33,3 +33,5 @@ Route::get("casesDropDown", [\App\Http\Controllers\CasesController::class,'dropD
 Route::resource("tasks", \App\Http\Controllers\TaskController::class);
 Route::resource("expenses", \App\Http\Controllers\ExpenseController::class);
 Route::resource('hearings',\App\Http\Controllers\HearingController::class);
+
+Route::resource('documents',\App\Http\Controllers\DocumentController::class);

@@ -47,7 +47,7 @@
 
 
         <!-- Add Modal -->
-        <div class="modal fade register-modal" id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal fade " id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
             <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
@@ -206,7 +206,7 @@ const submit_form4 = () => {
             axios.put(`/api/clients/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Client updatedsuccessfully.');
+                    showMessage('Client updated successfully.');
                     // Optionally, you can update the UI or perform other actions after successful insertion
                 })
                 .catch(error => {

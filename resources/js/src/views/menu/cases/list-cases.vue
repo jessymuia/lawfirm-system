@@ -27,15 +27,12 @@
                         <v-client-table :data="items" :columns="columns" :options="table_option">
                             <template #actions="props">
                                 <div class="actions text-center">
-                                    <!--                                    <a href="javascript:;" class="cancel" @click="view_row(props.row)">-->
-                                    <!--                                        <button type="button" class="btn btn-primary btn-sm">View</button>-->
-                                    <!--                                    </a>-->
+                                    <a href="javascript:;" class="cancel" @click="view_row(props.row.id)">
+                                      <button type="button" class="btn btn-primary btn-sm">View</button>
+                                    </a>
                                     <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
                                     </a>
-                                    <!--                                    <router-link :to='view-client'>-->
-                                    <!--                                        <button type="button" class="btn btn-primary btn-sm">View</button>-->
-                                    <!--                                    </router-link>-->
                                 </div>
                             </template>
                             <template #salary="props"> ${{ props.row.salary }} </template>
@@ -47,7 +44,7 @@
 
 
         <!-- Add Modal -->
-        <div class="modal fade register-modal" id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal fade" id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
             <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
@@ -319,5 +316,9 @@ const update_row = (item) => {
 
     modal.value.title = "Update Case";
     modal.value.button = "Update";
+};
+const view_row = (itemId) => {
+    localStorage.setItem("caseId", itemId);
+    router.push("/view-case");
 };
 </script>

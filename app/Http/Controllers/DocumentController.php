@@ -3,10 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
+    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
+    {
+        return response()->json([
+            'success' => $success,
+            'message'=>$message,
+            'data' => $data
+        ], $statusCode);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +24,7 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
     /**
@@ -33,20 +43,54 @@ class DocumentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
-        //
+
+        Log::info($request);
+        $file = $request->file('file');
+
+        // Generate a random name for the file
+        $filename = $file->getClientOriginalName();
+        $randomName = uniqid() . '_' . $filename;
+
+        // Store the file in storage/app/cases/docs
+        $filePath = $file->storeAs('cases/docs', $randomName);
+
+        // Save the document record in the database
+        $document = Document::create([
+            'title' => $request->input('title'),
+            'case_id' => $request->input('case_id'),
+            'filename' => $filename,
+            'filepath' => $filePath,
+            'full_path' => $filePath,
+            'mimetype' => $file->getClientMimeType(),
+            'filesize' => $file->getSize(),
+            'extension' => $file->getClientOriginalExtension(),
+        ]);
+
+        return $this->response(true,'success',null,200);
     }
 
     /**
      * Display the specified resource.
      *
      * @param  \App\Models\Document  $document
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function show(Document $document)
+    public function show($id): JsonResponse
     {
-        //
+        $documents = Document::where("case_id",$id)->get();
+        $documents = $documents->map(function($row) {
+            return [
+                "id" => $row->id,
+                "title" => $row->title,
+                "filename" => $row->filename,
+                "full_path" => $row->full_path
+            ];
+        });
+
+        return  $this->response(true,'success',$documents,200);
+
     }
 
     /**

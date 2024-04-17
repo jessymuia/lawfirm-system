@@ -78,7 +78,7 @@ const routes = [
         component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/list-cases.vue'),
     },
     {
-        path: "/cases/:id",
+        path: "/view-case",
         name: "case-details",
         component: () => import(/* webpackChunkName: "case" */ '../views/menu/cases/view-case.vue'),
     },

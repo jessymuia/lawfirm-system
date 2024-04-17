@@ -81,20 +81,14 @@
                                         <label for="validationDefault04">Opposing Party</label>
                                         <input type="text" v-model="form5.state" class="form-control" id="validationDefault04" placeholder="Address" required />
                                     </div>
-                                    <!--                                    <div class="col-md-3 form-group">-->
-                                    <!--                                        <label for="validationDefault05">Zip</label>-->
-                                    <!--                                        <input type="text" v-model="form5.zip" class="form-control" id="validationDefault05" placeholder="Zip" required />-->
-                                    <!--                                    </div>-->
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 form-group">
                                         <label for="validationDefault03">Description</label>
                                         <textarea class="form-control" id="validationDefault03" rows="12" required>Description</textarea>
-                                        <!--                                        <input type="text" v-model="form5.city" class="form-control" rows="12"-->
-                                        <!--                                               id="validationDefault03" placeholder="City" required />-->
                                     </div>
                                 </div>
-                                <button class="btn btn-primary mt-3" type="submit">Submit form</button>
+                                <button class="btn btn-primary mt-3" type="submit">Update</button>
                             </form>
                         </div>
                     </div>
@@ -183,83 +177,6 @@
                         <div class="code-section-container show-code">
                             <button type="button" class="btn-default toggle-code-snippet" @click="toggleCode('code13')"><span>Code</span></button>
 
-                            <div v-if="code_arr.includes('code13')" class="code-section text-start">
-                                <highlight>
-                                            <pre>
-&lt;div class=&quot;panel-body tab-justify-centered tabs&quot;&gt;
-    &lt;ul class=&quot;nav nav-tabs mb-3 mt-3 justify-content-center&quot; id=&quot;justifyCenterTab&quot; role=&quot;tablist&quot;&gt;
-        &lt;li class=&quot;nav-item&quot;&gt;
-            &lt;a
-                class=&quot;nav-link active&quot;
-                id=&quot;justify-center-home-tab&quot;
-                data-bs-toggle=&quot;tab&quot;
-                href=&quot;#justify-center-home&quot;
-                role=&quot;tab&quot;
-                aria-controls=&quot;justify-center-home&quot;
-                aria-selected=&quot;true&quot;
-                &gt;Home&lt;/a
-            &gt;
-        &lt;/li&gt;
-        &lt;li class=&quot;nav-item&quot;&gt;
-            &lt;a
-                class=&quot;nav-link&quot;
-                id=&quot;justify-center-profile-tab&quot;
-                data-bs-toggle=&quot;tab&quot;
-                href=&quot;#justify-center-profile&quot;
-                role=&quot;tab&quot;
-                aria-controls=&quot;justify-center-profile&quot;
-                aria-selected=&quot;false&quot;
-                &gt;Profile&lt;/a
-            &gt;
-        &lt;/li&gt;
-        &lt;li class=&quot;nav-item&quot;&gt;
-            &lt;a
-                class=&quot;nav-link&quot;
-                id=&quot;justify-center-contact-tab&quot;
-                data-bs-toggle=&quot;tab&quot;
-                href=&quot;#justify-center-contact&quot;
-                role=&quot;tab&quot;
-                aria-controls=&quot;justify-center-contact&quot;
-                aria-selected=&quot;false&quot;
-                &gt;Contact&lt;/a
-            &gt;
-        &lt;/li&gt;
-    &lt;/ul&gt;
-
-    &lt;div class=&quot;tab-content&quot; id=&quot;justifyCenterTabContent&quot;&gt;
-        &lt;div class=&quot;tab-pane fade show active&quot; id=&quot;justify-center-home&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;justify-center-home-tab&quot;&gt;
-            &lt;p class=&quot;mb-4&quot;&gt;
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            &lt;/p&gt;
-
-            &lt;p&gt;
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            &lt;/p&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;tab-pane fade&quot; id=&quot;justify-center-profile&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;justify-center-profile-tab&quot;&gt;
-            &lt;div class=&quot;media&quot;&gt;
-                &lt;img class=&quot;me-3&quot; src=&quot;@/assets/images/profile-32.jpeg&quot; alt=&quot;Generic placeholder image&quot; /&gt;
-                &lt;div class=&quot;media-body&quot;&gt;
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra
-                    turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                &lt;/div&gt;
-            &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;tab-pane fade&quot; id=&quot;justify-center-contact&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;justify-center-contact-tab&quot;&gt;
-            &lt;p class=&quot;dropcap dc-outline-primary&quot;&gt;
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            &lt;/p&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-</pre
->
-                                </highlight>
-                            </div>
                         </div>
                     </div>
                 </div>
