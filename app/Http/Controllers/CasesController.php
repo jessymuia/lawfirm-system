@@ -6,6 +6,8 @@ use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Court;
 use App\Models\CourtType;
+use App\Models\Document;
+use App\Models\DocumentAccess;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -181,5 +183,25 @@ class CasesController extends Controller
         });
 
         return $this->response(true,'success', $cases,200);
+    }
+
+    public function preview()
+    {
+        $id = \request()->id;
+        $doc = Document::findOrFail($id);
+
+        $userAgent = \request()->header('User-Agent');
+        //$browser = get_browser($userAgent,true);
+        $docAccess = DocumentAccess::create([
+            'document_id' => $doc->id,
+            'accessed_by' => auth()->user()->id,
+            'accessed_date' => now(),
+            'action' => 'preview',
+            'ip_address' => \request()->ip(),
+            'outcome' => 'success',
+            'device_info' => 'device'//$browser['device_type']
+        ]);
+        $full_path = "/home/lawrence/Documents/law-firm-new-ui/storage/app/".$doc->full_path;
+        return response()->file($full_path);
     }
 }

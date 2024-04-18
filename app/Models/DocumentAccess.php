@@ -10,7 +10,7 @@ class DocumentAccess extends DefaultAppModel
         'id',
         'document_id',
         'accessed_by',
-        'access_date',
+        'accessed_date',
         'action',
         'ip_address',
         'outcome',

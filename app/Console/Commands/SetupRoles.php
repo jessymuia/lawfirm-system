@@ -51,8 +51,8 @@ class SetupRoles extends Command
         $role = Role::create(['name' => 'advocate']);
         if($rolePermissions->count() == $allPermissions->count()){
             //assign role to admin user
-//            $user = \App\Models\User::find(1);
-//            $user->assignRole($role);
+            $user = \App\Models\User::find(1);
+            $user->assignRole($role);
 
             $this->info('Admin role created successfully');
             return Command::SUCCESS;

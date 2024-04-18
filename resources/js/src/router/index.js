@@ -63,6 +63,9 @@ const routes = [
         path: "/clients",
         name: "clients",
         component: () => import(/* webpackChunkName: "clients" */ '../views/menu/clients/list-clients.vue'),
+        meta: {
+            authRequired: true,
+        },
     },
     // view client details
     {
@@ -262,10 +265,12 @@ const routes = [
         meta: { layout: 'auth' },
     },
     {
-        path: '/auth/login',
+        path: '/login',
         name: 'login',
         component: () => import(/* webpackChunkName: "auth-login" */ '../views/auth/login.vue'),
-        meta: { layout: 'auth' },
+        meta: {
+            layout: 'auth',
+        },
     },
     {
         path: '/auth/register',
@@ -630,7 +635,14 @@ router.beforeEach((to, from, next) => {
     } else {
         store.commit('setLayout', 'app');
     }
-    next(true);
+    const authRequired = to.matched.some((route) => route.meta.authRequired);
+    if (!authRequired) return next();
+
+    if (localStorage.getItem('user')) {
+        next();
+    } else {
+        next({ name: 'login', query: { redirectFrom: to.fullPath } });
+    }
 });
 
 export default router;

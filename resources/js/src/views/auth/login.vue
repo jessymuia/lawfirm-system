@@ -8,8 +8,7 @@
                             <h1 class="">
                                 Log In to <router-link to="/"><span class="brand-name">CORK</span></router-link>
                             </h1>
-                            <p class="signup-link">New Here? <router-link to="/auth/register">Create an account</router-link></p>
-                            <form class="text-start">
+                            <form class="needs-validation" novalidate @submit.stop.prevent="loginFunc">
                                 <div class="form">
                                     <div id="username-field" class="field-wrapper input">
                                         <svg
@@ -27,7 +26,7 @@
                                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                             <circle cx="12" cy="7" r="4"></circle>
                                         </svg>
-                                        <input type="text" class="form-control" placeholder="Username" />
+                                        <input type="text" v-model = "client.email" class="form-control" placeholder="Username" />
                                     </div>
 
                                     <div id="password-field" class="field-wrapper input mb-2">
@@ -46,7 +45,7 @@
                                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                         </svg>
-                                        <input type="password" class="form-control" placeholder="Password" />
+                                        <input type="password" v-model="client.password" class="form-control" placeholder="Password" />
                                     </div>
                                     <div class="d-sm-flex justify-content-between">
                                         <div class="field-wrapper toggle-pass d-flex align-items-center">
@@ -90,7 +89,61 @@
 
 <script setup>
     import '@/assets/sass/authentication/auth.scss';
-
+    import '@/assets/sass/scrollspyNav.scss';
+    import {useRouter} from "vue-router";
     import { useMeta } from '@/composables/use-meta';
+    import { onMounted, ref } from 'vue';
+    import axios from "../../api";
     useMeta({ title: 'Login Cover' });
+
+    const router = useRouter();
+
+    const is_submit_form4 = ref(false);
+    const client = ref({email: "", password: ""});
+    const loginFunc = () => {
+        is_submit_form4.value = true;
+        if (client.value.email && client.value.password) {
+            axios.post('/api/login', client.value) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+
+                    console.log(response.data.data);
+                    if(response.data.data !== 400) {
+                        const logged_user = {
+                            login: true,
+                            user_id: response.data.data[0].id,
+                            name: response.data.data[0].name,
+                            token: response.data.data[1],
+                            isAllowed: response.data.data[2],
+                            roles: response.data.data[3],
+                            // email: data.data.email,
+                        }
+                        localStorage.setItem('user', JSON.stringify(logged_user));
+                        router.push("/view-case");
+                    } else {
+                        showMessage(response.data.message);
+                    }
+
+
+                })
+                .catch(error => {
+                    showMessage('Error logging in. Please try again.');
+                    console.error(error);
+                });
+        }
+    }
+
+    const showMessage = (msg = '', type = 'success') => {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
+
 </script>

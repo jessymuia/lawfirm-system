@@ -10,6 +10,7 @@ class CourtType extends DefaultAppModel
 {
     protected $fillable = [
         'id',
-        'name'
+        'name',
+        'created_by'
     ];
 }
