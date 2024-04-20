@@ -12,4 +12,6 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+# ignore generated js files
 public/js/
+public/mix-manifest.json
