@@ -261,8 +261,19 @@ const submit_form4 = () => {
         }
 
         client.value.id = "";
+        client.value.case_number = "";
+        client.value.description = "";
+        client.value.client_id = "";
+        client.value.assigned_to = "";
+        client.value.start_date = "";
+        client.value.end_date = "";
+        client.value.case_type = "";
+        client.value.police_station ="";
+        client.value.court_id = "";
+        client.value.opposing_party ="";
         modal.value.title = "Add Case";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
     }
 };
 
