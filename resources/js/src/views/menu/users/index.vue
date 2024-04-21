@@ -225,7 +225,13 @@ const submit_form4 = () => {
                 });
         }
 
-        client = ref({id: "",name:"",phone_number : "",email : "",department : "",role : "",hire_date: ""});
+        client.value.id= "";
+        client.value.name = "";
+        client.value.phone_number = "";
+        client.value.email = "";
+        client.value.department = "";
+        client.value.role = "";
+        client.value.hire_date = "";
         modal.value.title = "Add User";
         modal.value.button = "Add";
 
