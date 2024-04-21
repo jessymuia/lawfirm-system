@@ -73,9 +73,7 @@ class UserController extends Controller
             'password' => Hash::make("Password default")
         ]);
         if($request->has("role")) {
-            Log::info("Role passed");
-            $role = Role::findById($request->role);
-            Log::info($role);
+            $role = Role::findBy($request->role);
             if($role) {
                 $user->assignRole($role);
             }
@@ -139,9 +137,7 @@ class UserController extends Controller
         $user->save();
 
         if($request->has("role")) {
-            Log::info("Role passed");
             $role = Role::findById($request->role);
-            Log::info($role);
             if($role) {
                 $user->syncRoles([$role->name]);
             }

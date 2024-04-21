@@ -225,7 +225,7 @@ const submit_form4 = () => {
                 });
         }
 
-        client.value.id = "";
+        client = ref({id: "",name:"",phone_number : "",email : "",department : "",role : "",hire_date: ""});
         modal.value.title = "Add User";
         modal.value.button = "Add";
 
