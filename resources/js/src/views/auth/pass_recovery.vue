@@ -25,11 +25,11 @@
                                             <circle cx="12" cy="12" r="4"></circle>
                                             <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
                                         </svg>
-                                        <input type="email" class="form-control" placeholder="Email" />
+                                        <input v-model="client.email" type="email" class="form-control" placeholder="Email" />
                                     </div>
                                     <div class="d-sm-flex justify-content-between">
                                         <div class="field-wrapper">
-                                            <button type="submit" class="btn btn-primary">Reset</button>
+                                            <button @click="passRecFunc()" type="submit" class="btn btn-primary">Reset</button>
                                         </div>
                                     </div>
                                 </div>
@@ -53,5 +53,40 @@
     import '@/assets/sass/authentication/auth.scss';
 
     import { useMeta } from '@/composables/use-meta';
+    import axios from "../../api";
+    import {ref} from "vue";
     useMeta({ title: 'Password Recovery Cover' });
+
+    const is_submit_form4 = ref(false);
+    const client = ref({email: ""});
+    const passRecFunc = () => {
+        is_submit_form4.value = true;
+        if (client.value.email) {
+            axios.post('/api/password-recovery', client.value) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+
+                        showMessage(response.data.message);
+
+
+                })
+                .catch(error => {
+                    showMessage('Error recovering password. Please try again.');
+                    console.error(error);
+                });
+        }
+    }
+
+    const showMessage = (msg = '', type = 'success') => {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
 </script>

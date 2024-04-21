@@ -97,6 +97,12 @@ const routes = [
         component: () => import(/* webpackChunkName: "create-case" */ '../views/menu/cases/create-case.vue'),
     },
 
+    {
+        path: '/reset/{token}',
+        name: 'reset',
+        component: () => import(/* webpackChunkName: "components-tabs" */ '../views/auth/resetPassword.vue'),
+    },
+
     //components
     {
         path: '/components/tabs',

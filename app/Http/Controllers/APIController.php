@@ -193,4 +193,25 @@ class APIController extends Controller
             return $this->sendResponse(400, "Something went wrong, please contact support.");
         }
     }
+
+    public function passwordRecovery(Request $request)
+    {
+        $request->validate([
+            "email" => "required"
+        ]);
+
+        $user = User::where("email", $request->email)->first();
+        if($user) {
+            $token_str = Str::random(64);
+            $url = env('APP_URL');
+            $token = $url."reset-password/".$token_str;
+
+            Mail::send('email.forgetPassword', ['token' => $token], function ($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Reset Password');
+            });
+        }
+
+
+    }
 }
