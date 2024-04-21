@@ -5,8 +5,10 @@
             <div class="shadow-bottom"></div>
 
             <perfect-scrollbar class="list-unstyled menu-categories" tag="ul" :options="{ wheelSpeed: 0.5, swipeEasing: !0, minScrollbarLength: 40, maxScrollbarLength: 300, suppressScrollX: true }">
+
+                <!-- Start Dashboard Menu -->
                 <li class="menu">
-                    <a class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#dashboard" aria-controls="dashboard" aria-expanded="false">
+                    <router-link to="/" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -25,37 +27,9 @@
                             </svg>
                             <span>{{ $t('dashboard') }}</span>
                         </div>
-                        <div>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="feather feather-chevron-right"
-                            >
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </div>
-                    </a>
-
-                    <ul id="dashboard" class="collapse submenu list-unstyled" data-bs-parent="#sidebar">
-                        <li>
-                            <router-link to="/" @click="toggleMobileMenu">
-                                {{ $t('sales') }}
-                            </router-link>
-                        </li>
-                        <li>
-                            <router-link to="/index2" @click="toggleMobileMenu">
-                                {{ $t('analytics') }}
-                            </router-link>
-                        </li>
-                    </ul>
+                    </router-link>
                 </li>
+                <!-- End dashboard Menu -->
 
                 <!-- Start Users Menu -->
                 <li class="menu">

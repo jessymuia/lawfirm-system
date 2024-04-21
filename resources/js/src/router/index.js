@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import Home from '../views/index.vue';
+import Home from '../views/dashboard.vue';
 import store from '../store';
 
 // Vue.use(VueRouter);
