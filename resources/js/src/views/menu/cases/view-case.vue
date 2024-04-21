@@ -423,8 +423,8 @@ const submit_form4H = () => {
         clientH.value.id = "";
         clientH.value.hearing_date = "";
         clientH.value.hearing_type = "";
-        client.value.notes = "";
-        client.value.outcome = "";
+        clientH.value.notes = "";
+        clientH.value.outcome = "";
         modalH.value.title = "Add Hearing";
         modalH.value.button = "Add";
         is_submit_form4H.value = false;
