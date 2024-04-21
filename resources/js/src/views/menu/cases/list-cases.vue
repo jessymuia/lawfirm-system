@@ -241,7 +241,7 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('Case added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding Cases. Please try again.');
@@ -252,7 +252,7 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding case. Please try again.');
