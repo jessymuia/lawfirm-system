@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -138,7 +139,9 @@ class UserController extends Controller
         $user->save();
 
         if($request->has("role")) {
+            Log::info("Role passed");
             $role = Role::findById($request->role);
+            Log::info($role);
             if($role) {
                 $user->syncRoles([$role->name]);
             }
