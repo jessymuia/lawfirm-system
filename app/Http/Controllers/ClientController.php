@@ -62,7 +62,7 @@ class ClientController extends Controller
         Client::create([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
-            'extra_phone_number' => $request->extra_phone_number,
+            'extra_phone_number' => $request->extra_phone_number ?? null,
             'address' => $request->address,
             'advocate_id' => $request->advocate
         ]);
