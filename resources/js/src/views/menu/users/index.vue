@@ -254,6 +254,9 @@ const fetchData = () => {
         });
 };
 const update_row = (item) => {
+    modal.value.title = "Update User";
+    modal.value.button = "Update";
+
     client.value.id = item.id;
     client.value.name = item.name;
     client.value.phone_number = item.phone_number;
@@ -261,9 +264,6 @@ const update_row = (item) => {
     client.value.role = item.role_id;
     client.value.department = item.department;
     client.value.hire_date = item.hire_date;
-
-    modal.value.title = "Update User";
-    modal.value.button = "Update";
 
 };
 
