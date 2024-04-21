@@ -200,7 +200,7 @@ const is_submit_form4 = ref(false);
 const client = ref({id: "",name:"",phone_number : "",extra_phone_number : "",address : "",advocate : ""});
 const submit_form4 = () => {
     is_submit_form4.value = true;
-    if (client.value.name && client.value.phone_number && client.value.extra_phone_number && client.value.address && client.value.advocate) {
+    if (client.value.name && client.value.phone_number && client.value.address && client.value.advocate) {
         //form validated success
         if(client.value.id > 0) {
             axios.put(`/api/clients/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
