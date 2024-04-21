@@ -324,6 +324,7 @@ const update_row = (item) => {
     client.value.court_id = item.court_id;
     client.value.opposing_party = item.opposing_party;
     client.value.case_type = item.case_type;
+    client.value.description = item.description;
 
     modal.value.title = "Update Case";
     modal.value.button = "Update";
@@ -331,5 +332,19 @@ const update_row = (item) => {
 const view_row = (itemId) => {
     localStorage.setItem("caseId", itemId);
     router.push("/view-case");
+};
+
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>
