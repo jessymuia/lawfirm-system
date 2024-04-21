@@ -269,10 +269,10 @@ import { useMeta } from '@/composables/use-meta';
 useMeta({ title: 'Widgets' });
 
 const store = useStore();
-const clients = ref([clients: 45,cases: 3]);
+const dashboard= ref({clients : 45,cases: 3});
 
 //Statistics
-const total_visit_series = ref([{ data: [21, 9, 36, 12, 44, 25, 59, 41, 66, 25] }]);
+const total_visit_series = ref(][{ data: [21, 9, 36, 12, 44, 25, 59, 41, 66, 25] }]);
 const total_visit_options = computed(() => {
     const is_dark = store.state.is_dark_mode;
     return {
