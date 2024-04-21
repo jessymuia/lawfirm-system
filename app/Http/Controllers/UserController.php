@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -72,7 +73,7 @@ class UserController extends Controller
             'password' => Hash::make("Password default")
         ]);
         if($request->has("role")) {
-            $role = Role::findById($request->role);
+            $role = Role::find($request->role);
             if($role) {
                 $user->assignRole($role);
             }
@@ -136,7 +137,7 @@ class UserController extends Controller
         $user->save();
 
         if($request->has("role")) {
-            $role = Role::findById($request->role);
+            $role = Role::find($request->role);
             if($role) {
                 $user->syncRoles([$role->name]);
             }

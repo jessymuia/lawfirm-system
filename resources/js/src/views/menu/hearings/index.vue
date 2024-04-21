@@ -52,7 +52,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button  id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -195,22 +195,23 @@ const submit_form4 = () => {
             axios.put(`/api/hearings/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Hearing updated successfully.');
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error updating hearing. Please try again.');
                     console.error(error);
                 });
         } else {
             axios.post('/api/hearings', client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Hearing aded successfully.');
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error adding hearing. Please try again.');
                     console.error(error);
                 });
         }
@@ -247,7 +248,7 @@ const fetchData = () => {
             courts.value = response.data.data;
         })
         .catch(error => {
-            console.error('Error fetching clients:', error);
+            console.error('Error fetching courts:', error);
         });
 
 
@@ -263,5 +264,19 @@ const update_row = (item) => {
 
     modal.value.title = "Update Hearing";
     modal.value.button = "Update";
+};
+
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>

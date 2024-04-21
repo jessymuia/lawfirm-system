@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AssignedTask;
+use App\Mail\ReassignedTask;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class TaskController extends Controller
 {
@@ -26,7 +29,12 @@ class TaskController extends Controller
      */
     public function index(): JsonResponse
     {
-        $tasks = Task::all();
+        if(Auth::user()->hasPermissionTo('create-role')) {
+            $tasks = Task::all();
+        } else {
+            $tasks = Task::where("assigned_to" , \auth()->user()->id)->get();
+        }
+
         $tasks = $tasks->map(function ($row) {
            return [
                "id" => $row->id,
@@ -61,7 +69,7 @@ class TaskController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
-        Task::create([
+        $task = Task::create([
             "description" => $request->description,
             "title" => $request->title,
             "assigned_to" => $request->assigned_to,
@@ -69,6 +77,12 @@ class TaskController extends Controller
             "priority" => $request->priority,
             "status" => $request->status
         ]);
+
+        if($task) {
+            $user = User::find($request->assigned_to);
+
+            Mail::to($user->email)->send(new AssignedTask($task));
+        }
 
         return $this->index();
     }
@@ -105,7 +119,8 @@ class TaskController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $task = Task::find($id);
-        $task->update([
+        $orig = $task->assigned_to;
+        $task = $task->update([
             "description" => $request->description,
             "title" => $request->title,
             "assigned_to" => $request->assigned_to,
@@ -113,6 +128,15 @@ class TaskController extends Controller
             "priority" => $request->priority,
             "status" => $request->status
         ]);
+
+        if($task && $orig != $task->assigned_to) {
+            $user = User::find($request->assigned_to);
+
+            Mail::to($user->email)->send(new AssignedTask($task));
+            $user = User::find($orig);
+            Mail::to($user->email)->send(new ReassignedTask($task));
+        }
+
 
         return $this->index();
     }

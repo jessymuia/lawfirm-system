@@ -52,7 +52,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -203,11 +203,12 @@ const submit_form4 = () => {
             axios.put(`/api/users/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('User updated successfully.');
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding user. Please try again.');
+                    showMessage('Error updating user. Please try again.');
                     console.error(error);
                 });
         } else {
@@ -215,7 +216,8 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding user. Please try again.');
@@ -223,7 +225,13 @@ const submit_form4 = () => {
                 });
         }
 
-        client.value.id = "";
+        client.value.id= "";
+        client.value.name = "";
+        client.value.phone_number = "";
+        client.value.email = "";
+        client.value.department = "";
+        client.value.role = "";
+        client.value.hire_date = "";
         modal.value.title = "Add User";
         modal.value.button = "Add";
 
@@ -252,6 +260,9 @@ const fetchData = () => {
         });
 };
 const update_row = (item) => {
+    modal.value.title = "Update User";
+    modal.value.button = "Update";
+
     client.value.id = item.id;
     client.value.name = item.name;
     client.value.phone_number = item.phone_number;
@@ -260,8 +271,19 @@ const update_row = (item) => {
     client.value.department = item.department;
     client.value.hire_date = item.hire_date;
 
-    modal.value.title = "Update User";
-    modal.value.button = "Update";
+};
 
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>

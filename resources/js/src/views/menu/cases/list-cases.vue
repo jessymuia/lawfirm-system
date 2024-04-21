@@ -49,7 +49,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -240,11 +240,11 @@ const submit_form4 = () => {
             axios.put(`/api/cases/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Case added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Case updatedsuccessfully.');
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding Cases. Please try again.');
+                    showMessage('Error updating Cases. Please try again.');
                     console.error(error);
                 });
         } else {
@@ -252,7 +252,7 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding case. Please try again.');
@@ -261,8 +261,19 @@ const submit_form4 = () => {
         }
 
         client.value.id = "";
+        client.value.case_number = "";
+        client.value.description = "";
+        client.value.client_id = "";
+        client.value.assigned_to = "";
+        client.value.start_date = "";
+        client.value.end_date = "";
+        client.value.case_type = "";
+        client.value.police_station ="";
+        client.value.court_id = "";
+        client.value.opposing_party ="";
         modal.value.title = "Add Case";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
     }
 };
 
@@ -313,6 +324,7 @@ const update_row = (item) => {
     client.value.court_id = item.court_id;
     client.value.opposing_party = item.opposing_party;
     client.value.case_type = item.case_type;
+    client.value.description = item.description;
 
     modal.value.title = "Update Case";
     modal.value.button = "Update";
@@ -320,5 +332,19 @@ const update_row = (item) => {
 const view_row = (itemId) => {
     localStorage.setItem("caseId", itemId);
     router.push("/view-case");
+};
+
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>

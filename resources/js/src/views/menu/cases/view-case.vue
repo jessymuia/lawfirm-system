@@ -158,7 +158,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modalH.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtnH" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4H">
@@ -233,7 +233,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modalD.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtnD" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4D">
@@ -400,29 +400,34 @@ const submit_form4H = () => {
             axios.put(`/api/hearings/${clientH.value.id}`, clientH.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     itemsH.value = response.data.data;
-                    showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Hearing updated successfully.');
+                    document.getElementById('closebtnH').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error updating hearing. Please try again.');
                     console.error(error);
                 });
         } else {
             axios.post('/api/hearings', clientH.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     itemsH.value = response.data.data;
-                    showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Hearing added successfully.');
+                    document.getElementById('closebtnH').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error adding hearing. Please try again.');
                     console.error(error);
                 });
         }
 
         clientH.value.id = "";
+        clientH.value.hearing_date = "";
+        clientH.value.hearing_type = "";
+        clientH.value.notes = "";
+        clientH.value.outcome = "";
         modalH.value.title = "Add Hearing";
         modalH.value.button = "Add";
+        is_submit_form4H.value = false;
 
     }
 };
@@ -439,11 +444,11 @@ const submit_form4D = () => {
             axios.put(`/api/documents/${clientH.value.id}`, clientH.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     itemsD.value = response.data.data;
-                    showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Case Document updated successfully.');
+                    document.getElementById('closebtnD').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error updating document. Please try again.');
                     console.error(error);
                 });
         } else {
@@ -459,17 +464,21 @@ const submit_form4D = () => {
             }).then(response => {
                 itemsD.value = response.data.data;
                 showMessage('Doc added successfully.');
-                // Optionally, you can update the UI or perform other actions after successful insertion
+                document.getElementById('closebtnD').click();
             })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error adding doc. Please try again.');
                     console.error(error);
                 });
         }
 
         clientD.value.id = "";
+        clientD.value.title = "";
+        clientD.value.file = null;
+        selected_file.value = null;
         modalD.value.title = "Add Document";
         modalD.value.button = "Add";
+        is_submit_form4D.value = false;
 
     }
 };

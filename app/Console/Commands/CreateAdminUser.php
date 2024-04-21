@@ -42,15 +42,15 @@ class CreateAdminUser extends Command
     {
         User::create([
             "name" => "Lawrence",
-            "email" => "lawrenceekale2@gmail.com",
+            "email" => "admin@gmail..com",
             "password" => Hash::make("pass"),
             "phone_number" => "0745321146",
             "department" => "logis",
             "hire_date" => now()
         ]);
-        $customUser = User::where('email', 'lawrenceekale2@gmail.com')->first();
+        $customUser = User::where('email', 'admin@gmail..com')->first();
 
-        $customUser->password = Hash::make('Ekale2030');
+        $customUser->password = Hash::make('qwer1234');
 //        $customUser->password_expires_on = now()->addDays(90);
 
         $response = $customUser->save() ? CommandAlias::SUCCESS : CommandAlias::FAILURE;

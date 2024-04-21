@@ -1,12 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import Home from '../views/index.vue';
+import Home from '../views/dashboard.vue';
 import store from '../store';
 
-// Vue.use(VueRouter);
-// import { createApp } from 'vue';
-// const app = createApp();
-// app.use(createRouter);
 
 const routes = [
     //dashboard
@@ -80,15 +76,27 @@ const routes = [
         name: "cases",
         component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/list-cases.vue'),
     },
+
     {
         path: "/view-case",
         name: "case-details",
         component: () => import(/* webpackChunkName: "case" */ '../views/menu/cases/view-case.vue'),
     },
     {
+        path: "/roles",
+        name: "roles",
+        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/roles/index.vue'),
+    },
+    {
         path: "/cases/create",
         name: "create-case",
         component: () => import(/* webpackChunkName: "create-case" */ '../views/menu/cases/create-case.vue'),
+    },
+
+    {
+        path: '/reset/{token}',
+        name: 'reset',
+        component: () => import(/* webpackChunkName: "components-tabs" */ '../views/auth/resetPassword.vue'),
     },
 
     //components

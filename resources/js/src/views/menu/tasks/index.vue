@@ -47,12 +47,12 @@
 
 
         <!-- Add Modal -->
-        <div class="modal fade " id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal fade" id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
             <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -200,11 +200,12 @@ const submit_form4 = () => {
             axios.put(`/api/tasks/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Task added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Task updated successfully.');
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding task. Please try again.');
+                    showMessage('Error updating task. Please try again.');
                     console.error(error);
                 });
         } else {
@@ -212,15 +213,16 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('Task added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error adding task. Please try again.');
                     console.error(error);
                 });
         }
 
-        client.value.id = "";
+        client = ref({id: "",description:"",title : "", assigned_to: "", due_date:"",priority:"",status:""});
         modal.value.title = "Add Task";
         modal.value.button = "Add";
 
@@ -236,7 +238,7 @@ const fetchData = () => {
             items.value = response.data.data;
         })
         .catch(error => {
-            console.error('Error fetching clients:', error);
+            console.error('Error fetching tasks:', error);
         });
 
 

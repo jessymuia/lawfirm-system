@@ -16,7 +16,7 @@
         </teleport>
         <div class="row justify-content-end">
             <div class="col-auto">
-                <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#client_modal">Add Client</button>
+                <button  type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#client_modal">Add Client</button>
             </div>
         </div>
 
@@ -47,12 +47,12 @@
 
 
         <!-- Add Modal -->
-        <div class="modal fade " id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal fade" id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
             <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -207,10 +207,10 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('Client updated successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding user. Please try again.');
+                    showMessage('Error updating user. Please try again.');
                     console.error(error);
                 });
         } else {
@@ -218,7 +218,7 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('Client added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding client. Please try again.');
@@ -228,8 +228,14 @@ const submit_form4 = () => {
 
 
         client.value.id = "";
+        client.value.name = "";
+        client.value.phone_number = "";
+        client.value.extra_phone_number = "";
+        client.value.address = "";
+        client.value.advocate = "";
         modal.value.title = "Add Client";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
     }
 };
 
@@ -260,8 +266,24 @@ const update_row = (item) => {
     client.value.phone_number = item.phone_number;
     client.value.extra_phone_number = item.extra_phone_number;
     client.value.advocate = item.advocate_id;
+    client.value.address = item.address;
+
 
     modal.value.title = "Update Client";
     modal.value.button = "Update";
+};
+
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>

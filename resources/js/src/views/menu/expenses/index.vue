@@ -52,7 +52,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -233,11 +233,11 @@ const submit_form4 = () => {
             axios.put(`/api/expenses/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Expense updated successfully.');
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
+                    showMessage('Error updating expense. Please try again.');
                     console.error(error);
                 });
         } else {
@@ -245,7 +245,7 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('Expense added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding expense. Please try again.');
@@ -253,9 +253,11 @@ const submit_form4 = () => {
                 });
         }
 
-        client.value.id = "";
+        //client.value.id = "";
+        client = ref({id: "",case_id:"",expense_date : "",amount:"",category:"",description:"",vendor:"",payment_method:"",invoice_number:"",user_id:""});
         modal.value.title = "Add Expense";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
 
     }
 };
@@ -304,5 +306,19 @@ const update_row = (item) => {
     modal.value.title = "Update Expense";
     modal.value.button = "Update";
 
+};
+
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>

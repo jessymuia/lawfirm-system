@@ -106,7 +106,6 @@
             axios.post('/api/login', client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
 
-                    console.log(response.data.data);
                     if(response.data.data !== 400) {
                         const logged_user = {
                             login: true,
@@ -145,5 +144,9 @@
             padding: '10px 20px',
         });
     };
+
+    onMounted(() => {
+        //localStorage.clear();
+    });
 
 </script>
