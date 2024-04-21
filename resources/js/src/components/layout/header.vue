@@ -413,7 +413,7 @@
                                 </router-link>
                             </li>
                             <li role="presentation">
-                                <router-link to="/auth/lockscreen" class="dropdown-item">
+                                <router-link to="/auth/lockscreen" class="dropdown-item" @click="logout">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="24"
@@ -433,7 +433,7 @@
                                 </router-link>
                             </li>
                             <li role="presentation">
-                                <router-link to="/auth/login" class="dropdown-item">
+                                <router-link to="/login" class="dropdown-item">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="24"
@@ -1099,5 +1099,9 @@
         window.$appSetting.toggleLanguage(item);
 
         i18n.locale.value = item.code;
+    };
+
+    const logout = () => {
+      localStorage.clear();
     };
 </script>
