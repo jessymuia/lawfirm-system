@@ -203,12 +203,12 @@ const submit_form4 = () => {
             axios.put(`/api/users/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('User added successfully.');
+                    showMessage('User updated successfully.');
 
                     document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding user. Please try again.');
+                    showMessage('Error updating user. Please try again.');
                     console.error(error);
                 });
         } else {

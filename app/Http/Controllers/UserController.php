@@ -72,7 +72,9 @@ class UserController extends Controller
             'password' => Hash::make("Password default")
         ]);
         if($request->has("role")) {
+            Log::info("Role passed");
             $role = Role::findById($request->role);
+            Log::info($role);
             if($role) {
                 $user->assignRole($role);
             }
