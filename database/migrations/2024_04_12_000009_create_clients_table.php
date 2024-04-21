@@ -17,7 +17,7 @@ return new class extends Migration
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
             $table->string('name');
             $table->string('phone_number');
-            $table->string('extra_phone_number');
+            $table->string('extra_phone_number')->nullable();
             $table->string('address');
             $table->foreignId('advocate_id');
         });
