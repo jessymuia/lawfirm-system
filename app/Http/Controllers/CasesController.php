@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Court;
+use App\Models\CourtType;
+use App\Models\Document;
+use App\Models\DocumentAccess;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CasesController extends Controller
 {
@@ -89,12 +93,36 @@ class CasesController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Cases  $cases
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function show(Cases $cases)
+    public function show($id)
     {
-        //
+        if(!$id) {
+            abort(404);
+        }
+
+        $case = Cases::find($id);
+
+        if(!$case) {
+            return $this->response(false,'error',null, 404);
+        }
+
+        $data = [
+            "id" => $case->id,
+            "assigned" => $case->assigned_to ? User::find($case->assigned_to)->name : "Not assigned",
+            "case_number" => $case->case_number,
+            "client" => Client::find($case->client_id)->name ,
+            "court" => $case->court_id ? Court::find($case->court_id)->name : "",
+            "type" => $case->case_type,
+            "police_station" => $case->police_station,
+            "start_date" => $case->start_date,
+            "opposing_party" => $case->opposing_party,
+            "description" => $case->description
+        ];
+
+        return $this->response(true,'success' , $data, 200);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -155,5 +183,25 @@ class CasesController extends Controller
         });
 
         return $this->response(true,'success', $cases,200);
+    }
+
+    public function preview()
+    {
+        $id = \request()->id;
+        $doc = Document::findOrFail($id);
+
+        $userAgent = \request()->header('User-Agent');
+        //$browser = get_browser($userAgent,true);
+        $docAccess = DocumentAccess::create([
+            'document_id' => $doc->id,
+            'accessed_by' => auth()->user()->id,
+            'accessed_date' => now(),
+            'action' => 'preview',
+            'ip_address' => \request()->ip(),
+            'outcome' => 'success',
+            'device_info' => 'device'//$browser['device_type']
+        ]);
+        $full_path = "/home/lawrence/Documents/law-firm-new-ui/storage/app/".$doc->full_path;
+        return response()->file($full_path);
     }
 }

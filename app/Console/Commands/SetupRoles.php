@@ -42,17 +42,18 @@ class SetupRoles extends Command
         //fetch all permissions
         $allPermissions = Permission::all();
 
-        $role = Role::create(['name' => 'admin']);
+        //$role = Role::create(['name' => 'admin']);
+        $role = Role::findById(1);
         $role->syncPermissions($allPermissions);
 
         //check if role has all permissions
         $rolePermissions = $role->permissions;
 
-        $role = Role::create(['name' => 'advocate']);
+        //$role = Role::create(['name' => 'advocate']);
         if($rolePermissions->count() == $allPermissions->count()){
             //assign role to admin user
-//            $user = \App\Models\User::find(1);
-//            $user->assignRole($role);
+            $user = \App\Models\User::find(1);
+            $user->assignRole($role);
 
             $this->info('Admin role created successfully');
             return Command::SUCCESS;

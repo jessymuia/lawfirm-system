@@ -1,13 +1,13 @@
 <template>
-    <div class="container">
+    <div class="layout-px-spacing">
         <teleport to="#breadcrumb">
             <ul class="navbar-nav flex-row">
                 <li>
                     <div class="page-header">
                         <nav class="breadcrumb-one" aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="javascript:;">Forms</a></li>
-                                <li class="breadcrumb-item active" aria-current="page"><span>Validation</span></li>
+                                <li class="breadcrumb-item"><a href="javascript:;">Users</a></li>
+                                <li class="breadcrumb-item active" aria-current="page"><span>Account Settings</span></li>
                             </ol>
                         </nav>
                     </div>
@@ -15,337 +15,571 @@
             </ul>
         </teleport>
 
-        <div class="container">
-            <div class="nav sidenav">
-                <div class="sidenav-content" v-scroll-spy-active v-scroll-spy-link>
-                    <a href="#browser_default" class="nav-link">Case Details</a>
-                </div>
-            </div>
-            <div class="row layout-top-spacing">
-
-                <div id="browser_default" class="col-lg-12 layout-spacing col-md-12">
-                    <div class="statbox panel box box-shadow">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-                                    <h4>Case Details</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel-body">
+        <div class="account-settings-container layout-top-spacing">
+            <div class="account-content">
+                <div class="scrollspy-example" data-spy="scroll" data-target="#account-settings-scroll" data-offset="-100">
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12 col-md-12 layout-spacing">
                             <form @submit.stop.prevent="submit_form5">
+                                <div class="info">
+                                    <h6>Case Information</h6>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-4 form-group">
                                         <label for="validationDefault01">Case Number</label>
-                                        <input type="text" v-model="form5.first_name" class="form-control" id="validationDefault01" placeholder="First name" required />
+                                        <input type="text" v-model="caseD.case_number"  class="form-control" id="validationDefault01" placeholder="First name" readonly />
                                     </div>
                                     <div class="col-md-4 form-group">
-                                        <label for="validationDefault02">Name</label>
-                                        <input type="text" v-model="form5.last_name" class="form-control" id="validationDefault02" placeholder="Last name" required />
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <label for="validationDefault02">CNR Number</label>
-                                        <input type="text" v-model="form5.last_name" class="form-control" id="validationDefault02" placeholder="Last name" required />
+                                        <label for="validationDefault02">Client </label>
+                                        <input type="text" v-model="caseD.client" class="form-control" id="validationDefault02" placeholder="Last name" readonly />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-4 form-group">
-                                        <label for="validationDefault01">Client</label>
-                                        <input type="text" v-model="form5.first_name" class="form-control" id="validationDefault01" placeholder="First name" required />
-                                    </div>
-                                    <div class="col-md-4 form-group">
                                         <label for="validationDefault02">Advocate</label>
-                                        <input type="text" v-model="form5.last_name" class="form-control" id="validationDefault02" placeholder="Last name" required />
+                                        <input type="text" v-model="caseD.assigned" class="form-control" id="validationDefault02" placeholder="Last name" readonly />
                                     </div>
                                     <div class="col-md-4 form-group">
                                         <label for="validationDefault02">Case Type</label>
-                                        <input type="text" v-model="form5.last_name" class="form-control" id="validationDefault02" placeholder="Last name" required />
+                                        <input type="text" v-model="caseD.type" class="form-control" id="validationDefault02" placeholder="Last name" readonly />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label for="validationDefault03">Start Date</label>
-                                        <input type="text" v-model="form5.city" class="form-control" id="validationDefault03" placeholder="Phone Number" required />
+                                        <input type="text" v-model="caseD.start_date" class="form-control" id="validationDefault03" placeholder="Phone Number" readonly />
                                     </div>
                                     <div class="col-md-6 form-group">
                                         <label for="validationDefault04">Police Station</label>
-                                        <input type="text" v-model="form5.state" class="form-control" id="validationDefault04" placeholder="Advocate" required />
+                                        <input type="text" v-model="caseD.police_station" class="form-control" id="validationDefault04" placeholder="Advocate" readonly />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 form-group">
-                                        <label for="validationDefault03">Court ID</label>
-                                        <input type="text" v-model="form5.city" class="form-control" id="validationDefault03" placeholder="City" required />
+                                        <label for="validationDefault03">Court</label>
+                                        <input type="text" v-model="caseD.court"  class="form-control" id="validationDefault03" placeholder="City" readonly />
                                     </div>
                                     <div class="col-md-6 form-group">
                                         <label for="validationDefault04">Opposing Party</label>
-                                        <input type="text" v-model="form5.state" class="form-control" id="validationDefault04" placeholder="Address" required />
+                                        <input type="text" v-model="caseD.opposing_party" class="form-control" id="validationDefault04" placeholder="Address" readonly />
                                     </div>
-                                    <!--                                    <div class="col-md-3 form-group">-->
-                                    <!--                                        <label for="validationDefault05">Zip</label>-->
-                                    <!--                                        <input type="text" v-model="form5.zip" class="form-control" id="validationDefault05" placeholder="Zip" required />-->
-                                    <!--                                    </div>-->
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 form-group">
                                         <label for="validationDefault03">Description</label>
-                                        <textarea class="form-control" id="validationDefault03" rows="12" required>Description</textarea>
-                                        <!--                                        <input type="text" v-model="form5.city" class="form-control" rows="12"-->
-                                        <!--                                               id="validationDefault03" placeholder="City" required />-->
+                                        <textarea class="form-control" v-model="caseD.description" id="validationDefault03" rows="12" readonly>Description</textarea>
                                     </div>
                                 </div>
-                                <button class="btn btn-primary mt-3" type="submit">Submit form</button>
+                                <!--                                <button class="btn btn-primary mt-3" type="submit">Update</button>-->
+                            </form>
+
+                        </div>
+
+                        <div class="col-xl-12 col-lg-12 col-md-12 layout-spacing">
+                            <form id="about" class="section about">
+                                <div class="info">
+                                    <h5 class="">Case Documents</h5>
+                                    <div class="col-md-12 text-end mb-5">
+                                        <button type="button" id="add-education" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientD_modal">Add</button>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-11 mx-auto">
+                                            <div class="custom-table">
+                                                <v-client-table :data="itemsD" :columns="columnsD" :options="table_option">
+
+                                                    <template #actions="props">
+                                                        <div class="actions text-center">
+                                                            <a href="javascript:;" class="cancel" @click="preview(props.row.id)">
+                                                                <button type="button" class="btn btn-primary btn-sm">Preview</button>
+                                                            </a>
+                                                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
+                                                            </a>
+                                                        </div>
+                                                    </template>
+                                                    <template #salary="props"> ${{ props.row.salary }} </template>
+                                                </v-client-table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </form>
                         </div>
-                    </div>
-                </div>
 
-            </div>
-            <div class="col-lg-12 col-12 layout-spacing">
-                <div class="statbox panel box box-shadow">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-                                <h4>Justify Center Tabs</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body tab-justify-centered tabs">
-                        <ul class="nav nav-tabs mb-3 mt-3 justify-content-center" id="justifyCenterTab" role="tablist">
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link active"
-                                    id="justify-center-home-tab"
-                                    data-bs-toggle="tab"
-                                    href="#justify-center-home"
-                                    role="tab"
-                                    aria-controls="justify-center-home"
-                                    aria-selected="true"
-                                >Home</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    id="justify-center-profile-tab"
-                                    data-bs-toggle="tab"
-                                    href="#justify-center-profile"
-                                    role="tab"
-                                    aria-controls="justify-center-profile"
-                                    aria-selected="false"
-                                >Profile</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    id="justify-center-contact-tab"
-                                    data-bs-toggle="tab"
-                                    href="#justify-center-contact"
-                                    role="tab"
-                                    aria-controls="justify-center-contact"
-                                    aria-selected="false"
-                                >Contact</a
-                                >
-                            </li>
-                        </ul>
-
-                        <div class="tab-content" id="justifyCenterTabContent">
-                            <div class="tab-pane fade show active" id="justify-center-home" role="tabpanel" aria-labelledby="justify-center-home-tab">
-                                <p class="mb-4">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                                    nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </p>
-
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                                    nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </p>
-                            </div>
-                            <div class="tab-pane fade" id="justify-center-profile" role="tabpanel" aria-labelledby="justify-center-profile-tab">
-                                <div class="media">
-                                    <img class="me-3" src="@/assets/images/profile-32.jpeg" alt="Generic placeholder image" />
-                                    <div class="media-body">
-                                        Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra
-                                        turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+                        <div class="col-xl-12 col-lg-12 col-md-12 layout-spacing">
+                            <form id="about" class="section about">
+                                <div class="info">
+                                    <h5 class="">Case Hearings</h5>
+                                    <div class="col-md-12 text-end mb-5">
+                                        <button type="button" id="add-education" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientH_modal">Add</button>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-11 mx-auto">
+                                            <div class="custom-table">
+                                                <v-client-table :data="itemsH" :columns="columnsH" :options="table_optionH">
+                                                    <template #actions="props">
+                                                        <div class="actions text-center">
+                                                            <a href="javascript:;" class="cancel" @click="view_row(props.row.id)">
+                                                                <button type="button" class="btn btn-primary btn-sm">View</button>
+                                                            </a>
+                                                            <a href="javascript:;" class="cancel me-1" @click="update_rowH(props.row)">
+                                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#clientH_modal">Update</button>
+                                                            </a>
+                                                        </div>
+                                                    </template>
+                                                    <template #salary="props"> ${{ props.row.salary }} </template>
+                                                </v-client-table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="tab-pane fade" id="justify-center-contact" role="tabpanel" aria-labelledby="justify-center-contact-tab">
-                                <p class="dropcap dc-outline-primary">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                                    nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
-                                    eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                </p>
-                            </div>
+                            </form>
                         </div>
 
-                        <div class="code-section-container show-code">
-                            <button type="button" class="btn-default toggle-code-snippet" @click="toggleCode('code13')"><span>Code</span></button>
 
-                            <div v-if="code_arr.includes('code13')" class="code-section text-start">
-                                <highlight>
-                                            <pre>
-&lt;div class=&quot;panel-body tab-justify-centered tabs&quot;&gt;
-    &lt;ul class=&quot;nav nav-tabs mb-3 mt-3 justify-content-center&quot; id=&quot;justifyCenterTab&quot; role=&quot;tablist&quot;&gt;
-        &lt;li class=&quot;nav-item&quot;&gt;
-            &lt;a
-                class=&quot;nav-link active&quot;
-                id=&quot;justify-center-home-tab&quot;
-                data-bs-toggle=&quot;tab&quot;
-                href=&quot;#justify-center-home&quot;
-                role=&quot;tab&quot;
-                aria-controls=&quot;justify-center-home&quot;
-                aria-selected=&quot;true&quot;
-                &gt;Home&lt;/a
-            &gt;
-        &lt;/li&gt;
-        &lt;li class=&quot;nav-item&quot;&gt;
-            &lt;a
-                class=&quot;nav-link&quot;
-                id=&quot;justify-center-profile-tab&quot;
-                data-bs-toggle=&quot;tab&quot;
-                href=&quot;#justify-center-profile&quot;
-                role=&quot;tab&quot;
-                aria-controls=&quot;justify-center-profile&quot;
-                aria-selected=&quot;false&quot;
-                &gt;Profile&lt;/a
-            &gt;
-        &lt;/li&gt;
-        &lt;li class=&quot;nav-item&quot;&gt;
-            &lt;a
-                class=&quot;nav-link&quot;
-                id=&quot;justify-center-contact-tab&quot;
-                data-bs-toggle=&quot;tab&quot;
-                href=&quot;#justify-center-contact&quot;
-                role=&quot;tab&quot;
-                aria-controls=&quot;justify-center-contact&quot;
-                aria-selected=&quot;false&quot;
-                &gt;Contact&lt;/a
-            &gt;
-        &lt;/li&gt;
-    &lt;/ul&gt;
 
-    &lt;div class=&quot;tab-content&quot; id=&quot;justifyCenterTabContent&quot;&gt;
-        &lt;div class=&quot;tab-pane fade show active&quot; id=&quot;justify-center-home&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;justify-center-home-tab&quot;&gt;
-            &lt;p class=&quot;mb-4&quot;&gt;
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            &lt;/p&gt;
+                    </div>
+                </div>
+            </div>
 
-            &lt;p&gt;
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            &lt;/p&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;tab-pane fade&quot; id=&quot;justify-center-profile&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;justify-center-profile-tab&quot;&gt;
-            &lt;div class=&quot;media&quot;&gt;
-                &lt;img class=&quot;me-3&quot; src=&quot;@/assets/images/profile-32.jpeg&quot; alt=&quot;Generic placeholder image&quot; /&gt;
-                &lt;div class=&quot;media-body&quot;&gt;
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra
-                    turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                &lt;/div&gt;
-            &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;tab-pane fade&quot; id=&quot;justify-center-contact&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;justify-center-contact-tab&quot;&gt;
-            &lt;p class=&quot;dropcap dc-outline-primary&quot;&gt;
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            &lt;/p&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-</pre
->
-                                </highlight>
+            <div class="account-settings-footer">
+                <div class="as-footer-container">
+                    <button type="button" class="btn btn-primary">Reset All</button>
+                    <button type="button" class="btn btn-success" @click="save()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Add Modal -->
+        <div class="modal fade " id="clientH_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+            <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" id="registerModalLabel">
+                        <h4 class="modal-title">{{ modalH.title }}</h4>
+                        <button id="closebtnH" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4H">
+                            <div class="row">
+                                <div id="select_menu" class="form-group form-group">
+                                    <select v-model="clientH.court_id" class="form-select" :class="[is_submit_form4H ? (clientH.court_id ? 'is-valid' : 'is-invalid') : '']">
+                                        <option value="">Select Court</option>
+                                        <option v-for="data in courts" :key="data.id" :value="data.id">{{ data.name }}</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please Select the Court</div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="form-group">
+                                        <label for="date">Hearing Date="'##/##/####'" (dd/mm/yyyy)</label>
+                                        <input v-model="clientH.hearing_date" type="text" id="date" class="form-control"
+                                               :class="[is_submit_form4H ? (clientH.hearing_date ? 'is-valid' : 'is-invalid') : '']"
+                                               v-maska="'##/##/####'" placeholder="__/__/____" />
+                                        <div class="invalid-feedback">Please provide a valid date.</div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label for="validationCustom01">Hearing Type</label>
+                                    <input
+                                        type="text"
+                                        v-model="clientH.hearing_type"
+                                        class="form-control"
+                                        :class="[is_submit_form4H ? (clientH.hearing_type ? 'is-valid' : 'is-invalid') : '']"
+                                        id="validationCustom01"
+                                        placeholder="Hearing Type"
+                                    />
+                                    <div class="invalid-feedback">Please fill the hearing type</div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label for="validationCustom01">Notes</label>
+                                    <input
+                                        type="text"
+                                        v-model="clientH.notes"
+                                        class="form-control"
+                                        :class="[is_submit_form4H ? (clientH.notes ? 'is-valid' : 'is-invalid') : '']"
+                                        id="validationCustom01"
+                                        placeholder="Notes"
+                                    />
+                                    <div class="invalid-feedback">Please fill the Notes</div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label for="validationCustom01">Outcomes</label>
+                                    <input
+                                        type="text"
+                                        v-model="clientH.outcome"
+                                        class="form-control"
+                                        :class="[is_submit_form4H ? (clientH.outcome ? 'is-valid' : 'is-invalid') : '']"
+                                        id="validationCustom01"
+                                        placeholder="Description"
+                                    />
+                                    <div class="invalid-feedback">Please fill the outcomes</div>
+                                </div>
+
                             </div>
-                        </div>
+                            <button class="btn btn-primary mt-3" type="submit">{{ modalH.button }}</button>
+                        </form>
+
+
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Add Modal -->
+        <div class="modal fade " id="clientD_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+            <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" id="registerModalLabel">
+                        <h4 class="modal-title">{{ modalD.title }}</h4>
+                        <button id="closebtnD" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4D">
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label for="validationCustom01">Title</label>
+                                    <input
+                                        type="text"
+                                        v-model="clientD.title"
+                                        class="form-control"
+                                        :class="[is_submit_form4D? (clientD.title ? 'is-valid' : 'is-invalid') : '']"
+                                        id="validationCustom01"
+                                        placeholder="Description"
+                                    />
+                                    <div class="invalid-feedback">Please fill the title</div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label for="validationCustom01">File Upload</label>
+                                    <label class="custom-file-container__custom-file">
+                                        <input type="file" class="custom-file-container__custom-file__custom-file-input" @change="handleFileInputChange" />
+                                        <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
+                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                    </label>
+                                    <div class="custom-file-container__image-preview"></div>
+
+                                </div>
+
+                            </div>
+                            <button class="btn btn-primary mt-3" type="submit">{{ modalD.button }}</button>
+                        </form>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import '@/assets/sass/scrollspyNav.scss';
-import highlight from '@/components/plugins/highlight.vue';
+import '@/assets/sass/users/account-setting.scss';
 
 import { useMeta } from '@/composables/use-meta';
-useMeta({ title: 'Form Validation' });
+import {useRouter} from "vue-router";
+import axios from "../../../api";
+useMeta({ title: 'Account Setting' });
 
-const code_arr = ref([]);
-const form1 = ref({ name: '' });
-const is_submit_form1 = ref(false);
-const form2 = ref({ email: '' });
-const is_submit_form2 = ref(false);
-const form3 = ref({ select: '' });
-const is_submit_form3 = ref(false);
-const form4 = ref({ first_name: 'Shaun', last_name: 'Park', username: '', city: '', state: '', zip: '', is_terms: false });
-const is_submit_form4 = ref(false);
-const form5 = ref({ first_name: 'Shaun', last_name: 'Park', username: '', city: '', state: '', zip: '', is_terms: false });
-const is_submit_form5 = ref(false);
-const form6 = ref({ first_name: 'Shaun', last_name: 'Park', username: '', city: '', state: '', zip: '', is_terms: false });
-const is_submit_form6 = ref(false);
+const columns = ref(['case_number', 'description', 'client', 'attorney', 'start_date', 'end_date','case_type','police_station','court','opposing_party', 'actions']);
+const items = ref([]);
+const table_option = ref({
+    perPage: 10,
+    perPageValues: [5, 10, 20, 50],
+    skin: 'table table-hover',
+    columnsClasses: { actions: 'actions text-center' },
+    pagination: { nav: 'scroll', chunk: 5 },
+    texts: {
+        count: 'Showing {from} to {to} of {count}',
+        filter: '',
+        filterPlaceholder: 'Search...',
+        limit: 'Results:',
+    },
+    sortable: ['case_number', 'description', 'client', 'attorney', 'start_date', 'end_date','case_type','police_station','court','opposing_party'],
+    sortIcon: {
+        base: 'sort-icon-none',
+        up: 'sort-icon-asc',
+        down: 'sort-icon-desc',
+    },
+    resizableColumns: false,
+});
 
-const toggleCode = (name) => {
-    if (code_arr.value.includes(name)) {
-        code_arr.value = code_arr.value.filter((d) => d != name);
-    } else {
-        code_arr.value.push(name);
-    }
+const columnsH = ref(['case', 'court','hearing_date','hearing_type','notes','outcome', 'actions']);
+const itemsH = ref([]);
+const table_optionH = ref({
+    perPage: 10,
+    perPageValues: [5, 10, 20, 50],
+    skin: 'table table-hover',
+    columnsClasses: { actions: 'actions text-center' },
+    pagination: { nav: 'scroll', chunk: 5 },
+    texts: {
+        count: 'Showing {from} to {to} of {count}',
+        filter: '',
+        filterPlaceholder: 'Search...',
+        limit: 'Results:',
+    },
+    sortable: ['case', 'court','hearing_date','hearing_type','notes','outcome'],
+    sortIcon: {
+        base: 'sort-icon-none',
+        up: 'sort-icon-asc',
+        down: 'sort-icon-desc',
+    },
+    resizableColumns: false,
+});
+
+const columnsD = ref(['title', 'filename',  'actions']);
+const itemsD = ref([]);
+const table_optionD = ref({
+    perPage: 10,
+    perPageValues: [5, 10, 20, 50],
+    skin: 'table table-hover',
+    columnsClasses: { actions: 'actions text-center' },
+    pagination: { nav: 'scroll', chunk: 5 },
+    texts: {
+        count: 'Showing {from} to {to} of {count}',
+        filter: '',
+        filterPlaceholder: 'Search...',
+        limit: 'Results:',
+    },
+    sortable: ['title', 'filename'],
+    sortIcon: {
+        base: 'sort-icon-none',
+        up: 'sort-icon-asc',
+        down: 'sort-icon-desc',
+    },
+    resizableColumns: false,
+});
+
+const modalH = ref({title: "", button: ""});
+const modalD = ref({title: "", button: ""});
+
+const caseD = ref({});
+const courts = ref([]);
+
+const is_submit_form4D = ref(false);
+const router = useRouter();
+
+const selected = ref(null);
+const selected_file = ref(null);
+const ddl_1 = ref('20');
+const ddl_2 = ref('Jan');
+const ddl_3 = ref('1989');
+const ddl_4 = ref('May');
+const ddl_5 = ref('2009');
+const ddl_6 = ref('United States');
+const months = ref(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+const range_1 = ref(25);
+const range_2 = ref(50);
+const range_3 = ref(70);
+const range_4 = ref(60);
+
+const change_file = (event) => {
+    selected_file.value = event.target.files[0];
 };
-const email_validate = (email) => {
-    const regexp = /^[\w.%+-]+@[\w.-]+\.[\w]{2,6}$/;
-    return regexp.test(email);
+
+const save = () => {
+    showMessage('Settings saved successfully.');
 };
-const submit_form1 = () => {
-    is_submit_form1.value = true;
-    if (form1.value.name) {
+
+const handleFileInputChange = (event) => {
+    selected_file.value = event.target.files[0];
+};
+
+const is_submit_form4H = ref(false);
+const clientH = ref({id: "",case_id:"",court_id : "", hearing_date:"",hearing_type:"", notes:"", outcome:""});
+const submit_form4H = () => {
+    is_submit_form4H.value = true;
+    clientH.value.case_id = localStorage.getItem('caseId');
+    if (clientH.value.case_id && clientH.value.hearing_type && clientH.value.hearing_date && clientH.value.court_id) {
         //form validated success
-        showMessage('Form submitted successfully.');
-    }
-};
-const submit_form2 = () => {
-    is_submit_form2.value = true;
-    if (email_validate(form2.value.email)) {
-        //form validated success
-        showMessage('Form submitted successfully.');
-    }
-};
-const submit_form3 = () => {
-    is_submit_form3.value = true;
-    if (form3.value.select) {
-        //form validated success
-        showMessage('Form submitted successfully.');
-    }
-};
-const submit_form4 = () => {
-    is_submit_form4.value = true;
-    if (form4.value.first_name && form4.value.last_name && form4.value.username && form4.value.city && form4.value.state && form4.value.zip && form4.value.is_terms) {
-        //form validated success
-        showMessage('Form submitted successfully.');
-    }
-};
-const submit_form5 = () => {
-    is_submit_form5.value = true;
-    if (form5.value.first_name && form5.value.last_name && form5.value.username && form5.value.city && form5.value.state && form5.value.zip && form5.value.is_terms) {
-        //form validated success
-        showMessage('Form submitted successfully.');
-    }
-};
-const submit_form6 = () => {
-    is_submit_form6.value = true;
-    if (form6.value.first_name && form6.value.last_name && form6.value.username && form6.value.city && form6.value.state && form6.value.zip && form6.value.is_terms) {
-        //form validated success
-        showMessage('Form submitted successfully.');
+        if(clientH.value.id > 0)//id exists then update
+        {
+            axios.put(`/api/hearings/${clientH.value.id}`, clientH.value) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+                    itemsH.value = response.data.data;
+                    showMessage('Hearing updated successfully.');
+                    document.getElementById('closebtnH').click();
+                })
+                .catch(error => {
+                    showMessage('Error updating hearing. Please try again.');
+                    console.error(error);
+                });
+        } else {
+            axios.post('/api/hearings', clientH.value) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+                    itemsH.value = response.data.data;
+                    showMessage('Hearing added successfully.');
+                    document.getElementById('closebtnH').click();
+                })
+                .catch(error => {
+                    showMessage('Error adding hearing. Please try again.');
+                    console.error(error);
+                });
+        }
+
+        clientH.value.id = "";
+        clientH.value.hearing_date = "";
+        clientH.value.hearing_type = "";
+        modalH.value.title = "Add Hearing";
+        modalH.value.button = "Add";
+        is_submit_form4H.value = false;
+
     }
 };
 
+const clientD = ref({id: "",title:"", case_id:"",file:null});
+const submit_form4D = () => {
+    is_submit_form4D.value = true;
+    clientD.value.case_id = localStorage.getItem('caseId')
+    if (clientD.value.case_id && clientD.value.title ) {
+        //form validated success
+        if(clientD.value.id > 0)//id exists then update
+        {
+
+            axios.put(`/api/documents/${clientH.value.id}`, clientH.value) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+                    itemsD.value = response.data.data;
+                    showMessage('Case Document updated successfully.');
+                    document.getElementById('closebtnD').click();
+                })
+                .catch(error => {
+                    showMessage('Error updating document. Please try again.');
+                    console.error(error);
+                });
+        } else {
+            let formData = new FormData();
+            formData.append('case_id', clientD.value.case_id);
+            formData.append('title', clientD.value.title);
+            formData.append('file', selected_file.value); // Append the selected file
+
+            axios.post('/api/documents',  formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data' // Set content type for FormData
+                }
+            }).then(response => {
+                itemsD.value = response.data.data;
+                showMessage('Doc added successfully.');
+                document.getElementById('closebtnD').click();
+            })
+                .catch(error => {
+                    showMessage('Error adding doc. Please try again.');
+                    console.error(error);
+                });
+        }
+
+        clientD.value.id = "";
+        clientD.value.title = "";
+        clientD.value.file = null;
+        selected_file.value = null;
+        modalD.value.title = "Add Document";
+        modalD.value.button = "Add";
+        is_submit_form4D.value = false;
+
+    }
+};
 const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 3000 });
-    toast.fire({ icon: type, title: msg, padding: '10px 20px' });
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
+
+const preview = (id) => {
+    axios.get('/api/preview', {
+        params: {
+            id : id
+        },
+        responseType: 'blob'
+    }) // Assuming your API endpoint for client creation is /api/clients
+        .then(response => {
+            const blob = new Blob([response.data], {type:'application/pdf'  });
+            const url = window.URL.createObjectURL(blob);
+
+            window.open(url);
+        })
+        .catch(error => {
+            showMessage('Error viewing document. Please try again.');
+            console.error(error);
+        });
+}
+const update_rowH = (item) => {
+    clientH.value.id = item.id;
+    clientH.value.case_id = localStorage.getItem('caseId');
+    clientH.value.court_id = item.court_id;
+    clientH.value.hearing_date = item.hearing_date;
+    clientH.value.notes = item.notes;
+    clientH.value.outcome = item.outcome;
+    clientH.value.hearing_type = item.hearing_type;
+
+    modalH.value.title = "Update Hearing";
+    modalH.value.button = "Update";
+};
+
+const update_rowD = (item) => {
+    clientD.value.id = item.id;
+    clientD.value.title = item.title;
+
+    modalD.value.title = "Update Document";
+    modalD.value.button = "Update";
+};
+
+const fetchData = () => {
+    modalH.value.title = "Add Hearing";
+    modalH.value.button = "Add";
+
+    modalD.value.title = "Add Document";
+    modalD.value.button = "Add";
+    // Fetch list of clients
+    axios.get('/api/hearings')
+        .then(response => {
+            itemsH.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching clients:', error);
+        });
+
+    let caseId = localStorage.getItem('caseId');
+    axios.get(`/api/documents/${caseId}`)
+        .then(response => {
+            itemsD.value = response.data.data;
+            console.log("he");
+        })
+        .catch(error => {
+            console.error('Error fetching docs:', error);
+        });
+
+    // Fetch list of advocates
+    axios.get(`/api/cases/${caseId}`)
+        .then(response => {
+            caseD.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching case:', error);
+        });
+    axios.get('/api/courts')
+        .then(response => {
+            courts.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching case:', error);
+        });
+
+
+};
+
+
+onMounted(() => {
+    //bind_data();
+    fetchData();
+});
 </script>

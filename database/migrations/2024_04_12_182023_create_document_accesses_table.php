@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('accessed_by');
             $table->date('accessed_date');
             $table->string('action');
-            $table->ipAddress('$ip_address');
+            $table->ipAddress('ip_address');
             $table->string('outcome');
             $table->string('device_info');
         });

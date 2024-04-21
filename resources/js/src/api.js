@@ -4,6 +4,18 @@ const axiosInstance = axios.create({
     // You can add any custom configuration here
     withCredentials: true, // Include credentials with requests
 });
+
+axiosInstance.interceptors.request.use((config) => {
+    if (config.url !== '/') {
+        const accessToken = JSON.parse(localStorage.getItem("user"));
+        if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken.token}`;
+        }
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {

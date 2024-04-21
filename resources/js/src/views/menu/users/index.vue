@@ -52,7 +52,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -204,7 +204,8 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding user. Please try again.');
@@ -215,7 +216,8 @@ const submit_form4 = () => {
                 .then(response => {
                     items.value = response.data.data;
                     showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error adding user. Please try again.');

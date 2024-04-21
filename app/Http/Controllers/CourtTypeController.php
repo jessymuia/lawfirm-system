@@ -53,7 +53,8 @@ class CourtTypeController extends Controller
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
         CourtType::create([
-            'name' => $request->name
+            'name' => $request->name,
+            'created_by' => auth()->user()->id
         ]);
 
         return $this->index();

@@ -16,7 +16,7 @@
         </teleport>
         <div class="row justify-content-end">
             <div class="col-auto">
-                <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#client_modal">Add Court</button>
+                <button id="closebtn" type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#client_modal">Add Court</button>
             </div>
         </div>
 
@@ -52,7 +52,7 @@
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
                         <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
@@ -153,29 +153,32 @@ const submit_form4 = () => {
             axios.put(`/api/courts/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Court updated successfully.');
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding user. Please try again.');
+                    showMessage('Error updating Court. Please try again.');
                     console.error(error);
                 });
         } else {
             axios.post('/api/courts', client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('User added successfully.');
-                    // Optionally, you can update the UI or perform other actions after successful insertion
+                    showMessage('Court added successfully.');
+                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding user. Please try again.');
+                    showMessage('Error adding court. Please try again.');
                     console.error(error);
                 });
         }
 
         client.value.id = "";
+        client.value.name = "";
+        client.value.type = "";
         modal.value.title = "Add Court";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
 
     }
 };
@@ -208,5 +211,19 @@ const update_row = (item) => {
 
     modal.value.title = "Update Court";
     modal.value.button = "Update";
+};
+
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
 };
 </script>
