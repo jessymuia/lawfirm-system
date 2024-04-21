@@ -79,7 +79,8 @@
                                                         <input
                                                             type="checkbox"
                                                             :id="'chk_info_' + index"
-                                                        v-model="client.permissions"
+                                                            v-model="client.permissions"
+                                                            :value="permission.name"
                                                         class="custom-control-input"
                                                         />
                                                         <label :for="'chk_info_' + index" class="custom-control-label">{{ permission.name }}</label>
