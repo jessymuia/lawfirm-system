@@ -99,9 +99,18 @@ class ClientController extends Controller
      * @param  \App\Models\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Client $client)
+    public function update(Request $request, $id)
     {
-        //
+        $client = Client::findOrFail($id);
+        $client->update([
+            'name' => $request->name,
+            'phone_number' => $request->phone_number,
+            'extra_phone_number' => $request->extra_phone_number,
+            'address' => $request->address,
+            'advocate_id' => $request->advocate
+        ]);
+
+        return $this->index();
     }
 
     /**
