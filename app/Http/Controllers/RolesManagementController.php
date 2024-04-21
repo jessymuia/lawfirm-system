@@ -136,8 +136,11 @@ class RolesManagementController extends Controller
     }
 
     public function getRolePermissions(string $id) {
+        Log::info($id);
         $role = Role::where("id",$id)->first();
+        Log::info($role);
         $permissions = $role->permissions->pluck('name');
+        Log::info($permissions);
         return $this->response(true,"Permissions retrieved successfully",$permissions, 200);
     }
 }
