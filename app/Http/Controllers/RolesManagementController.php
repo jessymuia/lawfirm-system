@@ -61,7 +61,6 @@ class RolesManagementController extends Controller
      */
     public function store(Request $request)
     {
-        Log::info($request);
         if(Auth::user()->hasRole('admin') || Auth::user()->hasPermissionTo('create-role')) {
 //            $this->authorize('createRoles',Auth::user());
             $data = $request->validate([
@@ -104,7 +103,6 @@ class RolesManagementController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        Log::info($request);
         $role = Role::where("id",$id)->first();
         $role->name = $request->name;
         $role->syncPermissions([$request->permissions]);
@@ -136,11 +134,8 @@ class RolesManagementController extends Controller
     }
 
     public function getRolePermissions(string $id) {
-        Log::info($id);
         $role = Role::where("id",$id)->first();
-        Log::info($role);
         $permissions = $role->permissions->pluck('name');
-        Log::info($permissions);
         return $this->response(true,"Permissions retrieved successfully",$permissions, 200);
     }
 }
