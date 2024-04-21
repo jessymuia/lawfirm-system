@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AssignedTask;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class TaskController extends Controller
 {
@@ -61,7 +63,7 @@ class TaskController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
-        Task::create([
+        $task = Task::create([
             "description" => $request->description,
             "title" => $request->title,
             "assigned_to" => $request->assigned_to,
@@ -69,6 +71,12 @@ class TaskController extends Controller
             "priority" => $request->priority,
             "status" => $request->status
         ]);
+
+        if($task) {
+            $user = User::find($request->assigned_to);
+
+            Mail::to($user->email)->send(new AssignedTask($task));
+        }
 
         return $this->index();
     }
