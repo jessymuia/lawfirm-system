@@ -3,10 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/dashboard.vue';
 import store from '../store';
 
-// Vue.use(VueRouter);
-// import { createApp } from 'vue';
-// const app = createApp();
-// app.use(createRouter);
 
 const routes = [
     //dashboard
