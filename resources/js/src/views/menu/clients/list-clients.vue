@@ -266,6 +266,8 @@ const update_row = (item) => {
     client.value.phone_number = item.phone_number;
     client.value.extra_phone_number = item.extra_phone_number;
     client.value.advocate = item.advocate_id;
+    client.value.address = item.address;
+
 
     modal.value.title = "Update Client";
     modal.value.button = "Update";
