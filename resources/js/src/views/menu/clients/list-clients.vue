@@ -227,8 +227,12 @@ const submit_form4 = () => {
         }
 
 
-        //client.value.id = "";
-        client = ref({id: "",name:"",phone_number : "",extra_phone_number : "",address : "",advocate : ""});
+        client.value.id = "";
+        client.value.name = "";
+        client.value.phone_number = "";
+        client.value.extra_phone_number = "";
+        client.value.address = "";
+        client.value.advocate = "";
         modal.value.title = "Add Client";
         modal.value.button = "Add";
         is_submit_form4.value = false;
