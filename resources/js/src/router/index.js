@@ -80,10 +80,16 @@ const routes = [
         name: "cases",
         component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/list-cases.vue'),
     },
+
     {
         path: "/view-case",
         name: "case-details",
         component: () => import(/* webpackChunkName: "case" */ '../views/menu/cases/view-case.vue'),
+    },
+    {
+        path: "/roles",
+        name: "roles",
+        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/roles/index.vue'),
     },
     {
         path: "/cases/create",

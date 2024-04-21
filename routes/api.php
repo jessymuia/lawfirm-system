@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\APIController;
+use App\Http\Controllers\RolesManagementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,4 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('documents',\App\Http\Controllers\DocumentController::class);
 
     Route::get("/preview", [\App\Http\Controllers\CasesController::class,'preview']);
+
+    //Roles and Permissions
+    Route::resource('roles',RolesManagementController::class);
+    Route::get('/permissions',[RolesManagementController::class,'allPermissions']);
+    Route::put('/permissions/{name}',[RolesManagementController::class,'getRolePermissions']);
+
 });
