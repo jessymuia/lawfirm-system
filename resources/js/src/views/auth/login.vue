@@ -146,4 +146,8 @@
         });
     };
 
+    onMounted(() => {
+        localStorage.clear();
+    });
+
 </script>
