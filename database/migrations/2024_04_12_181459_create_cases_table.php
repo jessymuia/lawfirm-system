@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('client_id');
             $table->foreignId('assigned_to');
             $table->date('start_date');
-            $table->date('end_date');
+            $table->date('end_date')->nullable();
             $table->string('case_type');
             $table->string('police_station');
             $table->foreignId('court_id');
