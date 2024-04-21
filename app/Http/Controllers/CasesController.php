@@ -43,7 +43,7 @@ class CasesController extends Controller
                "assigned_to" => $row->assigned_to,
                "attorney" => User::find($row->assigned_to)->name ?? null,
                "start_date" => $row->start_date ? Carbon::parse($row->start_date)->format('d/m/Y') : null,
-               "end_date" => Carbon::parse($row->end_date)->format('d/m/Y'),
+               "end_date" => $row->end_date ? Carbon::parse($row->end_date)->format('d/m/Y') : null,
                "case_type" => $row->case_type,
                "police_station" => $row->police_station,
                "court_id" => $row->court_id,
