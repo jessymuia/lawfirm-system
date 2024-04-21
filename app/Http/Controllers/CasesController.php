@@ -12,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CasesController extends Controller
@@ -192,6 +193,8 @@ class CasesController extends Controller
 
         $userAgent = \request()->header('User-Agent');
         //$browser = get_browser($userAgent,true);
+
+
         $docAccess = DocumentAccess::create([
             'document_id' => $doc->id,
             'accessed_by' => auth()->user()->id,
@@ -201,6 +204,12 @@ class CasesController extends Controller
             'outcome' => 'success',
             'device_info' => 'device'//$browser['device_type']
         ]);
+
+        if(!Auth::user()->hasPermissionTo('create-cases')) {
+            $docAccess->outcome = "Unsuccessfull";
+            $docAccess->save();
+            abort(403);
+        }
         $full_path = "/home/lawrence/Documents/law-firm-new-ui/storage/app/".$doc->full_path;
         return response()->file($full_path);
     }

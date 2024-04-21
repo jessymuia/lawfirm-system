@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
@@ -46,7 +47,9 @@ class DocumentController extends Controller
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
 
-        Log::info($request);
+        if(!Auth::user()->hasPermissionTo('create-cases'))
+            abort(403);
+
         $file = $request->file('file');
 
         // Generate a random name for the file
