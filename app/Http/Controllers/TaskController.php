@@ -29,7 +29,7 @@ class TaskController extends Controller
      */
     public function index(): JsonResponse
     {
-        if(Auth::user()->hasPermissionTo('create-role')) {
+        if(Auth::user()->hasPermissionTo('create-roles')) {
             $tasks = Task::all();
         } else {
             $tasks = Task::where("assigned_to" , \auth()->user()->id)->get();
