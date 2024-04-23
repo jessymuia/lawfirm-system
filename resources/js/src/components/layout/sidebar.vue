@@ -280,7 +280,7 @@
                 <!-- End Invoice Menu -->
 
                 <!-- Start Roles Menu -->
-                <li class="menu">
+                <li class="menu" v-if="isAdmin">
                     <router-link to="/roles" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -316,6 +316,7 @@
     const store = useStore();
 
     const menu_collapse = ref('dashboard');
+    const isAdmin = ref(false);
 
     onMounted(() => {
         const selector = document.querySelector('#sidebar a[href="' + window.location.pathname + '"]');
