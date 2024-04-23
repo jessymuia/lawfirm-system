@@ -334,10 +334,8 @@
                 selector.click();
             }
         }
-        const user = localStorage.getItem("user");
-        const role = user.roles;
-        console.log(role);
-        console.log(user);
+        const user = JSON.parse(localStorage.getItem("user"));
+        isAdmin.value = user.isAllowed;
     });
 
     const toggleMobileMenu = () => {
