@@ -27,7 +27,7 @@
                                 <div class="row">
                                     <div class="col-md-4 form-group">
                                         <label for="validationDefault01">Case Number</label>
-                                        <input type="text" v-model="invoice.case_number"  class="form-control" id="validationDefault01" placeholder="Case Number" readonly />
+                                        <input type="text" v-model="invoice.case"  class="form-control" id="validationDefault01" placeholder="Case Number" readonly />
                                     </div>
                                     <div class="col-md-4 form-group">
                                         <label for="validationDefault02">Client </label>
