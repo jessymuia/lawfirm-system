@@ -78,9 +78,8 @@ class InvoiceItemController extends Controller
     public function show($id): JsonResponse
     {
         $items = InvoiceItem::where("invoice_id", $id)->get();
-        $invoice = Invoice::where("id", $id)->first();
 
-        return $this->response(true,'success',[$items,$invoice], 200);
+        return $this->response(true,'success',$items, 200);
     }
 
     /**
