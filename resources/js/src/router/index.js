@@ -22,10 +22,11 @@ const routes = [
     },
 
     //court types
+
     {
-        path: '/courttypes',
-        name: 'court-types',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/types.vue'),
+        path: '/hearingtypes',
+        name: 'hearing-types',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/hearings/types.vue'),
     },
 
     //court types
@@ -81,6 +82,16 @@ const routes = [
         path: "/view-case",
         name: "case-details",
         component: () => import(/* webpackChunkName: "case" */ '../views/menu/cases/view-case.vue'),
+    },
+    {
+        path: "/invoices",
+        name: "invoices",
+        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/invoices/index.vue'),
+    },
+    {
+        path: "/view-invoice",
+        name: "invoice-details",
+        component: () => import(/* webpackChunkName: "case" */ '../views/menu/invoices/items/index.vue'),
     },
     {
         path: "/roles",

@@ -36,6 +36,7 @@ class HearingController extends Controller
                "court" => Court::find($row->court_id)->name,
                "hearing_date" => Carbon::parse($row->hearing_date)->format('d/m/Y'),
                "hearing_type" => $row->hearing_type,
+               "hearing_type_name" => $row->hearingTypeName->name,
                "notes" => $row->notes,
                "outcome" => $row->outcome
            ];

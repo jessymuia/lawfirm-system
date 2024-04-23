@@ -85,7 +85,7 @@
                                     <div class="row">
                                         <div class="col-md-11 mx-auto">
                                             <div class="custom-table">
-                                                <v-client-table :data="itemsD" :columns="columnsD" :options="table_option">
+                                                <v-client-table :data="itemsD" :columns="columnsD" :options="table_optionD">
 
                                                     <template #actions="props">
                                                         <div class="actions text-center">
@@ -136,6 +136,38 @@
                             </form>
                         </div>
 
+                        <div class="col-xl-12 col-lg-12 col-md-12 layout-spacing">
+                            <form id="about" class="section about">
+                                <div class="info">
+                                    <h5 class="">Case Expenses</h5>
+<!--                                    <div class="col-md-12 text-end mb-5">-->
+<!--                                        <button type="button" id="add-education" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientH_modal">Add</button>-->
+<!--                                    </div>-->
+                                    <div class="row">
+                                        <div class="col-md-11 mx-auto">
+                                            <div class="custom-table">
+                                                <v-client-table :data="itemsE" :columns="columnsE" :options="table_optionE">
+                                                    <template #actions="props">
+                                                        <div class="actions text-center">
+                                                            <!--                                    <a href="javascript:;" class="cancel" @click="view_row(props.row)">-->
+                                                            <!--                                        <button type="button" class="btn btn-primary btn-sm">View</button>-->
+                                                            <!--                                    </a>-->
+                                                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
+                                                            </a>
+                                                            <!--                                    <router-link :to='view-client'>-->
+                                                            <!--                                        <button type="button" class="btn btn-primary btn-sm">View</button>-->
+                                                            <!--                                    </router-link>-->
+                                                        </div>
+                                                    </template>
+                                                    <template #salary="props"> ${{ props.row.salary }} </template>
+                                                </v-client-table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
 
 
                     </div>
@@ -353,6 +385,29 @@ const table_optionD = ref({
     resizableColumns: false,
 });
 
+const itemsE = ref([]);
+const columnsE = ref(['case', 'expense_date','amount','category','description','vendor','payment_method','invoice_number','user', 'actions']);
+const table_optionE = ref({
+    perPage: 10,
+    perPageValues: [5, 10, 20, 50],
+    skin: 'table table-hover',
+    columnsClasses: { actions: 'actions text-center' },
+    pagination: { nav: 'scroll', chunk: 5 },
+    texts: {
+        count: 'Showing {from} to {to} of {count}',
+        filter: '',
+        filterPlaceholder: 'Search...',
+        limit: 'Results:',
+    },
+    sortable: ['case', 'court','hearing_date','hearing_type','notes','outcome'],
+    sortIcon: {
+        base: 'sort-icon-none',
+        up: 'sort-icon-asc',
+        down: 'sort-icon-desc',
+    },
+    resizableColumns: false,
+});
+
 const modalH = ref({title: "", button: ""});
 const modalD = ref({title: "", button: ""});
 
@@ -547,14 +602,21 @@ const fetchData = () => {
             itemsH.value = response.data.data;
         })
         .catch(error => {
-            console.error('Error fetching clients:', error);
+            console.error('Error fetching hearings:', error);
+        });
+
+    axios.get('/api/expenses')
+        .then(response => {
+            itemsE.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching expenses:', error);
         });
 
     let caseId = localStorage.getItem('caseId');
     axios.get(`/api/documents/${caseId}`)
         .then(response => {
             itemsD.value = response.data.data;
-            console.log("he");
         })
         .catch(error => {
             console.error('Error fetching docs:', error);

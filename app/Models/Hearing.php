@@ -17,4 +17,9 @@ class Hearing extends DefaultAppModel
         'notes',
         'outcome'
     ];
+
+    public function hearingTypeName(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(HearingType::class,'hearing_type');
+    }
 }

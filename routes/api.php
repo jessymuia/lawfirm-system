@@ -40,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource("tasks", \App\Http\Controllers\TaskController::class);
     Route::resource("expenses", \App\Http\Controllers\ExpenseController::class);
     Route::resource('hearings',\App\Http\Controllers\HearingController::class);
+    Route::resource("hearingtypes", \App\Http\Controllers\HearingTypeController::class);
+    Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
+    Route::resource('invoiceItems', \App\Http\Controllers\InvoiceController::class);
 
     Route::resource('documents',\App\Http\Controllers\DocumentController::class);
 

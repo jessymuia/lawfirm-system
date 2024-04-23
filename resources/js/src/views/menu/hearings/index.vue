@@ -84,16 +84,13 @@
 
                                 </div>
                                 <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Hearing Type</label>
-                                    <input
-                                        type="text"
-                                        v-model="client.hearing_type"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.hearing_type ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Hearing Type"
-                                    />
-                                    <div class="invalid-feedback">Please fill the hearing type</div>
+                                    <div id="select_menu" class="form-group form-group">
+                                        <select v-model="client.hearing_type" class="form-select" :class="[is_submit_form4 ? (client.hearing_type ? 'is-valid' : 'is-invalid') : '']">
+                                            <option value="">Select Hearing Type</option>
+                                            <option v-for="data in types" :key="data.id" :value="data.id">{{ data.name }}</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please Select the type</div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 form-group">
                                     <label for="validationCustom01">Notes</label>
@@ -142,8 +139,9 @@ import { useMeta } from '@/composables/use-meta';
 import Multiselect from "@suadelabs/vue3-multiselect";
 useMeta({ title: 'Hearings' });
 
-const columns = ref(['case', 'court','hearing_date','hearing_type','notes','outcome', 'actions']);
+const columns = ref(['case', 'court','hearing_date','hearing_type_name','notes','outcome', 'actions']);
 const items = ref([]);
+const types = ref([]);
 const cases = ref([]); // List of advocates
 const users = ref([]);
 const courts = ref([]);
@@ -161,7 +159,7 @@ const table_option = ref({
         filterPlaceholder: 'Search...',
         limit: 'Results:',
     },
-    sortable: ['case', 'court','hearing_date','hearing_type','notes','outcome'],
+    sortable: ['case', 'court','hearing_date','hearing_type_name','notes','outcome'],
     sortIcon: {
         base: 'sort-icon-none',
         up: 'sort-icon-asc',
@@ -240,6 +238,14 @@ const fetchData = () => {
         })
         .catch(error => {
             console.error('Error fetching clients:', error);
+        });
+
+    axios.get('/api/courttypes')
+        .then(response => {
+            types.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching roles:', error);
         });
 
     // Fetch list of advocates

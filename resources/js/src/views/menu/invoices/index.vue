@@ -245,6 +245,11 @@ const update_row = (item) => {
     modal.value.button = "Update";
 };
 
+const view_row = (itemId) => {
+    localStorage.setItem("invoiceId", itemId);
+    router.push("/view-invoice");
+};
+
 const showMessage = (msg = '', type = 'success') => {
     const toast = window.Swal.mixin({
         toast: true,
