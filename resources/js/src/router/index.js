@@ -100,7 +100,7 @@ const routes = [
     },
     {
         path: '/invoice-preview',
-        name: 'invoice-preview',
+        name: 'invoice-preview-d',
         component: () => import(/* webpackChunkName: "apps-invoice-preview" */ '../views/menu/invoices/preview.vue'),
     },
     {
