@@ -75,11 +75,13 @@ class InvoiceController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Invoice  $invoice
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
+        $invoice = Invoice::find($id);
 
+        return $this->response(true,'success', $invoice, 200);
     }
 
     /**
