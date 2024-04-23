@@ -258,4 +258,17 @@ const update_row = (item) => {
     modal.value.title = "Update Task";
     modal.value.button = "Update";
 };
+const showMessage = (msg = '', type = 'success') => {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+    });
+    toast.fire({
+        icon: type,
+        title: msg,
+        padding: '10px 20px',
+    });
+};
 </script>
