@@ -53,7 +53,7 @@
                                 <div class="info">
                                     <h5 class="">Invoice Items</h5>
                                     <div class="col-md-12 text-end mb-5">
-                                        <button type="button" id="preview-invoice" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientI_modal">Preview</button>
+                                        <button type="button" id="preview-invoice" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientI_modal">Add</button>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-11 mx-auto">
