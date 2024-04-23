@@ -335,8 +335,9 @@
             }
         }
         const user = localStorage.getItem("user");
-        const role = user["roles"];
-        console.log(user.value.isAllowed);
+        const role = user.roles;
+        console.log(role);
+        console.log(user.isAllowed);
     });
 
     const toggleMobileMenu = () => {
