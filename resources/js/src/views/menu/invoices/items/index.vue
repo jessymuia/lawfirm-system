@@ -81,7 +81,7 @@
 
             <div class="account-settings-footer">
                 <div class="as-footer-container">
-                    <button type="button" class="btn btn-success" @click="view()">View</button>
+                    <button type="button" class="btn btn-success" @click="preview()">View</button>
                 </div>
             </div>
         </div>
@@ -223,7 +223,7 @@ const save = () => {
 };
 
 
-const clientH = ref({id: "",invoice_id:"",description : "", quantity:"",rate:"", tax:"", total_amount:""});
+const client = ref({id: "",invoice_id:"",description : "", quantity:"",rate:"", tax:"", total_amount:""});
 const submit_form4 = () => {
     is_submit_form4.value = true;
     client.value.invoice_id = localStorage.getItem('invoiceId');
