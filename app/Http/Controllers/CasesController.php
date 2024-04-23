@@ -210,7 +210,9 @@ class CasesController extends Controller
             $docAccess->save();
             abort(403);
         }
-        $full_path = "/home/lawrence/Documents/law-firm-new-ui/storage/app/".$doc->full_path;
+
+        $storagePath = storage_path('app/');
+        $full_path = $storagePath.$doc->full_path;
         return response()->file($full_path);
     }
 }

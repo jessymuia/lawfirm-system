@@ -87,9 +87,11 @@ class ExpenseController extends Controller
      * @param  \App\Models\Expense  $expense
      * @return \Illuminate\Http\Response
      */
-    public function show(Expense $expense)
+    public function show($id): \Illuminate\Http\Response|JsonResponse
     {
-        //
+        $expenses = Expense::where('case_id', $id)->firstOrFail();
+
+        return $this->response(true,'success',$expenses,200);
     }
 
     /**

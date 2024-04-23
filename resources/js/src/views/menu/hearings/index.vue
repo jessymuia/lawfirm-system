@@ -217,8 +217,15 @@ const submit_form4 = () => {
         }
 
         client.value.id = "";
+        client.value.case_id = "";
+        client.value.court_id = "";
+        client.value.hearing_date = "";
+        client.value.hearing_type = "";
+        client.value.notes = "";
+        client.value.outcome = "";
         modal.value.title = "Add Hearing";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
 
     }
 };
