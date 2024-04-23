@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
@@ -101,6 +102,7 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id): \Illuminate\Http\Response|JsonResponse
     {
+        Log::info($request);
         $invoice = Invoice::find($id);
         $invoice->update([
             "case_id" => $request->case_id,
