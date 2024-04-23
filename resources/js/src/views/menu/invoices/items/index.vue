@@ -194,7 +194,7 @@ import '@/assets/sass/users/account-setting.scss';
 
 import { useMeta } from '@/composables/use-meta';
 import {useRouter} from "vue-router";
-import axios from "../../../api";
+import axios from "../../../../api";
 useMeta({ title: 'Invoice Items' });
 
 const columnsI = ref(['description', 'quantity', 'rate', 'tax', 'total_amount', 'actions']);
