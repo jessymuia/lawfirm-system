@@ -162,17 +162,12 @@
                                 <div class="invoice-action-btn">
                                     <div class="row">
                                         <div class="col-xl-12 col-md-3 col-sm-6">
-                                            <a href="javascript:;" class="btn btn-primary btn-send">Send Invoice</a>
+                                            <router-link to="/view-invoice" class="btn btn-dark btn-edit">Back</router-link>
                                         </div>
                                         <div class="col-xl-12 col-md-3 col-sm-6">
                                             <a href="javascript:;" class="btn btn-secondary btn-print action-print" @click="print()">Print</a>
                                         </div>
-                                        <div class="col-xl-12 col-md-3 col-sm-6">
-                                            <a href="javascript:;" class="btn btn-success btn-download">Download</a>
-                                        </div>
-                                        <div class="col-xl-12 col-md-3 col-sm-6">
-                                            <router-link to="/apps/invoice/edit" class="btn btn-dark btn-edit">Edit</router-link>
-                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -187,34 +182,43 @@
 <script setup>
     import { onMounted, ref } from 'vue';
     import '@/assets/sass/apps/invoice-preview.scss';
+    import axios from "../../../api";
 
     import { useMeta } from '@/composables/use-meta';
     useMeta({ title: 'Invoice Preview' });
 
+    const invoice = ref({});
+    const summary = ref({});
     const items = ref([]);
-    const columns = ref([]);
+    const columns = ref([
+        { key: 'id', label: 'S.NO' },
+        { key: 'title', label: 'ITEMS' },
+        { key: 'quantity', label: 'QTY' },
+        { key: 'price', label: 'PRICE', class: 'text-end' },
+        { key: 'amount', label: 'AMOUNT', class: 'text-end' },
+    ]);
 
     onMounted(() => {
-        bind_data();
+        fetch_data();
     });
 
-    const bind_data = () => {
-        columns.value = [
-            { key: 'id', label: 'S.NO' },
-            { key: 'title', label: 'ITEMS' },
-            { key: 'quantity', label: 'QTY' },
-            { key: 'price', label: 'PRICE', class: 'text-end' },
-            { key: 'amount', label: 'AMOUNT', class: 'text-end' },
-        ];
-        items.value = [
-            { id: 1, title: 'Calendar App Customization', quantity: 1, price: '120', amount: '120' },
-            { id: 2, title: 'Chat App Customization', quantity: 1, price: '230', amount: '230' },
-            { id: 3, title: 'Laravel Integration', quantity: 1, price: '405', amount: '405' },
-            { id: 4, title: 'Backend UI Design', quantity: 1, price: '2500', amount: '2500' },
-        ];
-    };
+
 
     const print = () => {
         window.print();
+    };
+
+    const fetch_data = () => {
+        let invoiceId = localStorage.getItem('invoiceId');
+        axios.get(`/api/preview-invoice/${invoiceId}`)
+            .then(response => {
+                items.value = response.data.data[0];
+                invoice.value = response.data.data[1];
+                summary.value = response.data.data[2];
+
+            })
+            .catch(error => {
+                console.error('Error fetching preview:', error);
+            });
     };
 </script>

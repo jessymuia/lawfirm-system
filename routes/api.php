@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource("hearingtypes", \App\Http\Controllers\HearingTypeController::class);
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
     Route::resource('invoiceItems', \App\Http\Controllers\InvoiceItemController::class);
+    Route::get("/preview-invoice/{id}", [\App\Http\Controllers\InvoiceController::class,'preview']);
 
     Route::resource('documents',\App\Http\Controllers\DocumentController::class);
 

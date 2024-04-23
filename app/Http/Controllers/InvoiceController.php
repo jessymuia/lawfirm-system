@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use Carbon\Carbon;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\JsonResponse;
@@ -131,5 +132,33 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         //
+    }
+
+    public function preview($id): JsonResponse
+    {
+        $items = InvoiceItem::where("invoice_id",$id);
+        $invoice = Invoice::find($id);
+        $total = InvoiceItem::where("invoice_id", $id)
+            ->selectRaw("SUM(tax) as total_tax, SUM(total_amount) as totals")
+            ->first();
+
+
+        $items = $items->map(function($row) {
+            return [
+                "item" => $row->description,
+                "quantity" => $row->quantity,
+                "price" => $row->rate,
+                "amount" => $row->total_amount
+            ];
+        });
+
+        $invoice = [
+            "number"=> sprintf("%04d", $invoice->id),
+            "date" => $invoice->invoice_date,
+            "due_date"=>$invoice->invoice_due_date,
+            "client" => $invoice->client->name,
+        ];
+
+        return $this->response(true,'success',[$items,$invoice,$total],200);
     }
 }
