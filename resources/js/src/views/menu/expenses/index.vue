@@ -253,8 +253,16 @@ const submit_form4 = () => {
                 });
         }
 
-        //client.value.id = "";
-        client = ref({id: "",case_id:"",expense_date : "",amount:"",category:"",description:"",vendor:"",payment_method:"",invoice_number:"",user_id:""});
+        client.value.id = "";
+        client.value.case_id = "";
+        client.value.expense_date = "";
+        client.value.amount = "";
+        client.value.category = "";
+        client.value.description = "";
+        client.value.vendor = "";
+        client.value.payment_method = "";
+        client.value.invoice_number = "";
+        client.value.user_id = "";
         modal.value.title = "Add Expense";
         modal.value.button = "Add";
         is_submit_form4.value = false;

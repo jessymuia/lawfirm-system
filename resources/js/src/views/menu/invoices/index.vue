@@ -121,8 +121,7 @@ useMeta({ title: 'Hearings' });
 const columns = ref(['case', 'client','invoice_date','invoice_due_date','actions']);
 const items = ref([]);
 const cases = ref([]); // List of advocates
-const users = ref([]);
-const courts = ref([]);
+const clients = ref([]);
 const code_arr = ref([]);
 const modal = ref({title: "", button: ""});
 const table_option = ref({
@@ -208,7 +207,7 @@ const fetchData = () => {
     modal.value.title = "Add Hearing";
     modal.value.button = "Add";
     // Fetch list of clients
-    axios.get('/api/hearings')
+    axios.get('/api/invoices')
         .then(response => {
             items.value = response.data.data;
         })
@@ -224,14 +223,13 @@ const fetchData = () => {
         .catch(error => {
             console.error('Error fetching roles:', error);
         });
-    axios.get('/api/courts')
+    axios.get('/api/clientsDropDown')
         .then(response => {
-            courts.value = response.data.data;
+            clients.value = response.data.data;
         })
         .catch(error => {
-            console.error('Error fetching courts:', error);
+            console.error('Error fetching advocates:', error);
         });
-
 
 };
 const update_row = (item) => {
