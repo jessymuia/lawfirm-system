@@ -234,12 +234,10 @@ const fetchData = () => {
 };
 const update_row = (item) => {
     client.value.id = item.id;
+    client.value.client_id = item.client_id;
     client.value.case_id = item.case_id;
-    client.value.court_id = item.court_id;
-    client.value.hearing_date = item.hearing_date;
-    client.value.notes = item.notes;
-    client.value.outcome = item.outcome;
-    client.value.hearing_type = item.hearing_type;
+    client.value.invoice_date = item.invoice_date;
+    client.value.invoice_due_date = item.invoice_due_date;
 
     modal.value.title = "Update Hearing";
     modal.value.button = "Update";
