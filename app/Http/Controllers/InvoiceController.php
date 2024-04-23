@@ -66,7 +66,8 @@ class InvoiceController extends Controller
             "case_id" => $request->case_id,
             "invoice_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
             "invoice_due_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_due_date)->format('Y-m-d'),
-            "client_id" => $request->client_id
+            "client_id" => $request->client_id,
+            "created_by" => auth()->user()->id
         ]);
 
         return $this->index();
@@ -117,7 +118,8 @@ class InvoiceController extends Controller
             "case_id" => $request->case_id,
             "invoice_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
             "invoice_due_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_due_date)->format('Y-m-d'),
-            "client_id" => $request->client_id
+            "client_id" => $request->client_id,
+            "updated_by" => auth()->user()->id
         ]);
 
         return $this->index();

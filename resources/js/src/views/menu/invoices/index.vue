@@ -27,14 +27,11 @@
                         <v-client-table :data="items" :columns="columns" :options="table_option">
                             <template #actions="props">
                                 <div class="actions text-center">
-                                    <a href="javascript:" class="cancel" @click="view_row(props.row.id)">
+                                    <a href="javascript:" class="cancel me-2" @click="view_row(props.row.id)">
                                        <button type="button" class="btn btn-primary btn-sm">Add Items</button>
                                     </a>
                                     <a href="javascript:" class="cancel me-1" @click="update_row(props.row)">
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
-                                    </a>
-                                    <a href="javascript:" class="cancel me-1" @click="preview_row(props.row.id)">
-                                        <button type="button" class="btn btn-success btn-sm">Preview</button>
                                     </a>
                                 </div>
                             </template>

@@ -96,8 +96,8 @@
                                                                     <td>
                                                                         {{ item.quantity }}
                                                                     </td>
-                                                                    <td class="text-end">KES{{ item.price }}</td>
-                                                                    <td class="text-end">KES{{ item.amount }}</td>
+                                                                    <td class="text-end">{{ item.price }}</td>
+                                                                    <td class="text-end">{{ item.amount }}</td>
                                                                 </tr>
                                                             </tbody>
                                                         </table>
@@ -185,8 +185,8 @@
         { key: 'id', label: 'S.NO' },
         { key: 'title', label: 'ITEMS' },
         { key: 'quantity', label: 'QTY' },
-        { key: 'price', label: 'PRICE', class: 'text-end' },
-        { key: 'amount', label: 'AMOUNT', class: 'text-end' },
+        { key: 'price', label: 'PRICE(KES)', class: 'text-end' },
+        { key: 'amount', label: 'AMOUNT(KES)', class: 'text-end' },
     ]);
 
     onMounted(() => {

@@ -13,6 +13,9 @@ class InvoiceItem extends DefaultAppModel
         'quantity',
         'rate',
         'tax',
-        'total_amount'
+        'total_amount',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 }

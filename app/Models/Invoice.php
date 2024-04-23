@@ -11,7 +11,9 @@ class Invoice extends DefaultAppModel
         'case_id',
         'invoice_date',
         'invoice_due_date',
-        'client_id'
+        'client_id',
+        'created_by',
+        'updated_by',
     ];
 
     public function case(): \Illuminate\Database\Eloquent\Relations\BelongsTo
