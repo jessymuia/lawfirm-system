@@ -122,7 +122,7 @@ class TaskController extends Controller
         Log::info($id);
         $task = Task::find($id);
         $orig = $task->getOriginal();
-        $task = $task->update([
+        $task->update([
             "description" => $request->description,
             "title" => $request->title,
             "assigned_to" => $request->assigned_to,
