@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\AppUtils\DefaultAppModel;
 
-class HearingType extends Model
+class HearingType extends DefaultAppModel
 {
-    use HasFactory;
+    protected $fillable = [
+        'id',
+        'name',
+        'created_by'
+    ];
 }
