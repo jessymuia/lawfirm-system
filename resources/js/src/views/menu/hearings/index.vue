@@ -240,7 +240,7 @@ const fetchData = () => {
             console.error('Error fetching clients:', error);
         });
 
-    axios.get('/api/courttypes')
+    axios.get('/api/hearingtypes')
         .then(response => {
             types.value = response.data.data;
         })
