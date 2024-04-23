@@ -283,7 +283,7 @@ const showMessage = (msg = '', type = 'success') => {
 };
 
 const preview = () => {
-    router.push("/invoice-preview")
+    router.push("/invoice-preview");
 }
 const update_rowI = (item) => {
     client.value.id = item.id;
