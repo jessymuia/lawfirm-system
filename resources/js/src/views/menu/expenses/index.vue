@@ -226,7 +226,7 @@ const is_submit_form4 = ref(false);
 const client = ref({id: "",case_id:"",expense_date : "",amount:"",category:"",description:"",vendor:"",payment_method:"",invoice_number:"",user_id:""});
 const submit_form4 = () => {
     is_submit_form4.value = true;
-    if (client.value.case_id  && client.value.expense_date && client.value.payment_method) {
+    if (client.value.case_id  && client.value.expense_date && client.value.payment_method && client.value.amount && client.value.payment_method && client.value.invoice_number && client.value.user_id) {
         //form validated success
         if(client.value.id > 0)//id exists then update
         {
