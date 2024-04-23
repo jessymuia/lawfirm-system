@@ -119,7 +119,7 @@ class TaskController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $task = Task::find($id);
-        $orig = $task->assigned_to;
+        $orig = $task->getOriginal();
         $task = $task->update([
             "description" => $request->description,
             "title" => $request->title,
@@ -129,11 +129,11 @@ class TaskController extends Controller
             "status" => $request->status
         ]);
 
-        if($task && $orig != $task->assigned_to) {
+        if($task && $orig["assigned_to"] != $task->assigned_to) {
             $user = User::find($request->assigned_to);
 
             Mail::to($user->email)->send(new AssignedTask($task));
-            $user = User::find($orig);
+            $user = User::find($orig["assigned_to"]);
             Mail::to($user->email)->send(new ReassignedTask($task));
         }
 

@@ -225,12 +225,13 @@ const submit_form4 = () => {
         client.value.id = "";
         client.value.description = "";
         client.value.title = "";
-        client.value. assigned_to = "";
+        client.value.assigned_to = "";
         client.value.due_date = "";
         client.value.priority = "";
         client.value.status = "";
         modal.value.title = "Add Task";
         modal.value.button = "Add";
+        is_submit_form4.value = false;
 
     }
 };
