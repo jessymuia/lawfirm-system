@@ -35,16 +35,6 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-4 form-group">
-                                        <label for="validationDefault02">Advocate</label>
-                                        <input type="text" v-model="caseD.assigned" class="form-control" id="validationDefault02" placeholder="Last name" readonly />
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <label for="validationDefault02">Case Type</label>
-                                        <input type="text" v-model="caseD.type" class="form-control" id="validationDefault02" placeholder="Last name" readonly />
-                                    </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label for="validationDefault03">Invoice Date</label>
                                         <input type="text" v-model="invoice.invoice_date" class="form-control" id="validationDefault03" placeholder="Phone Number" readonly />
@@ -107,7 +97,7 @@
                         <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
-                        <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4H">
+                        <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
                             <div class="row">
                                 <div class="col-md-12 form-group">
                                     <label for="validationCustom01">Description</label>
