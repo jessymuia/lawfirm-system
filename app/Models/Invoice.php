@@ -13,4 +13,9 @@ class Invoice extends DefaultAppModel
         'invoice_due_date',
         'client_id'
     ];
+
+    public function case(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Cases::class,'case_id');
+    }
 }

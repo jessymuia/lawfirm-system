@@ -31,6 +31,7 @@ class InvoiceController extends Controller
            return [
                "id" => $row->id,
                "case_id" => $row->case_id,
+               "case" => $row->case->case_number,
                "invoice_date" => Carbon::parse($row->invoice_due_date)->format('d/m/Y'),
                "invoice_due_date" => Carbon::parse($row->invoice_due_date)->format('d/m/Y'),
                "client_id" => $row->client_id,
