@@ -222,7 +222,13 @@ const submit_form4 = () => {
                 });
         }
 
-        client = ref({id: "",description:"",title : "", assigned_to: "", due_date:"",priority:"",status:""});
+        client.value.id = "";
+        client.value.description = "";
+        client.value.title = "";
+        client.value. assigned_to = "";
+        client.value.due_date = "";
+        client.value.priority = "";
+        client.value.status = "";
         modal.value.title = "Add Task";
         modal.value.button = "Add";
 
@@ -253,8 +259,12 @@ const fetchData = () => {
 };
 const update_row = (item) => {
     client.value.id = item.id;
-    client.value.name = item.name;
-    client.value.type = item.type;
+    client.value.description = item.description;
+    client.value.title = item.title;
+    client.value.assigned_to = item.assigned_to;
+    client.value.due_date = item.due_date;
+    client.value.priority = item.priority;
+    client.value.status = item.status;
     modal.value.title = "Update Task";
     modal.value.button = "Update";
 };
