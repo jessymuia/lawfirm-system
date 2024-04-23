@@ -86,7 +86,7 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <tr v-for="(index,item) in items" :key="item.id">
+                                                                <tr v-for="(item,index) in items" :key="item.id">
                                                                     <td>
                                                                         {{ index+1 }}
                                                                     </td>
@@ -114,7 +114,7 @@
                                                                         <p class="">Sub Total:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">KES{{summary.totals - summary.total_tax}}</p>
+                                                                        <p class="">KES{{(summary.totals - summary.total_tax)}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7">
                                                                         <p class="">Tax Amount:</p>
