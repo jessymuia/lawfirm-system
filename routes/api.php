@@ -42,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('hearings',\App\Http\Controllers\HearingController::class);
     Route::resource("hearingtypes", \App\Http\Controllers\HearingTypeController::class);
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
-    Route::resource('invoiceItems', \App\Http\Controllers\InvoiceController::class);
+    Route::resource('invoiceItems', \App\Http\Controllers\InvoiceItemController::class);
 
     Route::resource('documents',\App\Http\Controllers\DocumentController::class);
 
