@@ -32,7 +32,7 @@
                 <!-- End dashboard Menu -->
 
                 <!-- Start Users Menu -->
-                <li class="menu">
+                <li v-if="isAdmin" class="menu">
                     <router-link to="/users" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
