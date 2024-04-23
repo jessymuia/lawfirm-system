@@ -319,7 +319,7 @@ const fetchData = () => {
     let invoiceId = localStorage.getItem('invoiceId');
     axios.get(`/api/invoiceItems/${invoiceId}`)
         .then(response => {
-            itemsI.value = response.data.data;
+            itemsI.value = response.data.data[0];
         })
         .catch(error => {
             console.error('Error fetching items:', error);
