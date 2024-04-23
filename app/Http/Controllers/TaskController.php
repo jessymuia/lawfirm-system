@@ -130,6 +130,7 @@ class TaskController extends Controller
             "priority" => $request->priority,
             "status" => $request->status
         ]);
+        Log::warning($task);
 
         if($task && $orig["assigned_to"] != $task->assigned_to) {
             $user = User::find($request->assigned_to);
