@@ -336,7 +336,7 @@
         }
         const user = localStorage.getItem("user");
         const role = user["roles"];
-        console.log(role);
+        console.log(user);
     });
 
     const toggleMobileMenu = () => {
