@@ -80,6 +80,11 @@ class InvoiceController extends Controller
     public function show($id): JsonResponse
     {
         $invoice = Invoice::find($id);
+        $invoice = [
+            "id" => $invoice->id,
+            "case" => $invoice->case->case_number,
+            "client" => $invoice->client->name,
+        ];
 
         return $this->response(true,'success', $invoice, 200);
     }

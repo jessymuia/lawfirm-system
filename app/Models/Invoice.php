@@ -18,4 +18,9 @@ class Invoice extends DefaultAppModel
     {
         return $this->belongsTo(Cases::class,'case_id');
     }
+
+    public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Client::class,'client_id');
+    }
 }
