@@ -335,7 +335,7 @@
             }
         }
         const user = localStorage.getItem("user");
-        const role = user["roles"][0];
+        const role = user["roles"];
         console.log(role);
     });
 
