@@ -136,7 +136,7 @@ class InvoiceController extends Controller
 
     public function preview($id): JsonResponse
     {
-        $items = InvoiceItem::where("invoice_id",$id);
+        $items = InvoiceItem::where("invoice_id",$id)->get();
         $invoice = Invoice::find($id);
         $total = InvoiceItem::where("invoice_id", $id)
             ->selectRaw("SUM(tax) as total_tax, SUM(total_amount) as totals")
