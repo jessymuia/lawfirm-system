@@ -334,6 +334,9 @@
                 selector.click();
             }
         }
+        const user = localStorage.getItem("user");
+        const role = user["roles"][0];
+        console.log(role);
     });
 
     const toggleMobileMenu = () => {
