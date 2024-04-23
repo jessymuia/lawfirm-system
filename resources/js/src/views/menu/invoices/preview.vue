@@ -35,7 +35,7 @@
                                                         </div>
 
                                                         <div class="col-sm-6 text-sm-end">
-                                                            <p class="inv-list-number"><span class="inv-title">Invoice : </span> <span class="inv-number">#0001</span></p>
+                                                            <p class="inv-list-number"><span class="inv-title">Invoice : </span> <span class="inv-number">#{{invoice.number}}</span></p>
                                                         </div>
 
                                                         <div class="col-sm-6 align-self-center mt-3">
@@ -44,8 +44,8 @@
                                                             <p class="inv-email-address">(120) 456 789</p>
                                                         </div>
                                                         <div class="col-sm-6 align-self-center mt-3 text-sm-end">
-                                                            <p class="inv-created-date"><span class="inv-title">Invoice Date : </span> <span class="inv-date">20 Aug 2020</span></p>
-                                                            <p class="inv-due-date"><span class="inv-title">Due Date : </span> <span class="inv-date">26 Aug 2020</span></p>
+                                                            <p class="inv-created-date"><span class="inv-title">Invoice Date : </span> <span class="inv-date">{{invoice.date}}</span></p>
+                                                            <p class="inv-due-date"><span class="inv-title">Due Date : </span> <span class="inv-date">{{ invoice.due_date }}</span></p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -61,18 +61,15 @@
                                                         </div>
 
                                                         <div class="col-xl-8 col-lg-7 col-md-6 col-sm-4">
-                                                            <p class="inv-customer-name">Jesse Cory</p>
-                                                            <p class="inv-street-addr">405 Mulberry Rd. Mc Grady, NC, 28649</p>
-                                                            <p class="inv-email-address">redq@company.com</p>
-                                                            <p class="inv-email-address">(128) 666 070</p>
+                                                            <p class="inv-customer-name">{{ invoice.client }}</p>
                                                         </div>
 
                                                         <div class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 order-sm-0 order-1">
                                                             <div class="inv--payment-info">
-                                                                <p><span class="inv-subtitle">Bank Name:</span> <span>Bank of America</span></p>
+                                                                <p><span class="inv-subtitle">Bank Name:</span> <span>KCB</span></p>
                                                                 <p><span class="inv-subtitle">Account Number: </span> <span>1234567890</span></p>
                                                                 <p><span class="inv-subtitle">SWIFT code:</span> <span>VS70134</span></p>
-                                                                <p><span class="inv-subtitle">Country: </span> <span>United States</span></p>
+                                                                <p><span class="inv-subtitle">Country: </span> <span>KENYA</span></p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -89,18 +86,18 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <tr v-for="item in items" :key="item.id">
+                                                                <tr v-for="(index,item) in items" :key="item.id">
                                                                     <td>
-                                                                        {{ item.id }}
+                                                                        {{ index+1 }}
                                                                     </td>
                                                                     <td>
-                                                                        {{ item.title }}
+                                                                        {{ item.item }}
                                                                     </td>
                                                                     <td>
                                                                         {{ item.quantity }}
                                                                     </td>
-                                                                    <td class="text-end">${{ item.price }}</td>
-                                                                    <td class="text-end">${{ item.amount }}</td>
+                                                                    <td class="text-end">KES{{ item.price }}</td>
+                                                                    <td class="text-end">KES{{ item.amount }}</td>
                                                                 </tr>
                                                             </tbody>
                                                         </table>
@@ -117,25 +114,19 @@
                                                                         <p class="">Sub Total:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">$3155</p>
+                                                                        <p class="">KES{{summary.totals - summary.total_tax}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7">
                                                                         <p class="">Tax Amount:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">$700</p>
-                                                                    </div>
-                                                                    <div class="col-sm-8 col-7">
-                                                                        <p class="discount-rate">Discount : <span class="discount-percentage">5%</span></p>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-5">
-                                                                        <p class="">$10</p>
+                                                                        <p class="">KES{{summary.total_tax}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7 grand-total-title">
                                                                         <h4 class="">Grand Total :</h4>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5 grand-total-amount">
-                                                                        <h4 class="">$3845</h4>
+                                                                        <h4 class="">KES{{summary.totals}}</h4>
                                                                     </div>
                                                                 </div>
                                                             </div>
