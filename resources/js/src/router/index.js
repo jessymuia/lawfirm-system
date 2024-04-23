@@ -99,6 +99,11 @@ const routes = [
         component: () => import(/* webpackChunkName: "case" */ '../views/menu/invoices/items/index.vue'),
     },
     {
+        path: '/invoice-preview',
+        name: 'invoice-preview',
+        component: () => import(/* webpackChunkName: "apps-invoice-preview" */ '../views/menu/invoices/preview.vue'),
+    },
+    {
         path: "/roles",
         name: "roles",
         component: () => import(/* webpackChunkName: "cases" */ '../views/menu/roles/index.vue'),

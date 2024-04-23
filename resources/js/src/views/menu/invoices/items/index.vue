@@ -54,6 +54,7 @@
                                     <h5 class="">Invoice Items</h5>
                                     <div class="col-md-12 text-end mb-5">
                                         <button type="button" id="preview-invoice" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientI_modal">Add</button>
+                                        <button type="button" id="preview-invoice" class="btn btn-primary" @click="preview" >Preview</button>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-11 mx-auto">
@@ -281,23 +282,8 @@ const showMessage = (msg = '', type = 'success') => {
     });
 };
 
-const preview = (id) => {
-    axios.get('/api/preview', {
-        params: {
-            id : id
-        },
-        responseType: 'blob'
-    }) // Assuming your API endpoint for client creation is /api/clients
-        .then(response => {
-            const blob = new Blob([response.data], {type:'application/pdf'  });
-            const url = window.URL.createObjectURL(blob);
-
-            window.open(url);
-        })
-        .catch(error => {
-            showMessage('Error viewing document. Please try again.');
-            console.error(error);
-        });
+const preview = () => {
+    router.push("/invoice-preview")
 }
 const update_rowI = (item) => {
     client.value.id = item.id;
