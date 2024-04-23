@@ -131,7 +131,7 @@ class InvoiceItemController extends Controller
         $item->save();
         $item->delete();
 
-        $items = InvoiceItem::where("invoice_id",$request->invoice_id)->orderBy("id","desc")->get();
+        $items = InvoiceItem::where("invoice_id",$item->invoice_id)->orderBy("id","desc")->get();
 
         return $this->response(true,'success',$items,200);
     }
