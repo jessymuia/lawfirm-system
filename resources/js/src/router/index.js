@@ -35,6 +35,11 @@ const routes = [
         name: 'courts',
         component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/index.vue'),
     },
+    {
+        path: '/courttypes',
+        name: 'court-types',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/types.vue'),
+    },
 
     //court types
     {
