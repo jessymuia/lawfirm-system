@@ -303,7 +303,7 @@ const update_row = (item) => {
     client.value.id = item.id;
     client.value.case_id = item.case_id;
     client.value.expense_date = item.expense_date;
-    client.value.amount = item.value;
+    client.value.amount = item.amount;
     client.value.category = item.category;
     client.value.description = item.description;
     client.value.vendor = item.vendor;
