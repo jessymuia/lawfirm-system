@@ -119,7 +119,6 @@ class TaskController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        Log::info($id);
         $task = Task::find($id);
         $orig = $task->getOriginal();
         $task->update([
@@ -130,7 +129,6 @@ class TaskController extends Controller
             "priority" => $request->priority,
             "status" => $request->status
         ]);
-        Log::warning($task);
 
         if($task && $orig["assigned_to"] != $task->assigned_to) {
             $user = User::find($request->assigned_to);
