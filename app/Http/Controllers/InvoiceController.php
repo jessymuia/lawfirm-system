@@ -33,7 +33,7 @@ class InvoiceController extends Controller
                "id" => $row->id,
                "case_id" => $row->case_id,
                "case" => $row->case->case_number,
-               "invoice_date" => Carbon::parse($row->invoice_due_date)->format('d/m/Y'),
+               "invoice_date" => Carbon::parse($row->invoice_date)->format('d/m/Y'),
                "invoice_due_date" => Carbon::parse($row->invoice_due_date)->format('d/m/Y'),
                "client_id" => $row->client_id,
                "client" => Client::find($row->client_id)->name,
@@ -102,7 +102,6 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id): \Illuminate\Http\Response|JsonResponse
     {
-        Log::info($request);
         $invoice = Invoice::find($id);
         $invoice->update([
             "case_id" => $request->case_id,
