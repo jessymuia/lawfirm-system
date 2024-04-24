@@ -313,6 +313,7 @@
 <script setup>
     import { onMounted, ref } from 'vue';
     import { useStore } from 'vuex';
+    import router from "@/router";
     const store = useStore();
 
     const menu_collapse = ref('dashboard');
@@ -335,6 +336,8 @@
             }
         }
         const user = JSON.parse(localStorage.getItem("user"));
+        if(!user)
+            router.push("/login");
         isAdmin.value = user.isAllowed;
     });
 
