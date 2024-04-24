@@ -118,9 +118,9 @@ class APIController extends Controller
         if($user) {
             $token_str = Str::random(64);
             $url = env('APP_URL');
-            $token = $url."reset-password/".$token_str;
+            //$token = $url."reset-password/".$token_str;
 
-            Log::info($token);
+            Log::info($token_str);
 
             DB::table('password_resets')->insert([
                 'email' => $request->email,
@@ -128,7 +128,7 @@ class APIController extends Controller
                 'created_at' => Carbon::now()
             ]);
 
-            Mail::send('email.forgotPassword', ['token' => $token], function ($message) use ($request) {
+            Mail::send('email.ForgetPassword', ['username' =>\auth()->user()->name ,'token' => $token_str], function ($message) use ($request) {
                 $message->to($request->email);
                 $message->subject('Reset Password');
             });
