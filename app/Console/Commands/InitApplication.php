@@ -29,6 +29,7 @@ class InitApplication extends Command
     public function handle()
     {
         $this->call('migrate:fresh');
+        $this->call('law:setup-permissions');
         $this->call('app:create-admin-here');
         $this->call('app:setup-roles');
 

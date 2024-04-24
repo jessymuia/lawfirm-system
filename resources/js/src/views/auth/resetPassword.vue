@@ -49,6 +49,9 @@
                                         <div class="field-wrapper">
                                             <button @click="passRecFunc()" type="submit" class="btn btn-primary">Reset</button>
                                         </div>
+                                        <div class="field-wrapper">
+                                            <router-link to="/login">Go To Login</router-link>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
