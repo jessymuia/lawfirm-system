@@ -336,9 +336,9 @@
             }
         }
         const user = JSON.parse(localStorage.getItem("user"));
-        // if(!user)
-        //     router.push("/login");
-        isAdmin.value = user.isAllowed;
+         if(user)
+             isAdmin.value = user.isAllowed;
+
     });
 
     const toggleMobileMenu = () => {
