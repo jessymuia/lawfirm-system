@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ForgetPassword;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -130,10 +131,7 @@ class APIController extends Controller
                 'created_at' => Carbon::now()
             ]);
 
-            Mail::send('mail.ForgetPassword', ['username' =>$user->name ,'token' => $token_str], function ($message) use ($request) {
-                $message->to($request->email);
-                $message->subject('Reset Password');
-            });
+            Mail::to($user->email)->send(new ForgetPassword($user->name,$token_str));
         }
 
 

@@ -86,6 +86,7 @@ const client = ref({token: "", password: "", password_confirmation: ""});
 const passRecFunc = () => {
     is_submit_form4.value = true;
     client.value.token = route.params.token;
+    console.log(client);
     if (client.value.token && (client.value.password === client.value.password_confirmation)) {
         axios.post('/api/password-reset', client.value) // Assuming your API endpoint for client creation is /api/clients
             .then(response => {
