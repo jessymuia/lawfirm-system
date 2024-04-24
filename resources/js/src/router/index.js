@@ -116,7 +116,7 @@ const routes = [
 
     {
         path: '/reset/{token}',
-        name: 'reset',
+        name: 'reset-password',
         component: () => import(/* webpackChunkName: "components-tabs" */ '../views/auth/resetPassword.vue'),
     },
 
