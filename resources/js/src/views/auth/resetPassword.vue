@@ -76,22 +76,22 @@ import '@/assets/sass/authentication/auth.scss';
 import { useMeta } from '@/composables/use-meta';
 import axios from "../../api";
 import {ref, onMounted} from "vue";
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 useMeta({ title: 'Password Recovery Cover' });
 
 const route = useRoute();
+const router = useRouter();
 
 const is_submit_form4 = ref(false);
 const client = ref({token: "", password: "", password_confirmation: ""});
 const passRecFunc = () => {
     is_submit_form4.value = true;
     client.value.token = route.params.token;
-    console.log(client);
     if (client.value.token && (client.value.password === client.value.password_confirmation)) {
         axios.post('/api/password-reset', client.value) // Assuming your API endpoint for client creation is /api/clients
             .then(response => {
                 showMessage(response.data.message);
-                route.push("/login");
+                router.push("/login");
             })
             .catch(error => {
                 showMessage('Error recovering password. Please check the token in email.');

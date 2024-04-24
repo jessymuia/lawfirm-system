@@ -374,7 +374,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="ddluser">
 
                             <li role="presentation">
-                                <router-link to="/login" class="dropdown-item">
+                                <router-link to="/login" class="dropdown-item" @click="logout">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="24"
