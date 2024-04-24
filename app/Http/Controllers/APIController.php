@@ -61,9 +61,6 @@ class APIController extends Controller
             $token = $user->createToken('authToken')->plainTextToken;
             $roles = $user->getRoleNames();
 
-//            Log::critical("Sign in request");
-//            info($user->name);
-//            Log::critical("Successful");
             return $this->sendResponse([$user,$token,$isAllowed,$roles], "success");
         }
         return $this->sendResponse(400, "Credentials not match with our records");
@@ -78,89 +75,6 @@ class APIController extends Controller
         $request->session()->invalidate();
 
         return $this->sendResponse(null,'Successfully logged out');
-    }
-
-    // custom register
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'id_type' => ['required', 'string'],
-            'id_number' => ['required', 'string'],
-            'member_type' => ['required', 'string'],
-            'dob' => ['required', 'string'],//check date of birth
-            'sex' => ['required', 'max:6'],
-            'phone' => ['required', 'string'],
-            'kra' => ['required', 'string']
-        ]);
-
-
-        if ($validator->fails()) {
-            return $this->sendResponse(400, $validator->errors()->first());
-        }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user',
-            'created_by' => $request->user()->id ?? null,
-            'updated_by' => $request->user()->id ?? null,
-        ]);
-
-        if ($user) {
-
-            Member::create([
-                'id_type' => $request->id_type,
-                'id_number' => $request->id_number,
-                'member_type' => $request->member_type,
-                'dob' => $request->dob,
-                'sex' => $request->sex,
-                'phone' => $request->phone,
-                'kra' => $request->kra,
-                'user_id' => $user->id,
-                'created_by' => $request->user()->id ?? null,
-                'updated_by' => $request->user()->id ?? null,
-            ]);
-
-            return $this->sendResponse($user, "success");
-        }
-    }
-
-    // password forget
-    public function forget_pass(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'email', 'max:255'],
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendResponse(400, $validator->errors()->first());
-        }
-
-        $token_str = Str::random(64);
-
-        try {
-            //code...
-            $url = env('APP_URL');
-            $token = $url."reset-password/".$token_str;
-            Mail::send('email.forgetPassword', ['token' => $token], function ($message) use ($request) {
-                $message->to($request->email);
-                $message->subject('Reset Password');
-            });
-
-            DB::table('password_resets')->insert([
-                'email' => $request->email,
-                'token' => $token_str,
-                'created_at' => Carbon::now()
-            ]);
-
-            return $this->sendResponse(null, "success");
-        } catch (\Throwable $th) {
-            return $this->sendResponse(400, "Something went wrong, please contact support.");
-        }
     }
 
     // reset password
@@ -205,6 +119,14 @@ class APIController extends Controller
             $token_str = Str::random(64);
             $url = env('APP_URL');
             $token = $url."reset-password/".$token_str;
+
+            Log::info($token);
+
+            DB::table('password_resets')->insert([
+                'email' => $request->email,
+                'token' => $token_str,
+                'created_at' => Carbon::now()
+            ]);
 
             Mail::send('email.forgetPassword', ['token' => $token], function ($message) use ($request) {
                 $message->to($request->email);

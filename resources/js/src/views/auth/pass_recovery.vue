@@ -64,10 +64,7 @@
         if (client.value.email) {
             axios.post('/api/password-recovery', client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
-
                         showMessage(response.data.message);
-
-
                 })
                 .catch(error => {
                     showMessage('Error recovering password. Please try again.');

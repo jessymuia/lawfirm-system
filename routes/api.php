@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::post('/login', [APIController::class, 'login']);
 Route::post('/password-recovery', [APIController::class, 'passwordRecovery']);
+Route::post('/password-reset', [APIController::class, 'reset_pass']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
