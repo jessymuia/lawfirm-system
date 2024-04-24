@@ -91,7 +91,7 @@ const passRecFunc = () => {
         axios.post('/api/password-reset', client.value) // Assuming your API endpoint for client creation is /api/clients
             .then(response => {
                 showMessage(response.data.message);
-                router.push("/login");
+                route.push("/login");
             })
             .catch(error => {
                 showMessage('Error recovering password. Please check the token in email.');
