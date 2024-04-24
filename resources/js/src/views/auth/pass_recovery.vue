@@ -65,7 +65,7 @@
         is_submit_form4.value = true;
         if (client.value.email) {
             axios.post('/api/password-recovery', client.value) // Assuming your API endpoint for client creation is /api/clients
-                .then(response => {
+                .then(() => {
                         showMessage("Check your mail");
                         route.push("/login");
                 })
