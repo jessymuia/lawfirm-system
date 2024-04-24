@@ -90,17 +90,17 @@ class APIController extends Controller
         }
 
         try {
-            $updatePassword = DB::table('password_resets')->where(['email' => $request->email, 'token' => $request->token])->first();
+            $updatePassword = DB::table('password_resets')->where('token', $request->token)->first();
 
             if(!$updatePassword){
                 return $this->sendResponse(400, 'Invalid token.');
             }
 
             // update users password
-            User::where('email', $request->email)->update(['password' => Hash::make($request->password)]);
+            User::where('email', $updatePassword->email)->update(['password' => Hash::make($request->password)]);
 
             // delete old data from database
-            DB::table('password_resets')->where(['email'=> $request->email])->delete();
+            DB::table('password_resets')->where(['email'=> $updatePassword->email])->delete();
 
             return $this->sendResponse(null, "success");
         } catch (\Throwable $th) {
