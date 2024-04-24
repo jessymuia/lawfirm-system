@@ -130,7 +130,7 @@ class APIController extends Controller
                 'created_at' => Carbon::now()
             ]);
 
-            Mail::send('email.ForgetPassword', ['username' =>\auth()->user()->name ,'token' => $token_str], function ($message) use ($request) {
+            Mail::send('email.ForgetPassword', ['username' =>$user->name ,'token' => $token_str], function ($message) use ($request) {
                 $message->to($request->email);
                 $message->subject('Reset Password');
             });
