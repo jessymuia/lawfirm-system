@@ -178,18 +178,12 @@ const table_option = ref({
 });
 
 onMounted(() => {
-    //bind_data();
     fetchData();
 });
 
 const router = useRouter();
 
 
-const bind_data = () => {
-    items.value = [
-        { id: 1, name: 'Tiger Nixon', phone_number: '0777262222', extra_phone_number: '07826827722', address: 'Penyslvenia', advocate: 'Advoccate 1'}
-    ];
-};
 
 
 

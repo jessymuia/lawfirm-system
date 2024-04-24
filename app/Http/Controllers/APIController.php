@@ -80,13 +80,10 @@ class APIController extends Controller
 
     // reset password
     public function reset_pass(Request $request) {
-        Log::info($request);
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'email', 'max:255'],
             'token' => ['required', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        Log::info("in");
 
         if ($validator->fails()) {
             return $this->sendResponse(400, $validator->errors()->first());

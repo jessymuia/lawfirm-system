@@ -51,11 +51,13 @@
 
 <script setup>
     import '@/assets/sass/authentication/auth.scss';
-
+    import { useRoute } from 'vue-router';
     import { useMeta } from '@/composables/use-meta';
     import axios from "../../api";
     import {ref} from "vue";
     useMeta({ title: 'Password Recovery Cover' });
+
+    const route = useRoute();
 
     const is_submit_form4 = ref(false);
     const client = ref({email: ""});
@@ -64,7 +66,8 @@
         if (client.value.email) {
             axios.post('/api/password-recovery', client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
-                        showMessage(response.data.message);
+                        showMessage("Check your mail");
+                        route.push("/login");
                 })
                 .catch(error => {
                     showMessage('Error recovering password. Please try again.');
