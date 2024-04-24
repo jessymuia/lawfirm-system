@@ -73,6 +73,7 @@
                 .catch(error => {
                     showMessage('Error recovering password. Please try again.');
                     console.error(error);
+                    router.push("/login");
                 });
         }
     }
