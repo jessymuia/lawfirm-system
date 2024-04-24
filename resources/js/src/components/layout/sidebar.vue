@@ -336,8 +336,8 @@
             }
         }
         const user = JSON.parse(localStorage.getItem("user"));
-        if(!user)
-            router.push("/login");
+        // if(!user)
+        //     router.push("/login");
         isAdmin.value = user.isAllowed;
     });
 
