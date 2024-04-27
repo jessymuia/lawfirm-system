@@ -6,7 +6,7 @@
                     <div class="form-container">
                         <div class="form-content">
                             <h1 class="">
-                                Log In to <router-link to="/"><span class="brand-name">CORK</span></router-link>
+                                Log In to <router-link to="/"><span class="brand-name">Njoga and Co. Advocates</span></router-link>
                             </h1>
                             <form class="needs-validation" novalidate @submit.stop.prevent="loginFunc">
                                 <div class="form">
@@ -73,8 +73,9 @@
                                 </div>
                             </form>
                             <p class="terms-conditions">
-                                © 2020 All Rights Reserved. <router-link to="/">CORK</router-link> is a product of Arrangic Solutions LLP. <a href="javascript:void(0);">Cookie Preferences</a>,
-                                <a href="javascript:void(0);">Privacy</a>, and <a href="javascript:void(0);">Terms</a>.
+                                © 2020 All Rights Reserved.
+<!--                                <router-link to="/">CORK</router-link> is a product of Arrangic Solutions LLP. <a href="javascript:void(0);">Cookie Preferences</a>,-->
+<!--                                <a href="javascript:void(0);">Privacy</a>, and <a href="javascript:void(0);">Terms</a>.-->
                             </p>
                         </div>
                     </div>
