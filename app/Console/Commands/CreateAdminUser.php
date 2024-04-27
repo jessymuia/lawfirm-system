@@ -41,10 +41,10 @@ class CreateAdminUser extends Command
     public function handle()
     {
         User::create([
-            "name" => "Lawrence",
+            "name" => "Mkubwa Admin",
             "email" => "admin@gmail.com",
             "password" => Hash::make("pass"),
-            "phone_number" => "0745321146",
+            "phone_number" => "0712312312",
             "department" => "logis",
             "hire_date" => now()
         ]);
