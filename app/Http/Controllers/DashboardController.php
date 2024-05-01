@@ -32,7 +32,6 @@ class DashboardController extends Controller
         $expenses = Expense::all()->sum("amount");
         $invoices = InvoiceItem::all()->sum("total_amount");
 
-        Log::info($clients);
 
         return $this->response(true,"success", [$clients,$cases,$invoices,$expenses], 200);
     }
