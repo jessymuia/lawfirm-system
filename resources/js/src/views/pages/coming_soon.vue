@@ -130,8 +130,9 @@
                                 </ul>
 
                                 <p class="terms-conditions">
-                                    © 2021 All Rights Reserved. <router-link to="/">CORK</router-link> is a product of Arrangic Solutions LLP. <a href="javascript:void(0);">Cookie Preferences</a>,
-                                    <a href="javascript:void(0);">Privacy</a>, and <a href="javascript:void(0);">Terms</a>.
+                                    © 2024 All Rights Reserved.
+<!--                                    <router-link to="/">CORK</router-link> is a product of Arrangic Solutions LLP. <a href="javascript:void(0);">Cookie Preferences</a>,-->
+<!--                                    <a href="javascript:void(0);">Privacy</a>, and <a href="javascript:void(0);">Terms</a>.-->
                                 </p>
                             </div>
                         </div>
