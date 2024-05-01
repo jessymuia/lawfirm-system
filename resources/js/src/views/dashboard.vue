@@ -134,7 +134,7 @@
 
                     <div class="widget-content">
                         <p class="value">
-                            $ 45,141
+                            KES {{ dashboard.expenses }}
                             <span>this week </span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -168,10 +168,10 @@
                         <div class="account-box">
                             <div class="info">
                                 <div class="inv-title">
-                                    <h5>Total Balance</h5>
+                                    <h5>Invoices Total Amount</h5>
                                 </div>
                                 <div class="inv-balance-info">
-                                    <p class="inv-balance">$ 41,741.42</p>
+                                    <p class="inv-balance">KES {{dashboard.invoices}}</p>
                                     <span class="inv-stats balance-credited">+ 2453</span>
                                 </div>
                             </div>
@@ -364,9 +364,8 @@ onMounted( () => {
 });
 
 const fetchData = () => {
-    axios.get("dashboard")
+    axios.get("/api/dashboard")
         .then(response => {
-            console.log(response);
             dashboard.value.cases = response.data.data[1];
             dashboard.value.clients = response.data.data[0];
             dashboard.value.invoices = response.data.data[2];
