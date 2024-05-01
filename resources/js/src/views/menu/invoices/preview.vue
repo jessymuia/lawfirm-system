@@ -62,6 +62,7 @@
 
                                                         <div class="col-xl-8 col-lg-7 col-md-6 col-sm-4">
                                                             <p class="inv-customer-name">{{ invoice.client }}</p>
+                                                            <p class="inv-customer-name">{{ invoice.client_address}}</p>
                                                         </div>
 
                                                         <div class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 order-sm-0 order-1">
@@ -114,13 +115,13 @@
                                                                         <p class="">Sub Total:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">KES{{(summary.totals + summary.total_tax)}}</p>
+                                                                        <p class="">KES{{summary.totals}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7">
                                                                         <p class="">Tax Amount:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">KES{{summary.total_tax}}</p>
+                                                                        <p class="">KES{{(summary.totals - summary.total_tax)}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7 grand-total-title">
                                                                         <h4 class="">Grand Total :</h4>
@@ -157,6 +158,11 @@
                                         </div>
                                         <div class="col-xl-12 col-md-3 col-sm-6">
                                             <a href="javascript:;" class="btn btn-secondary btn-print action-print" @click="print()">Print</a>
+                                        </div>
+                                        <div class="col-xl-12 col-md-3 col-sm-6">
+                                            <a v-if="invoice.postShow" href="javascript:" class="btn btn-info btn-edit" @click="submit_form6()">
+                                                Post Invoice
+                                            </a>
                                         </div>
 
                                     </div>
@@ -198,6 +204,24 @@
     const print = () => {
         window.print();
     };
+
+    const submit_form6 = () => {
+        let invoiceId = localStorage.getItem('invoiceId');
+        if (confirm('Are you sure want to post the invoice ?')) {
+            if (invoiceId) {
+                // items.value = items.value.filter((d) => d.id != item.id);
+                axios.put(`/api/send-to-admin/${invoiceId}`) // Assuming your API endpoint for client creation is /api/clients
+                    .then(response => {
+                        showMessage('Invoice sent successfully.');
+                        document.getElementById('closebtn').click();
+                    })
+                    .catch(error => {
+                        showMessage('Error posting the invoice. Please try again.');
+                        console.error(error);
+                    });
+            }
+        }
+    }
 
     const fetch_data = () => {
         let invoiceId = localStorage.getItem('invoiceId');

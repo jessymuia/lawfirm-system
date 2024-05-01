@@ -12,6 +12,10 @@ class Court extends DefaultAppModel
     protected $fillable = [
         'id',
         'name',
-        'type'
+        'type',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }

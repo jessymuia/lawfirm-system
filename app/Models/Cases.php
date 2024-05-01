@@ -17,6 +17,10 @@ class Cases extends DefaultAppModel
         'case_type',
         'police_station',
         'court_id',
-        'opposing_party'
+        'opposing_party',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }

@@ -69,6 +69,7 @@ class DocumentController extends Controller
             'mimetype' => $file->getClientMimeType(),
             'filesize' => $file->getSize(),
             'extension' => $file->getClientOriginalExtension(),
+            "created_by" => auth()->user()->id
         ]);
 
         return $this->response(true,'success',null,200);

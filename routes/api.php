@@ -25,6 +25,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    //Dashboard
+    Route::resource("dashboard", \App\Http\Controllers\DashboardController::class);
+
+
     Route::resource("clients", \App\Http\Controllers\ClientController::class);
     Route::get("/clientsDropDown", [\App\Http\Controllers\ClientController::class,'clientsDropDown']);
     Route::get("/advocates", [\App\Http\Controllers\AttorneyController::class,'getAdvocateUsers']);
@@ -40,9 +44,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::resource("tasks", \App\Http\Controllers\TaskController::class);
     Route::resource("expenses", \App\Http\Controllers\ExpenseController::class);
+    Route::resource("expense-categories", \App\Http\Controllers\ExpenseCategoryController::class);
     Route::resource('hearings',\App\Http\Controllers\HearingController::class);
     Route::resource("hearingtypes", \App\Http\Controllers\HearingTypeController::class);
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
+    Route::put("/send-to-admin/{id}", [\App\Http\Controllers\InvoiceController::class,'sendToAdmin']);
     Route::resource('invoiceItems', \App\Http\Controllers\InvoiceItemController::class);
     Route::get("/preview-invoice/{id}", [\App\Http\Controllers\InvoiceController::class,'preview']);
 

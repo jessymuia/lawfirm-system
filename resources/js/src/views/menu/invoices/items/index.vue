@@ -64,6 +64,9 @@
                                                         <div class="actions text-center">
                                                             <a href="javascript:;" class="cancel me-1" @click="update_rowI(props.row)">
                                                                 <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#clientI_modal">Update</button>
+                                                                <a href="javascript:" class="cancel me-1" @click="submit_form6(props.row)">
+                                                                    <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                                                                </a>
                                                             </a>
                                                         </div>
                                                     </template>
@@ -267,6 +270,24 @@ const submit_form4 = () => {
 
     }
 };
+const submit_form6 = (item) => {
+    if (confirm('Are you sure want to delete the item ?')) {
+        if (item) {
+            // items.value = items.value.filter((d) => d.id != item.id);
+            axios.delete(`/api/invoiceItems/${item.id}`) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+                    itemsI.value = response.data.data;
+                    showMessage('Invoice item deleted successfully.');
+                    document.getElementById('closebtn').click();
+                })
+                .catch(error => {
+                    showMessage('Error deleting the invoice item. Please try again.');
+                    console.error(error);
+                });
+        }
+    }
+}
+
 
 const showMessage = (msg = '', type = 'success') => {
     const toast = window.Swal.mixin({

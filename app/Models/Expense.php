@@ -16,6 +16,15 @@ class Expense extends DefaultAppModel
         'vendor',
         'payment_method',
         'invoice_number',
-        'user_id'
+        'user_id',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
+
+    public function categoryName(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+       return $this->belongsTo(ExpenseCategory::class, 'category');
+    }
 }

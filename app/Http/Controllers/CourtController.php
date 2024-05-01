@@ -97,6 +97,7 @@ class CourtController extends Controller
         $court = Court::find($id);
         $court->name = $request->name;
         $court->type = $request->type;
+        $court->updated_by = auth()->user()->id;
         $court->save();
 
         return $this->index();

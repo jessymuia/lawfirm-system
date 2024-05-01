@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -28,8 +29,34 @@ class InvoiceController extends Controller
      */
     public function index(): JsonResponse
     {
-        $invoices = Invoice::all();
+        if(auth()->user()->hasRole('admin')){
+            $invoices = Invoice::withTrashed()->orWhere("status",1)->orwhere("created_by", auth()->user()->id)->get();
+        } else {
+            $invoices = Invoice::where("created_by", auth()->user()->id)->get();
+        }
+
         $invoices = $invoices->map(function ($row) {
+            $status = "archived";
+            $delete = false;
+
+            switch ($row->status) {
+                case 1:
+                    $status = "active";
+                    $delete = true;
+                    break;
+                case 3:
+                    $status = "draft";
+                    $delete = true;
+                    break;
+                case 4:
+                    $status = "deleted(admin)";
+                    break;
+                case 5:
+                    $status = "deleted(user)";
+                    break;
+
+            }
+
            return [
                "id" => $row->id,
                "case_id" => $row->case_id,
@@ -38,6 +65,8 @@ class InvoiceController extends Controller
                "invoice_due_date" => Carbon::parse($row->invoice_due_date)->format('d/m/Y'),
                "client_id" => $row->client_id,
                "client" => Client::find($row->client_id)->name,
+               "status" => $status,
+               "delete" => $delete,
            ];
         });
 
@@ -67,6 +96,7 @@ class InvoiceController extends Controller
             "invoice_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
             "invoice_due_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_due_date)->format('Y-m-d'),
             "client_id" => $request->client_id,
+            "status" => 3,
             "created_by" => auth()->user()->id
         ]);
 
@@ -125,15 +155,44 @@ class InvoiceController extends Controller
         return $this->index();
     }
 
+    public function sendToAdmin($id): \Illuminate\Http\Response|JsonResponse
+    {
+        $invoice = Invoice::find($id);
+        $invoice->update([
+            "status" => 1,
+            "updated_by" => auth()->user()->id
+        ]);
+
+        return $this->index();
+    }
+
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Invoice  $invoice
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function destroy(Invoice $invoice)
+    public function destroy($id): JsonResponse
     {
-        //
+        $invoice = Invoice::find($id);
+        if(auth()->user()->hasPermissionTo(ModulePermissions::DELETE_INVOICES)) {
+            //maybe send to creator that the invoice has been rejected by admin
+
+            $invoice->deleted_by = auth()->user()->id;
+            $invoice->status = 4; //Deleted By admin
+            $invoice->save();
+            $invoice->delete();
+        } else if($invoice->created_by === auth()->user()->id && $invoice->status === 4) {
+
+            $invoice->deleted_by = auth()->user()->id;
+            $invoice->status = 5; //Deleted By creator
+            $invoice->save();
+            $invoice->delete();
+        } else {
+            return $this->response(false,"error", null, 404);
+        }
+
+        return $this->index();
     }
 
     public function preview($id): JsonResponse
@@ -159,6 +218,8 @@ class InvoiceController extends Controller
             "date" => $invoice->invoice_date,
             "due_date"=>$invoice->invoice_due_date,
             "client" => $invoice->client->name,
+            "client_address" => $invoice->client->address,
+            "postShow" => $invoice->status === 3
         ];
 
         return $this->response(true,'success',[$items,$invoice,$total],200);

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('case_id');
             $table->date('date');
             $table->double('amount');
-            $table->string('category');
+            $table->foreignId('category')->nullable();
             $table->string('description');
             $table->string('vendor');
             $table->string('payment_method');

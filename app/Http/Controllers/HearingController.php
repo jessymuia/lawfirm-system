@@ -69,7 +69,8 @@ class HearingController extends Controller
             "hearing_date" => Carbon::createFromFormat('d/m/Y', $request->hearing_date)->format('Y-m-d'),
             "hearing_type" => $request->hearing_type,
             "notes" => $request->notes,
-            "outcome" => $request->outcome
+            "outcome" => $request->outcome,
+            "created_by" => auth()->user()->id
         ]);
 
         return $this->index();
@@ -113,7 +114,8 @@ class HearingController extends Controller
             "hearing_date" => Carbon::createFromFormat('d/m/Y', $request->hearing_date)->format('Y-m-d'),
             "hearing_type" => $request->hearing_type,
             "notes" => $request->notes,
-            "outcome" => $request->outcome
+            "outcome" => $request->outcome,
+            "updated_by" => auth()->user()->id
         ]);
 
         return $this->index();

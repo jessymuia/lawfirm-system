@@ -73,4 +73,13 @@ class ModulePermissions
     public const UPDATE_COURTS = 'update-court';
     public const DELETE_COURTS = 'delete-court';
 
+    /**
+     * Invoices
+     */
+
+    public const LIST_INVOICES = 'list-invoice';
+    public const CREATE_INVOICES = 'create-invoice';
+    public const UPDATE_INVOICES = 'update-invoice';
+    public const DELETE_INVOICES = 'delete-invoice';
+
 }

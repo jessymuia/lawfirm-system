@@ -13,6 +13,9 @@ class Task extends DefaultAppModel
         'assigned_to',
         'due_date',
         'priority',
-        'status'
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }

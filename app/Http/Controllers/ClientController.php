@@ -64,7 +64,8 @@ class ClientController extends Controller
             'phone_number' => $request->phone_number,
             'extra_phone_number' => $request->extra_phone_number ?? null,
             'address' => $request->address,
-            'advocate_id' => $request->advocate
+            'advocate_id' => $request->advocate,
+            "created_by" => auth()->user()->id
         ]);
 
         return $this->index();
@@ -107,7 +108,8 @@ class ClientController extends Controller
             'phone_number' => $request->phone_number,
             'extra_phone_number' => $request->extra_phone_number,
             'address' => $request->address,
-            'advocate_id' => $request->advocate
+            'advocate_id' => $request->advocate,
+            "updated_by" => auth()->user()->id
         ]);
 
         return $this->index();

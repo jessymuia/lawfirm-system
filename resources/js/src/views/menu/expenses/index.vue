@@ -90,16 +90,13 @@
                                     <div class="invalid-feedback">Please fill the amount</div>
                                 </div>
                                 <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Category</label>
-                                    <input
-                                        type="text"
-                                        v-model="client.category"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.category ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Category"
-                                    />
-                                    <div class="invalid-feedback">Please fill the category</div>
+                                    <div id="select_menu" class="form-group form-group">
+                                        <select v-model="client.category" class="form-select" :class="[is_submit_form4 ? (client.category ? 'is-valid' : 'is-invalid') : '']">
+                                            <option value="">Select Hearing Type</option>
+                                            <option v-for="data in types" :key="data.id" :value="data.id">{{ data.name }}</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please Select the category</div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 form-group">
                                     <label for="validationCustom01">Description</label>
@@ -181,9 +178,10 @@ import { useMeta } from '@/composables/use-meta';
 import Multiselect from "@suadelabs/vue3-multiselect";
 useMeta({ title: 'Courts' });
 
-const columns = ref(['case', 'expense_date','amount','category','description','vendor','payment_method','invoice_number','user', 'actions']);
+const columns = ref(['case', 'expense_date','amount','category_name','description','vendor','payment_method','invoice_number','user', 'actions']);
 const items = ref([]);
 const cases = ref([]); // List of advocates
+const types = ref([]);
 const users = ref([]);
 const code_arr = ref([]);
 const modal = ref({title: "", button: ""});
@@ -199,7 +197,7 @@ const table_option = ref({
         filterPlaceholder: 'Search...',
         limit: 'Results:',
     },
-    sortable: ['case', 'expense_date','amount','category','description','vendor','payment_method','invoice_number','user'],
+    sortable: ['case', 'expense_date','amount','category_name','description','vendor','payment_method','invoice_number','user'],
     sortIcon: {
         base: 'sort-icon-none',
         up: 'sort-icon-asc',
@@ -280,6 +278,14 @@ const fetchData = () => {
         })
         .catch(error => {
             console.error('Error fetching clients:', error);
+        });
+
+    axios.get('/api/expense-categories')
+        .then(response => {
+            types.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching categories:', error);
         });
 
     // Fetch list of advocates

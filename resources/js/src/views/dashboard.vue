@@ -261,15 +261,16 @@
 </template>
 <script setup>
 import '@/assets/sass/widgets/widgets.scss';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import ApexChart from 'vue3-apexcharts';
+import axios from '../api';
 
 import { useMeta } from '@/composables/use-meta';
 useMeta({ title: 'Widgets' });
 
 const store = useStore();
-const dashboard= ref({clients : 45,cases: 3});
+const dashboard= ref({clients : 45,cases: 3, invoices: 0, expenses:0});
 
 //Statistics
 const total_visit_series = ref([{ data: [21, 9, 36, 12, 44, 25, 59, 41, 66, 25] }]);
@@ -358,54 +359,20 @@ const unique_visitor_options = computed(() => {
     };
 });
 
-//Followers
-const followers_series = ref([{ name: 'Sales', data: [38, 60, 38, 52, 36, 40, 28] }]);
-const followers_options = computed(() => {
-    const is_dark = store.state.is_dark_mode;
-    let option = {
-        chart: { sparkline: { enabled: true } },
-        stroke: { curve: 'smooth', width: 2 },
-        colors: ['#4361ee'],
-        yaxis: { min: 0, show: false },
-        tooltip: { theme: is_dark ? 'dark' : 'light', x: { show: false } },
-    };
-    if (is_dark) {
-        option['fill'] = { type: 'gradient', gradient: { type: 'vertical', shadeIntensity: 1, inverseColors: !1, opacityFrom: 0.3, opacityTo: 0.05, stops: [100, 100] } };
-    }
-    return option;
+onMounted( () => {
+    fetchData();
 });
 
-//Referral
-const referral_series = ref([{ name: 'Sales', data: [60, 28, 52, 38, 40, 36, 38] }]);
-const referral_options = computed(() => {
-    const is_dark = store.state.is_dark_mode;
-    let option = {
-        chart: { sparkline: { enabled: true } },
-        stroke: { curve: 'smooth', width: 2 },
-        colors: ['#e7515a'],
-        yaxis: { min: 0, show: false },
-        tooltip: { theme: is_dark ? 'dark' : 'light', x: { show: false } },
-    };
-    if (is_dark) {
-        option['fill'] = { type: 'gradient', gradient: { type: 'vertical', shadeIntensity: 1, inverseColors: !1, opacityFrom: 0.3, opacityTo: 0.05, stops: [100, 100] } };
-    }
-    return option;
-});
-
-//Engagement
-const engagement_series = ref([{ name: 'Sales', data: [28, 50, 36, 60, 38, 52, 38] }]);
-const engagement_options = computed(() => {
-    const is_dark = store.state.is_dark_mode;
-    let option = {
-        chart: { sparkline: { enabled: true } },
-        stroke: { curve: 'smooth', width: 2 },
-        colors: ['#1abc9c'],
-        yaxis: { min: 0, show: false },
-        tooltip: { theme: is_dark ? 'dark' : 'light', x: { show: false } },
-    };
-    if (is_dark) {
-        option['fill'] = { type: 'gradient', gradient: { type: 'vertical', shadeIntensity: 1, inverseColors: !1, opacityFrom: 0.3, opacityTo: 0.05, stops: [100, 100] } };
-    }
-    return option;
-});
+const fetchData = () => {
+    axios.get("dashboard")
+        .then(response => {
+            console.log(response);
+            dashboard.value.cases = response.data.data[1];
+            dashboard.value.clients = response.data.data[0];
+            dashboard.value.invoices = response.data.data[2];
+            dashboard.value.expenses = response.data.data[3];
+        }).catch(error => {
+        console.error('Error fetching clients:', error);
+    });
+};
 </script>

@@ -9,6 +9,9 @@ class HearingType extends DefaultAppModel
     protected $fillable = [
         'id',
         'name',
-        'created_by'
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }

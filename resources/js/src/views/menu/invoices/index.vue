@@ -27,11 +27,14 @@
                         <v-client-table :data="items" :columns="columns" :options="table_option">
                             <template #actions="props">
                                 <div class="actions text-center">
-                                    <a href="javascript:" class="cancel me-2" @click="view_row(props.row.id)">
+                                    <a v-if="props.row.delete" href="javascript:" class="cancel me-2" @click="view_row(props.row.id)">
                                        <button type="button" class="btn btn-primary btn-sm">Add Items</button>
                                     </a>
-                                    <a href="javascript:" class="cancel me-1" @click="update_row(props.row)">
+                                    <a v-if="props.row.delete"  href="javascript:" class="cancel me-1" @click="update_row(props.row)">
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
+                                    </a>
+                                    <a v-if="props.row.delete"  href="javascript:" class="cancel me-1" @click="submit_form6(props.row)">
+                                        <button type="button" class="btn btn-danger btn-sm">Delete</button>
                                     </a>
                                 </div>
                             </template>
@@ -115,7 +118,7 @@ import { useMeta } from '@/composables/use-meta';
 import Multiselect from "@suadelabs/vue3-multiselect";
 useMeta({ title: 'Hearings' });
 
-const columns = ref(['case', 'client','invoice_date','invoice_due_date','actions']);
+const columns = ref(['case', 'client','invoice_date','invoice_due_date','status','actions']);
 const items = ref([]);
 const cases = ref([]); // List of advocates
 const clients = ref([]);
@@ -199,6 +202,24 @@ const submit_form4 = () => {
 
     }
 };
+
+const submit_form6 = (item) => {
+    if (confirm('Are you sure want to delete the invoice ?')) {
+        if (item) {
+            // items.value = items.value.filter((d) => d.id != item.id);
+            axios.delete(`/api/invoices/${item.id}`) // Assuming your API endpoint for client creation is /api/clients
+                .then(response => {
+                    items.value = response.data.data;
+                    showMessage('Invoice deleted successfully.');
+                    document.getElementById('closebtn').click();
+                })
+                .catch(error => {
+                    showMessage('Error deleting the invoice. Please try again.');
+                    console.error(error);
+                });
+        }
+    }
+}
 
 const fetchData = () => {
     modal.value.title = "Add Hearing";

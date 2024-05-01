@@ -35,6 +35,7 @@ class ExpenseController extends Controller
                "expense_date" => Carbon::parse($row->date)->format('d/m/Y'),
                "amount" => $row->amount,
                "category" => $row->category,
+               "category_name" => $row->categoryName ? $row->categoryName->name : "",
                "description" => $row->description,
                "vendor" => $row->vendor,
                "payment_method" => $row->payment_method,
@@ -75,7 +76,8 @@ class ExpenseController extends Controller
             "vendor" => $request->vendor,
             "payment_method" => $request->payment_method,
             "invoice_number" => $request->invoice_number,
-            "user_id" => $request->user_id
+            "user_id" => $request->user_id,
+            "created_by" => auth()->user()->id
         ]);
 
         return $this->index();
@@ -124,7 +126,8 @@ class ExpenseController extends Controller
             "vendor" => $request->vendor,
             "payment_method" => $request->payment_method,
             "invoice_number" => $request->invoice_number,
-            "user_id" => $request->user_id
+            "user_id" => $request->user_id,
+            "updated_by" => auth()->user()->id
         ]);
 
         return $this->index();

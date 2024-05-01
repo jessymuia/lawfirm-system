@@ -84,7 +84,8 @@ class CasesController extends Controller
             "police_station" => $request->police_station,
             "court_id" => $request->court_id,
             "opposing_party" => $request->opposing_party,
-            "case_type" => $request->case_type
+            "case_type" => $request->case_type,
+            "created_by" => auth()->user()->id
         ]);
 
         return $this->index();
@@ -156,7 +157,8 @@ class CasesController extends Controller
             "police_station" => $request->police_station,
             "court_id" => $request->court_id,
             "opposing_party" => $request->opposing_party,
-            "case_type" => $request->case_type
+            "case_type" => $request->case_type,
+            "updated_by" => auth()->user()->id
         ]);
 
         return $this->index();

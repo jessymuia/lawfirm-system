@@ -15,7 +15,11 @@ class Hearing extends DefaultAppModel
         'hearing_date',
         'hearing_type',
         'notes',
-        'outcome'
+        'outcome',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     public function hearingTypeName(): \Illuminate\Database\Eloquent\Relations\BelongsTo

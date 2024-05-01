@@ -76,7 +76,8 @@ class TaskController extends Controller
             "assigned_to" => $request->assigned_to,
             "due_date" => Carbon::createFromFormat('d/m/Y', $request->due_date)->format('Y-m-d'),
             "priority" => $request->priority,
-            "status" => $request->status
+            "status" => $request->status,
+            "created_by" => auth()->user()->id
         ]);
 
         if($task) {
@@ -127,7 +128,8 @@ class TaskController extends Controller
             "assigned_to" => $request->assigned_to,
             "due_date" => Carbon::createFromFormat('d/m/Y', $request->due_date)->format('Y-m-d'),
             "priority" => $request->priority,
-            "status" => $request->status
+            "status" => $request->status,
+            "updated_by" => auth()->user()->id
         ]);
 
         if($task && $orig["assigned_to"] != $task->assigned_to) {

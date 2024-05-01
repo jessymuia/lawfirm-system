@@ -99,11 +99,17 @@ class SetupPermissions extends Command
         Permission::findOrCreate(ModulePermissions::UPDATE_COURTS);
         Permission::findOrCreate(ModulePermissions::DELETE_COURTS);
 
+        // permissions for invoices
+        Permission::findOrCreate(ModulePermissions::LIST_INVOICES);
+        Permission::findOrCreate(ModulePermissions::CREATE_INVOICES);
+        Permission::findOrCreate(ModulePermissions::UPDATE_INVOICES);
+        Permission::findOrCreate(ModulePermissions::DELETE_INVOICES);
+
 
         //confirm if all permissions are created
         $permissions = Permission::all();
 
-        if($status = $permissions->count() == 32){
+        if($status = $permissions->count() == 36){
             $this->info('All permissions created successfully');
         }else{
             $this->error('Some permissions were not created');

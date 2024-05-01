@@ -15,6 +15,10 @@ class Document extends DefaultAppModel
         'full_path',
         'mimetype',
         'filesize',
-        'extension'
+        'extension',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }

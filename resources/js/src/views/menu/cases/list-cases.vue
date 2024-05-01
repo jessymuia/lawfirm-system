@@ -240,7 +240,7 @@ const submit_form4 = () => {
             axios.put(`/api/cases/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('Case updatedsuccessfully.');
+                    showMessage('Case updated successfully.');
                     document.getElementById('closebtn').click();
                 })
                 .catch(error => {
@@ -251,7 +251,7 @@ const submit_form4 = () => {
             axios.post('/api/cases', client.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     items.value = response.data.data;
-                    showMessage('User added successfully.');
+                    showMessage('Case added successfully.');
                     document.getElementById('closebtn').click();
                 })
                 .catch(error => {

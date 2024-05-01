@@ -12,6 +12,10 @@ class Client extends DefaultAppModel
         'phone_number',
         'extra_phone_number',
         'address',
-        'advocate_id'
+        'advocate_id',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }

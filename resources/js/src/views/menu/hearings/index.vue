@@ -245,7 +245,7 @@ const fetchData = () => {
             types.value = response.data.data;
         })
         .catch(error => {
-            console.error('Error fetching roles:', error);
+            console.error('Error fetching types:', error);
         });
 
     // Fetch list of advocates

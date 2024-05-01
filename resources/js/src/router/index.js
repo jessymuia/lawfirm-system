@@ -21,12 +21,19 @@ const routes = [
         component: () => import(/* webpackChunkName: "clients" */ '../views/menu/users/index.vue'),
     },
 
-    //court types
+    //hearing types
 
     {
         path: '/hearingtypes',
         name: 'hearing-types',
         component: () => import(/* webpackChunkName: "clients" */ '../views/menu/hearings/types.vue'),
+    },
+
+    //expense categories
+    {
+        path: '/expense-categories',
+        name: 'expense-categories',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/expenses/categories.vue'),
     },
 
     //court types

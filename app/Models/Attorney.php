@@ -10,6 +10,10 @@ class Attorney extends DefaultAppModel
         'id',
         'case_id',
         'advocate_id',
-        'role'
+        'role',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 }
