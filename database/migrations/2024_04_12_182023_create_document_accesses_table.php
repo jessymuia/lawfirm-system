@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('document_accesses', function (Blueprint $table) {
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('document_id');
-            $table->foreignId('accessed_by');
+            $table->foreignId('document_id')->constrained("documents");
+            $table->foreignId('accessed_by')->constrained("users");
             $table->date('accessed_date');
             $table->string('action');
             $table->ipAddress('ip_address');

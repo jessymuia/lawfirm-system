@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('phone_number');
             $table->string('extra_phone_number')->nullable();
             $table->string('address');
-            $table->foreignId('advocate_id');
+            $table->foreignId('advocate_id')->constrained("users");
         });
     }
 

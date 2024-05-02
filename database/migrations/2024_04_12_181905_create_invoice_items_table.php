@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('invoice_items', function (Blueprint $table) {
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('invoice_id');
+            $table->foreignId('invoice_id')->constrained("invoices");
             $table->string('description');
             $table->double('quantity');
             $table->double('rate');

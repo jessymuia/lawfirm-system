@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('attorneys', function (Blueprint $table) {
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('case_id');
-            $table->foreignId('advocate_id');
+            $table->foreignId('case_id')->constrained("cases");
+            $table->foreignId('advocate_id')->constrained("users");
             $table->string('role');
         });
     }

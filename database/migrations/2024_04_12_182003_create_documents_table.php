@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('case_id');
+            $table->foreignId('case_id')->constrained("cases");
             $table->string('title');
             $table->string('filename');
             $table->string('filepath');
