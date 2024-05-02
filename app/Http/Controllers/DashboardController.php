@@ -6,6 +6,7 @@ use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Expense;
 use App\Models\InvoiceItem;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -27,13 +28,41 @@ class DashboardController extends Controller
      */
     public function index(): JsonResponse
     {
-        $clients = Client::all()->count();
+        //weekly
+        $weekStartDate = Carbon::now()->startOfWeek()->startOfDay();
+
+        $weekEndDate = Carbon::now()->startOfWeek()->subWeek()->endOfDay();
+
+        $clients = Client::whereBetween("created_at", [$weekStartDate,$weekEndDate])->count();
         $cases = Cases::all()->count();
-        $expenses = Expense::all()->sum("amount");
+        $expenses = Expense::whereBetween("created_at", [$weekStartDate,$weekEndDate])->sum("amount");
         $invoices = InvoiceItem::all()->sum("total_amount");
 
+        $monthlyCases = [];
 
-        return $this->response(true,"success", [$clients,$cases,$invoices,$expenses], 200);
+        for ($month = 1; $month <= 12; $month++) {
+            // Get the start and end dates for the current month
+            $startDate = Carbon::now()->startOfMonth()->month($month)->startOfDay();
+            $endDate = Carbon::now()->startOfMonth()->month($month)->endOfMonth()->endOfDay();
+
+            // Query your model where the date column is between the start and end dates of the current month
+            $monthlyCases[$month-1] = Cases::whereBetween('created_at', [$startDate, $endDate])->count();
+        }
+
+        $monthlyClients = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            // Get the start and end dates for the current month
+            $startDate = Carbon::now()->startOfMonth()->month($month)->startOfDay();
+            $endDate = Carbon::now()->startOfMonth()->month($month)->endOfMonth()->endOfDay();
+
+            // Query your model where the date column is between the start and end dates of the current month
+            $monthlyClients[$month-1] = Client::whereBetween('created_at', [$startDate, $endDate])->count();
+        }
+
+
+
+        return $this->response(true,"success", [$clients,$cases,$invoices,$expenses,$monthlyClients,$monthlyCases], 200);
     }
 
     /**

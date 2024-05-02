@@ -323,8 +323,8 @@ const paid_visit_options = computed(() => {
 
 //unique visitors
 const unique_visitor_series = ref([
-    { name: 'Direct', data: [58, 44, 55, 57, 56, 61, 58, 63, 60, 66, 56, 63] },
-    { name: 'Organic', data: [91, 76, 85, 101, 98, 87, 105, 91, 114, 94, 66, 70] },
+    { name: 'Clients', data: [58, 44, 55, 57, 56, 61, 58, 63, 60, 66, 56, 63] },
+    { name: 'Cases', data: [91, 76, 85, 101, 98, 87, 105, 91, 114, 94, 66, 70] },
 ]);
 const unique_visitor_options = computed(() => {
     const is_dark = store.state.is_dark_mode;
@@ -370,6 +370,11 @@ const fetchData = () => {
             dashboard.value.clients = response.data.data[0];
             dashboard.value.invoices = response.data.data[2];
             dashboard.value.expenses = response.data.data[3];
+
+            console.log(unique_visitor_series.value[1].data)
+            unique_visitor_series.value[0].data = response.data.data[4];//for clients
+            unique_visitor_series.value[1].data = response.data.data[5];//for cases
+
         }).catch(error => {
         console.error('Error fetching clients:', error);
     });

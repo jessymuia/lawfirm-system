@@ -19,5 +19,18 @@
     "starter_kit": "Starter Kit",
     "documentation": "Documentation",
     "ui_kit": "UI Kit",
-    "more": "More"
+    "more": "More",
+    "clients": "Clients",
+    "Cases": "Cases",
+    "Court Types": "Court Types",
+    "Hearing Types": "Hearing Types",
+    "Expense Category": "Expense Category",
+    "Courts": "Courts",
+    "Expenses": "Expenses",
+    "Tasks": "Tasks",
+    "Hearings": "Hearings",
+    "Invoices": "Invoices",
+    "Clients": "Clients",
+    "Users": "Users",
+    "Roles": "Roles"
 }
