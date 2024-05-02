@@ -17,7 +17,7 @@ return new class extends Migration
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
             $table->string('description');
             $table->string('title');
-            $table->foreignId('assigned_to');
+            $table->foreignId('assigned_to')->constrained('users');
             $table->date('due_date');
             $table->string('priority');
 

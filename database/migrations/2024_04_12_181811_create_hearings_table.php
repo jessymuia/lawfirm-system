@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('hearings', function (Blueprint $table) {
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('case_id');
-            $table->foreignId('court_id');
+            $table->foreignId('case_id')->constrained("cases");
+            $table->foreignId('court_id')->constrained("courts");
             $table->date('hearing_date');
             $table->integer('hearing_type');
             $table->string('notes');

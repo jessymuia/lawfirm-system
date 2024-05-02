@@ -15,15 +15,15 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('case_id');
+            $table->foreignId('case_id')->constrained("cases");
             $table->date('date');
             $table->double('amount');
-            $table->foreignId('category')->nullable();
+            $table->foreignId('category')->constrained("expense_categories");
             $table->string('description');
             $table->string('vendor');
             $table->string('payment_method');
             $table->string('invoice_number')->nullable();
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')->constrained("users");
         });
     }
 
