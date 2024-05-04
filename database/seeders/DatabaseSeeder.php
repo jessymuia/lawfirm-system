@@ -21,18 +21,19 @@ class DatabaseSeeder extends Seeder
         try {
             // initialize the database for usage
 //        $this->call([
-////            UserSeeder::class,
 //            CourtTypeSeeder::class,
-//            CourtSeeder::class,
+//            ExpenseCategorySeeder::class,
+//            // TODO: Add Court Seeder equivalent
 //            HearingTypeSeeder::class,
 //        ]);
 
             // initialize the database for demo purposes
             $this->call([
-//                UserSeeder::class,
-//                ClientSeeder::class,
-//                CourtTypeSeeder::class,
-//                CourtSeeder::class,
+                UserSeeder::class,
+                ClientSeeder::class,
+                ExpenseCategorySeeder::class,
+                CourtTypeSeeder::class,
+                CourtSeeder::class,
                 HearingTypeSeeder::class,
                 CasesSeeder::class,
                 HearingSeeder::class,
