@@ -31,6 +31,7 @@ class InitApplication extends Command
         $this->call('migrate:fresh');
         $this->call('law:setup-permissions');
         $this->call('app:create-admin-here');
+        $this->call('law:setup-permissions');
         $this->call('app:setup-roles');
 
         return CommandAlias::SUCCESS;
