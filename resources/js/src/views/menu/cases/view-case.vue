@@ -213,16 +213,13 @@
 
                                 </div>
                                 <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Hearing Type</label>
-                                    <input
-                                        type="text"
-                                        v-model="clientH.hearing_type"
-                                        class="form-control"
-                                        :class="[is_submit_form4H ? (clientH.hearing_type ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Hearing Type"
-                                    />
-                                    <div class="invalid-feedback">Please fill the hearing type</div>
+                                    <div id="select_menu" class="form-group form-group">
+                                        <select v-model="clientH.hearing_type" class="form-select" :class="[is_submit_form4H ? (clientH.hearing_type ? 'is-valid' : 'is-invalid') : '']">
+                                            <option value="">Select Hearing Type</option>
+                                            <option v-for="data in types" :key="data.id" :value="data.id">{{ data.name }}</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please Select the type</div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 form-group">
                                     <label for="validationCustom01">Notes</label>
@@ -318,6 +315,7 @@ useMeta({ title: 'Account Setting' });
 
 const columns = ref(['case_number', 'description', 'client', 'attorney', 'start_date', 'end_date','case_type','police_station','court','opposing_party', 'actions']);
 const items = ref([]);
+const types = ref([]);
 const table_option = ref({
     perPage: 10,
     perPageValues: [5, 10, 20, 50],
@@ -339,7 +337,7 @@ const table_option = ref({
     resizableColumns: false,
 });
 
-const columnsH = ref(['case', 'court','hearing_date','hearing_type','notes','outcome', 'actions']);
+const columnsH = ref(['case', 'court','hearing_date','hearing_type_name','notes','outcome', 'actions']);
 const itemsH = ref([]);
 const table_optionH = ref({
     perPage: 10,
@@ -603,6 +601,14 @@ const fetchData = () => {
         })
         .catch(error => {
             console.error('Error fetching hearings:', error);
+        });
+
+    axios.get('/api/hearingtypes')
+        .then(response => {
+            types.value = response.data.data;
+        })
+        .catch(error => {
+            console.error('Error fetching types:', error);
         });
 
     axios.get('/api/expenses')

@@ -26,7 +26,7 @@ class HearingController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
-        $hearings = Hearing::all();
+        $hearings = Hearing::orderBy("id","desc")->get();
         $hearings = $hearings->map(function ($row) {
            return [
                "id" => $row->id,

@@ -371,7 +371,6 @@ const fetchData = () => {
             dashboard.value.invoices = response.data.data[2];
             dashboard.value.expenses = response.data.data[3];
 
-            console.log(unique_visitor_series.value[1].data)
             unique_visitor_series.value[0].data = response.data.data[4];//for clients
             unique_visitor_series.value[1].data = response.data.data[5];//for cases
 
