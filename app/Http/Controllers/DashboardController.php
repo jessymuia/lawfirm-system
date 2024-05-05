@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
         $weekEndDate = Carbon::now()->startOfWeek()->subWeek()->endOfDay();
 
-        $clients = Client::whereBetween("created_at", [$weekStartDate,$weekEndDate])->count();
+        $clients = Client::all()->count();//whereBetween("created_at", [$weekStartDate,$weekEndDate])->count();
         $cases = Cases::all()->count();
         $expenses = Expense::whereBetween("created_at", [$weekStartDate,$weekEndDate])->sum("amount");
         $invoices = InvoiceItem::all()->sum("total_amount");

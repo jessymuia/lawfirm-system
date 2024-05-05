@@ -125,6 +125,7 @@
                                         :class="[is_submit_form4 ? (client.quantity ? 'is-valid' : 'is-invalid') : '']"
                                         id="validationCustom01"
                                         placeholder="Quantity"
+                                        @input="computeTotal"
                                     />
                                     <div class="invalid-feedback">Please fill the quantity</div>
                                 </div>
@@ -138,6 +139,7 @@
                                         :class="[is_submit_form4 ? (client.rate ? 'is-valid' : 'is-invalid') : '']"
                                         id="validationCustom01"
                                         placeholder="Rate"
+                                        @input="computeTotal"
                                     />
                                     <div class="invalid-feedback">Please fill the rate</div>
                                 </div>
@@ -151,6 +153,7 @@
                                         :class="[is_submit_form4 ? (client.tax ? 'is-valid' : 'is-invalid') : '']"
                                         id="validationCustom01"
                                         placeholder="Tax"
+                                        readonly
                                     />
                                     <div class="invalid-feedback">Please fill the tax</div>
                                 </div>
@@ -164,6 +167,7 @@
                                         :class="[is_submit_form4 ? (client.total_amount ? 'is-valid' : 'is-invalid') : '']"
                                         id="validationCustom01"
                                         placeholder="Total Amount"
+                                        readonly
                                     />
                                     <div class="invalid-feedback">Please fill the total Amount</div>
                                 </div>
@@ -182,7 +186,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import '@/assets/sass/scrollspyNav.scss';
 import '@/assets/sass/users/account-setting.scss';
 
@@ -227,7 +231,7 @@ const save = () => {
 };
 
 
-const client = ref({id: "",invoice_id:"",description : "", quantity:"",rate:"", tax:"", total_amount:""});
+const client = ref({id: "",invoice_id:"",description : "", quantity:0,rate:0, tax:0, total_amount:0});
 const submit_form4 = () => {
     is_submit_form4.value = true;
     client.value.invoice_id = localStorage.getItem('invoiceId');
@@ -260,10 +264,10 @@ const submit_form4 = () => {
 
         client.value.id = "";
         client.value.description = "";
-        client.value.quantity = "";
-        client.value.tax = "";
-        client.value.rate = "";
-        modal.value.total_amount = "";
+        client.value.quantity =0;
+        client.value.tax = 0;
+        client.value.rate = 0;
+        modal.value.total_amount = 0;
         modal.value.title = "Add Item";
         modal.value.button = "Add";
         is_submit_form4.value = false;
@@ -348,4 +352,11 @@ const fetchData = () => {
 onMounted(() => {
     fetchData();
 });
+
+const computeTotal =() => {
+    let totals = client.value.quantity * client.value.rate;
+    client.value.tax = (0.16 * totals);
+    client.value.total_amount = totals;
+}
+
 </script>

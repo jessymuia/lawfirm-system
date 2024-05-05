@@ -115,13 +115,13 @@
                                                                         <p class="">Sub Total:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">KES{{summary.totals}}</p>
+                                                                        <p class="">KES{{(summary.totals - summary.total_tax)}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7">
                                                                         <p class="">Tax Amount:</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
-                                                                        <p class="">KES{{(summary.totals - summary.total_tax)}}</p>
+                                                                        <p class="">KES{{summary.total_tax}}</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7 grand-total-title">
                                                                         <h4 class="">Grand Total :</h4>

@@ -118,7 +118,8 @@
                             // email: data.data.email,
                         }
                         localStorage.setItem('user', JSON.stringify(logged_user));
-                        router.push("/view-case");
+                        //router.push("/");
+                        window.location.href = "/";
                     } else {
                         showMessage(response.data.message);
                     }
