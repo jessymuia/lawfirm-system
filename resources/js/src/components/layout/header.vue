@@ -10,7 +10,7 @@
                         </router-link>
                     </li>
                     <li class="nav-item theme-text">
-                        <router-link to="/" class="nav-link"> O. Njoga & Co. Advocates </router-link>
+                        <router-link to="/" class="nav-link"> Ouma Njoga & Co. Advocates </router-link>
                     </li>
                 </ul>
                 <div class="d-none horizontal-menu">

@@ -88,6 +88,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div id="select_menu" class="form-group form-group">
+                                        <label for="date">Client</label>
                                         <select v-model="client.client_id" class="form-select" :class="[is_submit_form4 ? (client.client_id ? 'is-valid' : 'is-invalid') : '']">
                                             <option value="">Select Client</option>
                                             <option v-for="data in clients" :key="data.id" :value="data.id">{{ data.name }}</option>
@@ -222,7 +223,7 @@ const submit_form6 = (item) => {
 }
 
 const fetchData = () => {
-    modal.value.title = "Add Hearing";
+    modal.value.title = "Add Invoice";
     modal.value.button = "Add";
     // Fetch list of clients
     axios.get('/api/invoices')
@@ -257,7 +258,7 @@ const update_row = (item) => {
     client.value.invoice_date = item.invoice_date;
     client.value.invoice_due_date = item.invoice_due_date;
 
-    modal.value.title = "Update Hearing";
+    modal.value.title = "Update Invoice";
     modal.value.button = "Update";
 };
 
