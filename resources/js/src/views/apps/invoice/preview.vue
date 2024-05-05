@@ -30,7 +30,7 @@
                                                         <div class="col-sm-6 col-12 me-auto">
                                                             <div class="d-flex">
                                                                 <img class="company-logo" src="@/assets/images/cork-logo.png" alt="company" />
-                                                                <h3 class="in-heading align-self-center">Cork Inc.</h3>
+                                                                <h3 class="in-heading align-self-center">Ouma Njoga & Co. Advocates</h3>
                                                             </div>
                                                         </div>
 
