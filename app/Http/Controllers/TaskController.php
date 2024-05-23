@@ -83,6 +83,7 @@ class TaskController extends Controller
         if($task) {
             $user = User::find($request->assigned_to);
 
+            sendSMS($user,"You have been assigned task:\nTitle : ".$task->title.".\nDescription : ".$task->description);
             Mail::to($user->email)->send(new AssignedTask($task));
         }
 
@@ -135,8 +136,10 @@ class TaskController extends Controller
         if($task && $orig["assigned_to"] != $task->assigned_to) {
             $user = User::find($request->assigned_to);
 
+            sendSMS($user,"You have been assigned task:\nTitle : ".$task->title.".\nDescription : ".$task->description);
             Mail::to($user->email)->send(new AssignedTask($task));
             $user = User::find($orig["assigned_to"]);
+            sendSMS($user,"Someone else has been assigned task:\nTitle : ".$task->title.".\n.Description : ".$task->description);
             Mail::to($user->email)->send(new ReassignedTask($task));
         }
 
