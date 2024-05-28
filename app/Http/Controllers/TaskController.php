@@ -84,7 +84,7 @@ class TaskController extends Controller
             $user = User::find($request->assigned_to);
 
             sendSMS($user,"You have been assigned task:\nTitle : ".$task->title.".\nDescription : ".$task->description);
-            Mail::to($user->email)->send(new AssignedTask($task));
+//            Mail::to($user->email)->send(new AssignedTask($task));
         }
 
         return $this->index();
@@ -137,10 +137,10 @@ class TaskController extends Controller
             $user = User::find($request->assigned_to);
 
             sendSMS($user,"You have been assigned task:\nTitle : ".$task->title.".\nDescription : ".$task->description);
-            Mail::to($user->email)->send(new AssignedTask($task));
+//            Mail::to($user->email)->send(new AssignedTask($task));
             $user = User::find($orig["assigned_to"]);
             sendSMS($user,"Someone else has been assigned task:\nTitle : ".$task->title.".\n.Description : ".$task->description);
-            Mail::to($user->email)->send(new ReassignedTask($task));
+//            Mail::to($user->email)->send(new ReassignedTask($task));
         }
 
 

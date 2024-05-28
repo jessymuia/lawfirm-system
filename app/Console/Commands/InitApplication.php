@@ -33,7 +33,7 @@ class InitApplication extends Command
         $this->call('app:create-admin-here');
         $this->call('law:setup-permissions');
         $this->call('app:setup-roles');
-        $this->call('db:seed');  // seed the database
+//        $this->call('db:seed');  // seed the database
 
         return CommandAlias::SUCCESS;
     }
