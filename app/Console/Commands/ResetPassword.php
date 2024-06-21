@@ -34,7 +34,7 @@ class ResetPassword extends Command
         // prompt the user for the email address
         $email = $this->ask('Enter the email address of the user');
         // get the user with the email address
-        $user = User::where('email', $email)->first();
+        $user = User::query()->where('email', $email)->first();
         // check if the user exists
         if (!$user) {
             $this->error('User not found');
