@@ -96,7 +96,8 @@ class AttorneyController extends Controller
     public function getAdvocateUsers(): JsonResponse
     {
         $advocateUsers = User::whereHas('roles', function ($query) {
-            $query->where('name', 'advocate');
+            $query->where('name', 'advocate')
+                ->orWhere('name', 'ADVOCATE');
         })->get();
 
         $advocateUsers = $advocateUsers->map(function ($row) {
