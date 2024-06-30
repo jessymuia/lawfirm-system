@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Expense;
@@ -9,6 +10,7 @@ use App\Models\InvoiceItem;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -28,6 +30,8 @@ class DashboardController extends Controller
      */
     public function index(): JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::VIEW_DASHBOARD))
+            abort(403);
         //weekly
         $weekStartDate = Carbon::now()->startOfWeek()->startOfDay();
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceItemController extends Controller
 {
@@ -45,6 +47,8 @@ class InvoiceItemController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::CREATE_INVOICES))
+            abort(403);
         $request->validate([
             "invoice_id"=>"required",
             "description"=>"required",

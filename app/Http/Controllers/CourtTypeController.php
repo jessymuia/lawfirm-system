@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\CourtType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourtTypeController extends Controller
 {
@@ -23,6 +25,8 @@ class CourtTypeController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_COURTS))
+            abort(403);
         $types = CourtType::all();
         $types = $types->map(function ($row) {
             return [

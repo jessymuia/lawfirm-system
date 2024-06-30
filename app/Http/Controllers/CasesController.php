@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Court;
@@ -32,6 +33,8 @@ class CasesController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_CASE_DOCUMENTS))
+            abort(403);
         $cases = Cases::all();
         $cases = $cases->map(function ($row) {
            return [

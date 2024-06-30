@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Court;
 use App\Models\CourtType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourtController extends Controller
 {
@@ -24,6 +26,8 @@ class CourtController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_COURTS))
+            abort(403);
         $courts = Court::all();
         $courts = $courts->map(function ($row) {
             return [

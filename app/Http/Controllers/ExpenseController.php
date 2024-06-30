@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Cases;
 use App\Models\Expense;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ExpenseController extends Controller
@@ -27,6 +29,8 @@ class ExpenseController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
+            abort(403);
         $expenses = Expense::all();
         $expenses = $expenses->map(function ($row) {
            return [

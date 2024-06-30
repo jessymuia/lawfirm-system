@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExpenseCategoryController extends Controller
 {
@@ -24,6 +26,9 @@ class ExpenseCategoryController extends Controller
      */
     public function index()
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
+            abort(403);
+
         $types = ExpenseCategory::all();
         $types = $types->map(function ($row) {
             return [

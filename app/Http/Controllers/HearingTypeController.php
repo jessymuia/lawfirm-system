@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\HearingType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HearingTypeController extends Controller
 {
@@ -23,6 +25,8 @@ class HearingTypeController extends Controller
      */
     public function index(): JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_CASE_DOCUMENTS))
+            abort(403);
         $types = HearingType::all();
         $types = $types->map(function ($row) {
             return [

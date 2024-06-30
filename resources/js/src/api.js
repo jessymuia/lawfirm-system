@@ -23,6 +23,8 @@ axiosInstance.interceptors.response.use(
             // Redirect the user to the login page
             localStorage.clear();
             window.location.href = '/login'; // Change the URL as needed
+        } else if(error.response.status === 403) {
+            window.location.href='/pages/error503';
         }
         return Promise.reject(error);
     }

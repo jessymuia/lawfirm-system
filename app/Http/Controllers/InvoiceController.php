@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
@@ -29,6 +30,8 @@ class InvoiceController extends Controller
      */
     public function index(): JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
+            abort(403);
         if(auth()->user()->hasRole('admin')){
             $invoices = Invoice::withTrashed()->orWhere("status",1)->orwhere("created_by", auth()->user()->id)->get();
         } else {

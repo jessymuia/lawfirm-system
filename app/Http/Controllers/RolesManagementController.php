@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -31,6 +32,8 @@ class RolesManagementController extends Controller
      */
     public function index()
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_ROLES))
+            abort(403);
         $roles = Role::orderByDesc('id')->get();
         $userTimezone = Auth::user()->timezone;
 

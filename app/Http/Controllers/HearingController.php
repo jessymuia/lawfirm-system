@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Models\Cases;
 use App\Models\Court;
 use App\Models\Hearing;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HearingController extends Controller
 {
@@ -26,6 +28,8 @@ class HearingController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_CASE_DOCUMENTS))
+            abort(403);
         $hearings = Hearing::orderBy("id","desc")->get();
         $hearings = $hearings->map(function ($row) {
            return [

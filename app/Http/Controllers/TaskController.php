@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Mail\AssignedTask;
 use App\Mail\ReassignedTask;
 use App\Models\Task;
@@ -30,6 +31,8 @@ class TaskController extends Controller
      */
     public function index(): JsonResponse
     {
+        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_TASK))
+            abort(403);
         if(Auth::user()->hasPermissionTo('create-roles')) {
             $tasks = Task::all();
         } else {
