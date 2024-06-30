@@ -7,7 +7,7 @@
             <perfect-scrollbar class="list-unstyled menu-categories" tag="ul" :options="{ wheelSpeed: 0.5, swipeEasing: !0, minScrollbarLength: 40, maxScrollbarLength: 300, suppressScrollX: true }">
 
                 <!-- Start Dashboard Menu -->
-                <li class="menu">
+                <li v-if="hasPermission('view-dashboard')" class="menu">
                     <router-link to="/" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -32,7 +32,7 @@
                 <!-- End dashboard Menu -->
 
                 <!-- Start Users Menu -->
-                <li v-if="isAdmin" class="menu">
+                <li v-if="hasPermission('list-users')" class="menu">
                     <router-link to="/users" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -57,7 +57,7 @@
                 <!-- End Users Menu -->
 
                 <!-- Start Clients Menu -->
-                <li class="menu">
+                <li class="menu" v-if="hasPermission('list-clients')">
                     <router-link to="/clients" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -82,7 +82,7 @@
                 <!-- End Clients Menu -->
 
                 <!-- Start Cases Menu -->
-                <li class="menu">
+                <li class="menu" v-if="hasPermission('list-cases')">
                     <router-link to="/cases" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -107,7 +107,7 @@
                 <!-- End Cases Menu -->
 
                 <!-- Start Court Type Menu -->
-                <li class="menu">
+                <li class="menu" v-if="hasPermission('list-court')">
                     <router-link to="/courttypes" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -132,7 +132,7 @@
                 <!-- End Court Type Menu -->
 
                 <!-- Start Hearing Type Menu -->
-                <li class="menu">
+                <li class="menu" v-if="hasPermission('list-clients')">
                     <router-link to="/hearingtypes" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -157,7 +157,7 @@
                 <!-- End Hearing Type Menu -->
 
                 <!-- Start Expense Category Menu -->
-                <li class="menu">
+                <li class="menu"  v-if="hasPermission('list-invoice')">
                     <router-link to="/expense-categories" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -182,7 +182,7 @@
                 <!-- End Expense Category Menu -->
 
                 <!-- Start Courts Menu -->
-                <li class="menu">
+                <li class="menu"  v-if="hasPermission('list-court')">
                     <router-link to="/courts" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -207,7 +207,7 @@
                 <!-- End Courts Menu -->
 
                 <!-- Start Expenses Menu -->
-                <li class="menu">
+                <li class="menu"  v-if="hasPermission('list-invoice')">
                     <router-link to="/expenses" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -232,7 +232,7 @@
                 <!-- End Expenses Menu -->
 
                 <!-- Start Task Menu -->
-                <li class="menu">
+                <li class="menu"  v-if="hasPermission('list-task')">
                     <router-link to="/tasks" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -256,7 +256,7 @@
                 </li>
                 <!-- End Task Menu -->
                 <!-- Start Hearings Menu -->
-                <li class="menu">
+                <li class="menu"  v-if="hasPermission('list-clients')">
                     <router-link to="/hearings" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -281,7 +281,7 @@
                 <!-- End Hearings Menu -->
 
                 <!-- Start Invoice Menu -->
-                <li class="menu">
+                <li class="menu"  v-if="hasPermission('list-invoice')">
                     <router-link to="/invoices" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -306,7 +306,7 @@
                 <!-- End Invoice Menu -->
 
                 <!-- Start Roles Menu -->
-                <li class="menu" v-if="isAdmin">
+                <li class="menu"  v-if="hasPermission('list-roles')">
                     <router-link to="/roles" class="dropdown-toggle" @click="toggleMobileMenu">
                         <div class="">
                             <svg
@@ -337,13 +337,14 @@
 </template>
 
 <script setup>
-    import { onMounted, ref } from 'vue';
-    import { useStore } from 'vuex';
-    import router from "@/router";
-    const store = useStore();
+import {onMounted, ref} from 'vue';
+import {useStore} from 'vuex';
+
+const store = useStore();
 
     const menu_collapse = ref('dashboard');
     const isAdmin = ref(false);
+    const userPermissions = JSON.parse(localStorage.getItem("permissions") || "[]");
 
     onMounted(() => {
         const selector = document.querySelector('#sidebar a[href="' + window.location.pathname + '"]');
@@ -361,12 +362,15 @@
                 selector.click();
             }
         }
+
         const user = JSON.parse(localStorage.getItem("user"));
          if(user)
              isAdmin.value = user.isAllowed;
 
     });
-
+    const hasPermission = (permission) => {
+        return userPermissions.includes(permission);
+    };
     const toggleMobileMenu = () => {
         if (window.innerWidth < 991) {
             store.commit('toggleSideBar', !store.state.is_show_sidebar);

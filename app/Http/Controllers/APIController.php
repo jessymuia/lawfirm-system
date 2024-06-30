@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ModulePermissions;
 use App\Mail\ForgetPassword;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -58,11 +59,13 @@ class APIController extends Controller
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            $isAllowed = $user->hasRole('admin');
+            $isAllowed = Auth::user()->hasPermissionTo(ModulePermissions::VIEW_DASHBOARD);
             $token = $user->createToken('authToken')->plainTextToken;
             $roles = $user->getRoleNames();
+            $permissions = $user->getAllPermissions()->pluck("name");
 
-            return $this->sendResponse([$user,$token,$isAllowed,$roles], "success");
+
+            return $this->sendResponse([$user,$token,$isAllowed,$roles,$permissions], "success");
         }
         return $this->sendResponse(400, "Credentials not match with our records");
     }

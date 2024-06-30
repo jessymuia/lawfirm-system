@@ -67,6 +67,7 @@ class ExpenseController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
+
         Expense::create([
             "case_id" => $request->case_id,
             "date" => Carbon::createFromFormat('d/m/Y', $request->expense_date)->format('Y-m-d'),

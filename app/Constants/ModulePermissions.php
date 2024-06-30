@@ -82,4 +82,6 @@ class ModulePermissions
     public const UPDATE_INVOICES = 'update-invoice';
     public const DELETE_INVOICES = 'delete-invoice';
 
+    public const VIEW_DASHBOARD = 'view-dashboard';
+
 }

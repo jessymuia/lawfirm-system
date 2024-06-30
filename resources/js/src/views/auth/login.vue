@@ -118,8 +118,12 @@
                             // email: data.data.email,
                         }
                         localStorage.setItem('user', JSON.stringify(logged_user));
+                        localStorage.setItem('permissions', JSON.stringify(response.data.data[4]));
                         //router.push("/");
-                        window.location.href = "/";
+                        if(!response.data.data[2])
+                            window.location.href = "/tasks";
+                        else
+                            window.location.href = "/";
                     } else {
                         showMessage(response.data.message);
                     }
