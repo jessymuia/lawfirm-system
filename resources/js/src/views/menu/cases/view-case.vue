@@ -92,9 +92,10 @@
                                                             <a href="javascript:;" class="cancel" @click="preview(props.row.id)">
                                                                 <button type="button" class="btn btn-primary btn-sm">Preview</button>
                                                             </a>
-                                                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
-                                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
+                                                            <a href="javascript:;" class="cancel me-1" @click="delete_confirm(props.row.id)">
+                                                                <button type="button" class="btn btn-danger btn-sm">Delete</button>
                                                             </a>
+<!--                                                            <button type="button" data-remove="doc" class="btn btn-danger" @click="delete_confirm(props.row.id)">Delete</button>-->
                                                         </div>
                                                     </template>
                                                     <template #salary="props"> ${{ props.row.salary }} </template>
@@ -300,6 +301,42 @@
             </div>
         </div>
 
+        <div id="deleteConformation" class="modal fade" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md modal-dialog-centered">
+                <div class="modal-content mailbox-popup">
+                    <div class="modal-header">
+                        <div class="icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="feather feather-trash-2"
+                            >
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </div>
+                        <h5 class="modal-title" id="exampleModalLabel">Delete the document?</h5>
+                        <button type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="">If you delete the document it will be gone forever. Are you sure you want to proceed?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" data-remove="task" class="btn btn-danger" @click="delete_task()">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -417,20 +454,41 @@ const router = useRouter();
 
 const selected = ref(null);
 const selected_file = ref(null);
-const ddl_1 = ref('20');
-const ddl_2 = ref('Jan');
-const ddl_3 = ref('1989');
-const ddl_4 = ref('May');
-const ddl_5 = ref('2009');
-const ddl_6 = ref('United States');
 const months = ref(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
-const range_1 = ref(25);
-const range_2 = ref(50);
-const range_3 = ref(70);
-const range_4 = ref(60);
+
+let deleteId = null;
 
 const change_file = (event) => {
     selected_file.value = event.target.files[0];
+};
+
+let deleteConfirmation = ref(null);
+
+const initPopup = () => {
+    deleteConfirmation = new window.bootstrap.Modal(document.getElementById('deleteConformation'));
+};
+
+const delete_task = () => {
+    // let doc = itemsD.value.find((d) => d.id == deleted_task.value.project_id);
+    // project.tasks = project.tasks.filter((d) => d.task_id != deleted_task.value.task_id);
+    //
+    axios.delete(`/api/documents/${deleteId}`) // Assuming your API endpoint for client creation is /api/clients
+        .then(() => {
+            fetchData();
+        })
+        .catch(error => {
+            showMessage('Error updating document. Please try again.');
+            console.error(error);
+        });
+    showMessage('Task deleted successfully.');
+    deleteConfirmation.hide();
+    fetchData();
+};
+const delete_confirm = (document_id) => {
+    // deleted_task.value = { project_id: project_id, task_id: task.task_id };
+    deleteConfirmation.show();
+    deleteId = document_id;
+
 };
 
 const save = () => {
@@ -497,8 +555,9 @@ const submit_form4D = () => {
             axios.put(`/api/documents/${clientH.value.id}`, clientH.value) // Assuming your API endpoint for client creation is /api/clients
                 .then(response => {
                     itemsD.value = response.data.data;
-                    showMessage('Case Document updated successfully.');
+                    showMessage('Case Document deleted successfully.');
                     document.getElementById('closebtnD').click();
+                    fetchData();
                 })
                 .catch(error => {
                     showMessage('Error updating document. Please try again.');
@@ -515,9 +574,10 @@ const submit_form4D = () => {
                     'Content-Type': 'multipart/form-data' // Set content type for FormData
                 }
             }).then(response => {
-                itemsD.value = response.data.data;
+                itemsD.value.push(response.data.data);
                 showMessage('Doc added successfully.');
                 document.getElementById('closebtnD').click();
+
             })
                 .catch(error => {
                     showMessage('Error adding doc. Please try again.');
@@ -649,7 +709,7 @@ const fetchData = () => {
 
 
 onMounted(() => {
-    //bind_data();
+    initPopup();
     fetchData();
 });
 </script>

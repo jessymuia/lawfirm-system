@@ -72,7 +72,7 @@ class DocumentController extends Controller
             "created_by" => auth()->user()->id
         ]);
 
-        return $this->response(true,'success',null,200);
+        return $this->response(true,'success',$document,200);
     }
 
     /**
@@ -120,14 +120,18 @@ class DocumentController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Document  $document
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Document $document)
+    public function destroy($id)
     {
-        //
+        if(!Auth::user()->hasPermissionTo('delete-cases'))
+            abort(403);
+
+        $document = Document::find($id);
+        $document->deleted_by = \auth()->user()->id;
+        $document->save();
+
+        $document->delete();
+
+
+        return $this->response(true,'success',null,200);
     }
 }
