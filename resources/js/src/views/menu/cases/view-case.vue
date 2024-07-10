@@ -259,7 +259,7 @@
 
         <!-- Add Modal -->
         <div class="modal fade " id="clientD_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
-            <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div  class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header" id="registerModalLabel">
                         <h4 class="modal-title">{{ modalD.title }}</h4>
@@ -288,7 +288,6 @@
                                         <span class="custom-file-container__custom-file__custom-file-control"></span>
                                     </label>
                                     <div class="custom-file-container__image-preview"></div>
-
                                 </div>
 
                             </div>
