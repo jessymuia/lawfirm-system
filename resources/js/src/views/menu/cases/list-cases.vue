@@ -138,7 +138,7 @@
                                         class="form-control"
                                         :class="[is_submit_form4 ? (client.police_station ? 'is-valid' : 'is-invalid') : '']"
                                         id="validationCustom03"
-                                        placeholder="Police Station"
+                                        placeholder="Select Station"
                                     />
                                     <div class="invalid-feedback">Please provide a valid Police Station.</div>
                                 </div>
@@ -146,7 +146,7 @@
                                 <div class="col-md-12">
                                     <div id="select_menu" class="form-group form-group">
                                         <select v-model="client.court_id" class="form-select" :class="[is_submit_form4 ? (client.court_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Role</option>
+                                            <option value="">Select Court</option>
                                             <option v-for="data in courts" :key="data.id" :value="data.id">{{ data.name }}</option>
                                         </select>
                                         <div class="invalid-feedback">Please Select the Court</div>
