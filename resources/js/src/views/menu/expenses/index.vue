@@ -92,7 +92,7 @@
                                 <div class="col-md-12 form-group">
                                     <div id="select_menu" class="form-group form-group">
                                         <select v-model="client.category" class="form-select" :class="[is_submit_form4 ? (client.category ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Hearing Type</option>
+                                            <option value="">Select Category</option>
                                             <option v-for="data in types" :key="data.id" :value="data.id">{{ data.name }}</option>
                                         </select>
                                         <div class="invalid-feedback">Please Select the category</div>
