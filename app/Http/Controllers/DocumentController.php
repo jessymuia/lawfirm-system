@@ -50,6 +50,10 @@ class DocumentController extends Controller
         if(!Auth::user()->hasPermissionTo('create-cases'))
             abort(403);
 
+        $request->validate([
+            'file' => 'required|mimes:pdf'
+        ]);
+
         $file = $request->file('file');
 
         // Generate a random name for the file
