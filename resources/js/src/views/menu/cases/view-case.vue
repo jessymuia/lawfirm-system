@@ -577,8 +577,7 @@ const submit_form4D = () => {
 
             })
                 .catch(error => {
-                    showMessage('Error adding doc. Please try again.');
-                    console.error(error);
+                    showMessage('Error adding doc.' + error.response.data.errors["file"][0]);
                 });
         }
 
