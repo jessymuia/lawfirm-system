@@ -6,6 +6,7 @@ use App\Models\Attorney;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AttorneyController extends Controller
 {
@@ -97,8 +98,9 @@ class AttorneyController extends Controller
     {
         $advocateUsers = User::whereHas('roles', function ($query) {
             $query->where('name', 'advocates')
-                ->orWhere('name', 'ADVOCATES');
+                ->orWhere('name', 'ADVOCATES')->orWhere('name','advocate');
         })->get();
+
 
         $advocateUsers = $advocateUsers->map(function ($row) {
             return [
