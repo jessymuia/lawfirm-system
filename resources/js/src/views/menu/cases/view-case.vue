@@ -476,15 +476,13 @@ const delete_task = () => {
             fetchData();
         })
         .catch(error => {
-            showMessage('Error updating document. Please try again.');
-            console.error(error);
+            showMessage('Error deleting document. Please try again.');
         });
     showMessage('Task deleted successfully.');
     deleteConfirmation.hide();
     fetchData();
 };
 const delete_confirm = (document_id) => {
-    // deleted_task.value = { project_id: project_id, task_id: task.task_id };
     deleteConfirmation.show();
     deleteId = document_id;
 
