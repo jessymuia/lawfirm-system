@@ -131,7 +131,7 @@
                                     <div class="invalid-feedback">Please provide a valid Case Type</div>
                                 </div>
                                 <div class="col-md-12 form-group">
-                                    <label for="validationCustom03">Police Station</label>
+                                    <label for="validationCustom03">Court Station</label>
                                     <input
                                         type="text"
                                         v-model="client.police_station"
