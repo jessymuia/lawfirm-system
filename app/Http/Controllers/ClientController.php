@@ -72,6 +72,8 @@ class ClientController extends Controller
             "created_by" => auth()->user()->id
         ]);
 
+        sendCustomSMS($request->phone_number,"Welcome. You have been registered to the system");
+
         return $this->index();
     }
 
