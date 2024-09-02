@@ -51,7 +51,7 @@ class DocumentController extends Controller
             abort(403);
 
         $request->validate([
-            'file' => 'required|mimes:pdf'
+            'file' => 'required|mimetypes:application/pdf|max:10000', // 10MB
         ]);
 
         $file = $request->file('file');
