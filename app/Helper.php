@@ -81,10 +81,11 @@ function sendCustomSMS($phone_number, $message): void
 
 function sanitizePhone($phoneNumber): string
 {
-    $phone = preg_replace("/[^1-9]/","",$phoneNumber);
+    $phone = preg_replace("/[^0-9]/","",$phoneNumber);
     $lastNine = substr($phone,-9);
 
     $result = "254".$lastNine;
+    Log::info($result);
 
     return $result;
 }
