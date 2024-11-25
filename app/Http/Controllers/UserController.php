@@ -33,7 +33,7 @@ class UserController extends Controller
             abort(403);
         $users = User::with('roles')->get();
         $usersWithRoles = $users->map(function ($user) {
-            $role = $user->roles->first(); // Assuming each user has one role
+            $roles = $user->roles;
 
             return [
                 'id' => $user->id,
@@ -42,8 +42,8 @@ class UserController extends Controller
                 'phone_number' => $user->phone_number,
                 'department' => $user->department,
                 'hire_date' => Carbon::parse($user->hire_date)->format('d/m/Y'),
-                'role' => $role ? $role->name : null, // Get role name or null if no role
-                'role_id' => $role ? $role->id : null, // Get role ID or null if no role
+                'role' => implode(",", $roles->pluck('name')->toArray()),
+                'role_id' => $roles->pluck('id')->toArray(),
             ];
         });
 
@@ -76,10 +76,24 @@ class UserController extends Controller
             'hire_date' => Carbon::createFromFormat('d/m/Y', $request->hire_date)->format('Y-m-d'),
             'password' => Hash::make("Password default")
         ]);
-        if($request->has("role")) {
-            $role = Role::find($request->role);
-            if($role) {
-                $user->assignRole($role);
+//        if($request->has("role")) {
+//            $role = Role::find($request->role);
+//            if($role) {
+//                $user->assignRole($role);
+//            }
+//        }
+
+        if ($request->has('role')) {
+            $roles = $request->role; // Assuming 'role' is an array
+            if (is_array($roles)) {
+                // Assign multiple roles at once
+                $user->assignRole($roles);
+            } else {
+                // Handle single role as fallback
+                $role = Role::find($roles);
+                if ($role) {
+                    $user->assignRole($role);
+                }
             }
         }
 
@@ -140,10 +154,24 @@ class UserController extends Controller
 
         $user->save();
 
-        if($request->has("role")) {
-            $role = Role::find($request->role);
-            if($role) {
-                $user->syncRoles([$role->name]);
+//        if($request->has("role")) {
+//            $role = Role::find($request->role);
+//            if($role) {
+//                $user->syncRoles([$role->name]);
+//            }
+//        }
+
+        if ($request->has('role')) {
+            $roles = $request->role; // Assuming 'role' can be an array or a single value
+            if (is_array($roles)) {
+                // Sync roles directly with an array
+                $user->syncRoles($roles);
+            } else {
+                // Handle single role as fallback
+                $role = Role::find($roles);
+                if ($role) {
+                    $user->syncRoles([$role->name]);
+                }
             }
         }
 
