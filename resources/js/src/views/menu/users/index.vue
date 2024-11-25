@@ -123,11 +123,25 @@
 
                                 <div class="col-md-12">
                                     <div id="select_menu" class="form-group form-group">
-                                        <select v-model="client.role" class="form-select" :class="[is_submit_form4 ? (client.role ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Role</option>
-                                            <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please Select the role</div>
+<!--                                        <select v-model="client.role" class="form-select" :class="[is_submit_form4 ? (client.role ? 'is-valid' : 'is-invalid') : '']" multiple>-->
+<!--                                            <option value="">Select Role</option>-->
+<!--                                            <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>-->
+<!--                                        </select>-->
+<!--                                        <input type="checkbox" v-for="role in roles" :key="role.id" :value="role.id">-->
+<!--                                        <div class="invalid-feedback">Please Select the role</div>-->
+                                        <label>Select Role(s):</label>
+                                        <div v-for="role in roles" :key="role.id" class="form-check">
+                                            <input
+                                                type="checkbox"
+                                                :value="role.id"
+                                                v-model="client.role"
+                                                class="form-check-input"
+                                                :id="'role_' + role.id"
+                                            >
+                                            <label class="form-check-label" :for="'role_' + role.id">
+                                                {{ role.name }}
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -193,7 +207,7 @@ const router = useRouter();
 
 const is_submit_form4 = ref(false);
 
-const client = ref({id: "",name:"",phone_number : "",email : "",department : "",role : "",hire_date: ""});
+const client = ref({id: "",name:"",phone_number : "",email : "",department : "",role : [],hire_date: ""});
 const submit_form4 = () => {
     is_submit_form4.value = true;
     if (client.value.name && client.value.phone_number && client.value.email && client.value.department && client.value.role) {
@@ -230,7 +244,7 @@ const submit_form4 = () => {
         client.value.phone_number = "";
         client.value.email = "";
         client.value.department = "";
-        client.value.role = "";
+        client.value.role = [];
         client.value.hire_date = "";
         modal.value.title = "Add User";
         modal.value.button = "Add";
