@@ -290,6 +290,21 @@
                                     <div class="custom-file-container__image-preview"></div>
                                 </div>
 
+                                <!---Progress bar-->
+                                <div class="col-md-12 mt-3">
+                                    <div class="progress">
+                                        <div
+                                            class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                            role="progressbar"
+                                            :style="{ width: progress + '%' }"
+                                            :aria-valuenow="progress"
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                        >
+                                            {{ progress }}%
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <button class="btn btn-primary mt-3" type="submit">{{ modalD.button }}</button>
                         </form>
@@ -352,6 +367,8 @@ useMeta({ title: 'Account Setting' });
 const columns = ref(['case_number', 'description', 'client', 'attorney', 'start_date', 'end_date','case_type','police_station','court','opposing_party', 'actions']);
 const items = ref([]);
 const types = ref([]);
+const uploading = ref(false);
+const progress = ref(0);
 const table_option = ref({
     perPage: 10,
     perPageValues: [5, 10, 20, 50],
@@ -494,6 +511,24 @@ const save = () => {
 
 const handleFileInputChange = (event) => {
     selected_file.value = event.target.files[0];
+    if (selected_file) {
+        uploading.value = true;
+        progress.value = 0;
+        simulateUpload();
+    }
+};
+
+const simulateUpload = () => {
+    let interval = setInterval(() => {
+        if (progress.value >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+               uploading.value = false; // Hide progress bar after upload completes
+            }, 500);
+        } else {
+            progress.value += 10; // Simulating upload progress
+        }
+    }, 500);
 };
 
 const is_submit_form4H = ref(false);
