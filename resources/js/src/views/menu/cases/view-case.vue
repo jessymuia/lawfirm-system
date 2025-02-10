@@ -276,10 +276,11 @@
                                         class="form-control"
                                         :class="[is_submit_form4D? (clientD.title ? 'is-valid' : 'is-invalid') : '']"
                                         id="validationCustom01"
-                                        placeholder="Description"
+                                        placeholder="Document Title"
                                     />
                                     <div class="invalid-feedback">Please fill the title</div>
                                 </div>
+                                <div class="error-text text-danger">* Please upload one document at a time</div>
                                 <div class="col-md-12 form-group">
                                     <label for="validationCustom01">File Upload</label>
                                     <label class="custom-file-container__custom-file">
