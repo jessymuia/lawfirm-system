@@ -13,6 +13,7 @@ class Task extends DefaultAppModel
         'assigned_to',
         'due_date',
         'priority',
+        'task_status',
         'status',
         'created_by',
         'updated_by',

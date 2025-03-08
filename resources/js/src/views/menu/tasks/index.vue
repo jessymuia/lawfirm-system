@@ -101,31 +101,59 @@
 
                                 </div>
                                 <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Priority</label>
-                                    <input
-                                        type="number"
-                                        step="1"
-                                        v-model="client.priority"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.priority ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Priority"
-                                    />
-                                    <div class="invalid-feedback">Please fill the priority</div>
+                                    <div id="select_menu" class="form-group form-group">
+                                        <select v-model="client.priority" class="form-select"
+                                                :class="[is_submit_form4 ? (client.priority ? 'is-valid' : 'is-invalid') : '']"
+                                                id="validationCustom01">
+                                            <option value="">Select Priority</option>
+                                            <option value="low">Low</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please Select the Priority</div>
+                                    </div>
                                 </div>
+<!--                                <div class="col-md-12 form-group">-->
+<!--                                    <label for="validationCustom01">Priority</label>-->
+<!--                                    <input-->
+<!--                                        type="number"-->
+<!--                                        step="1"-->
+<!--                                        v-model="client.priority"-->
+<!--                                        class="form-control"-->
+<!--                                        :class="[is_submit_form4 ? (client.priority ? 'is-valid' : 'is-invalid') : '']"-->
+<!--                                        id="validationCustom01"-->
+<!--                                        placeholder="Priority"-->
+<!--                                    />-->
+<!--                                    <div class="invalid-feedback">Please fill the priority</div>-->
+<!--                                </div>-->
                                 <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Status</label>
-                                    <input
-                                        type="number"
-                                        step="1"
-                                        v-model="client.status"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.status ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Status"
-                                    />
-                                    <div class="invalid-feedback">Please fill the status</div>
+                                    <div id="select_menu" class="form-group form-group">
+                                        <select v-model="client.status"
+                                                class="form-select"
+                                                :class="[is_submit_form4 ? (client.status ? 'is-valid' : 'is-invalid') : '']"
+                                                id="validationCustom01">
+                                            <option value="">Select Status</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in_progress">In Progress</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="overdue">Overdue</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please Select the Status</div>
+                                    </div>
                                 </div>
+<!--                                <div class="col-md-12 form-group">-->
+<!--                                    <label for="validationCustom01">Status</label>-->
+<!--                                    <input-->
+<!--                                        type="number"-->
+<!--                                        step="1"-->
+<!--                                        v-model="client.status"-->
+<!--                                        class="form-control"-->
+<!--                                        :class="[is_submit_form4 ? (client.status ? 'is-valid' : 'is-invalid') : '']"-->
+<!--                                        id="validationCustom01"-->
+<!--                                        placeholder="Status"-->
+<!--                                    />-->
+<!--                                    <div class="invalid-feedback">Please fill the status</div>-->
+<!--                                </div>-->
 
                             </div>
                             <button class="btn btn-primary mt-3" type="submit">{{ modal.button }}</button>

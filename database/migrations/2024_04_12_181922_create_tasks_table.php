@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('title');
             $table->foreignId('assigned_to')->constrained('users');
             $table->date('due_date');
-            $table->string('priority');
-
+            $table->enum('priority', ['high', 'medium', 'low'])->default('medium');
+            $table->enum('task_status', ['pending', 'in_progress', 'completed', 'overdue'])->default('pending');
         });
     }
 

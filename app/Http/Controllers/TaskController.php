@@ -48,7 +48,8 @@ class TaskController extends Controller
                "advocate" => User::find($row->assigned_to)->name,
                "due_date" => Carbon::parse($row->due_date)->format('d/m/Y'),
                "priority" => $row->priority,
-               "status" => $row->status
+//               "task_status" => $row->status,
+               "status" => $row->task_status
            ];
         });
 
@@ -79,7 +80,7 @@ class TaskController extends Controller
             "assigned_to" => $request->assigned_to,
             "due_date" => Carbon::createFromFormat('d/m/Y', $request->due_date)->format('Y-m-d'),
             "priority" => $request->priority,
-            "status" => $request->status,
+            "task_status" => $request->status,
             "created_by" => auth()->user()->id
         ]);
 
@@ -132,7 +133,7 @@ class TaskController extends Controller
             "assigned_to" => $request->assigned_to,
             "due_date" => Carbon::createFromFormat('d/m/Y', $request->due_date)->format('Y-m-d'),
             "priority" => $request->priority,
-            "status" => $request->status,
+            "task_status" => $request->task_status,
             "updated_by" => auth()->user()->id
         ]);
 
@@ -173,7 +174,8 @@ class TaskController extends Controller
                 "advocate" => User::find($row->assigned_to)->name,
                 "due_date" => Carbon::parse($row->due_date)->format('d/m/Y'),
                 "priority" => $row->priority,
-                "status" => $row->status
+                "status" => $row->status,
+                "task_status" => $row->task_status
             ];
         });
 
