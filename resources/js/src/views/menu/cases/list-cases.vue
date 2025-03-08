@@ -187,7 +187,8 @@ import { useMeta } from '@/composables/use-meta';
 import Multiselect from "@suadelabs/vue3-multiselect";
 useMeta({ title: 'Cases' });
 
-const columns = ref(['case_number', 'description', 'client', 'attorney', 'start_date', 'end_date','case_type','police_station','court','opposing_party', 'actions']);
+// const columns = ref(['case_number', 'description', 'client', 'attorney', 'start_date', 'end_date','case_type','police_station','court','opposing_party', 'actions']);
+const columns = ref(['case_number', 'client', 'attorney', 'start_date','case_type','opposing_party', 'actions']);
 const items = ref([]);
 const courts = ref([]); // List of advocates
 const advocates = ref([]);
