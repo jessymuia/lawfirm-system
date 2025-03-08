@@ -63,18 +63,27 @@ class ClientController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
-        Client::create([
-            'name' => $request->name,
-            'phone_number' => $request->phone_number,
-            'extra_phone_number' => $request->extra_phone_number ?? null,
-            'address' => $request->address,
-            'advocate_id' => $request->advocate,
-            "created_by" => auth()->user()->id
-        ]);
+        try {
+            Client::create([
+                'name' => $request->name,
+                'phone_number' => $request->phone_number,
+                'extra_phone_number' => $request->extra_phone_number ?? null,
+                'address' => $request->address,
+                'advocate_id' => $request->advocate,
+                "created_by" => auth()->user()->id
+            ]);
 
-        sendCustomSMS($request->phone_number,"Welcome. You have been registered to the system");
+            sendCustomSMS($request->phone_number,"Welcome. You have been registered to the system");
 
-        return $this->index();
+            return $this->index();
+        }catch (\Exception $exception) {
+            Log::error($exception->getMessage().
+                " ".$exception->getLine().
+                " ".$exception->getFile().
+                " ".$exception->getTraceAsString()
+            );
+            return $this->response(false,'An error occurred',[],500);
+        }
     }
 
     /**
