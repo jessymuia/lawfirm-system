@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('court_id')->constrained("courts");
             $table->date('hearing_date');
             $table->integer('hearing_type');
-            $table->string('notes');
-            $table->string('outcome');
+            $table->text('notes');
+            $table->text('outcome');
         });
     }
 

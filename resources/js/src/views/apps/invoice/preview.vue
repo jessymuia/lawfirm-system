@@ -39,9 +39,10 @@
                                                         </div>
 
                                                         <div class="col-sm-6 align-self-center mt-3">
-                                                            <p class="inv-street-addr">XYZ Delta Street</p>
-                                                            <p class="inv-email-address">info@company.com</p>
-                                                            <p class="inv-email-address">(120) 456 789</p>
+                                                            <p class="inv-street-addr">Alpha House, Second Floor</p>
+                                                            <p class="inv-street-addr">Oginga Odinga Street, Kisumu</p>
+                                                            <p class="inv-email-address">info@oumanjogaadvocates.co.ke</p>
+                                                            <p class="inv-email-address">+254 721529757</p>
                                                         </div>
                                                         <div class="col-sm-6 align-self-center mt-3 text-sm-end">
                                                             <p class="inv-created-date"><span class="inv-title">Invoice Date : </span> <span class="inv-date">20 Aug 2020</span></p>
