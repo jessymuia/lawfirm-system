@@ -25,6 +25,7 @@ axiosInstance.interceptors.response.use(
             window.location.href = '/login'; // Change the URL as needed
         } else if(error.response.status === 403) {
             window.location.href='/pages/error503';
+            console.log(error)
         }
         return Promise.reject(error);
     }
