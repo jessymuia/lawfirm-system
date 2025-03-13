@@ -29,8 +29,8 @@ class ExpenseController extends Controller
      */
     public function index(): \Illuminate\Http\Response|JsonResponse
     {
-        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
-            abort(403);
+//        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
+//            abort(403);
         $expenses = Expense::all();
         $expenses = $expenses->map(function ($row) {
            return [
