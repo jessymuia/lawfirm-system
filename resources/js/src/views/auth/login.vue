@@ -45,13 +45,13 @@
                                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                         </svg>
-                                        <input type="password" v-model="client.password" class="form-control" placeholder="Password" />
+                                        <input :type="showPassword ? 'text' : 'password'" v-model="client.password" class="form-control" placeholder="Password" />
                                     </div>
                                     <div class="d-sm-flex justify-content-between">
                                         <div class="field-wrapper toggle-pass d-flex align-items-center">
                                             <p class="d-inline-block">Show Password</p>
                                             <label class="switch s-primary mx-2">
-                                                <input type="checkbox" class="custom-control-input" checked="" />
+                                                <input v-model="showPassword" type="checkbox" class="custom-control-input"  />
                                                 <span class="slider round"></span>
                                             </label>
                                         </div>
@@ -100,6 +100,7 @@
     const router = useRouter();
 
     const is_submit_form4 = ref(false);
+    const showPassword = ref(false);
     const client = ref({email: "", password: ""});
     const loginFunc = () => {
         is_submit_form4.value = true;
