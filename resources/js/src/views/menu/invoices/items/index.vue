@@ -1,13 +1,13 @@
 <template>
-    <div class="layout-px-spacing">
+    <div class="modern-invoice-items-page">
         <teleport to="#breadcrumb">
             <ul class="navbar-nav flex-row">
                 <li>
                     <div class="page-header">
                         <nav class="breadcrumb-one" aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="javascript:;">Users</a></li>
-                                <li class="breadcrumb-item active" aria-current="page"><span>Account Settings</span></li>
+                                <li class="breadcrumb-item"><a href="javascript:;">Invoices</a></li>
+                                <li class="breadcrumb-item active" aria-current="page"><span>Invoice Items</span></li>
                             </ol>
                         </nav>
                     </div>
@@ -15,184 +15,178 @@
             </ul>
         </teleport>
 
-        <div class="account-settings-container layout-top-spacing">
-            <div class="account-content">
-                <div class="scrollspy-example" data-spy="scroll" data-target="#account-settings-scroll" data-offset="-100">
-                    <div class="row">
-                        <div class="col-xl-12 col-lg-12 col-md-12 layout-spacing">
-                            <form @submit.stop.prevent="submit_form5">
-                                <div class="info">
-                                    <h6>Invoice Information</h6>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4 form-group">
-                                        <label for="validationDefault01">Case Number</label>
-                                        <input type="text" v-model="invoice.case"  class="form-control" id="validationDefault01" placeholder="Case Number" readonly />
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <label for="validationDefault02">Client </label>
-                                        <input type="text" v-model="invoice.client" class="form-control" id="validationDefault02" placeholder="Client Name" readonly />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label for="validationDefault03">Invoice Date</label>
-                                        <input type="text" v-model="invoice.invoice_date" class="form-control" id="validationDefault03" placeholder="Phone Number" readonly />
-                                    </div>
-                                    <div class="col-md-6 form-group">
-                                        <label for="validationDefault03">Invoice Due Date</label>
-                                        <input type="text" v-model="invoice.invoice_due_date" class="form-control" id="validationDefault03" placeholder="Phone Number" readonly />
-                                    </div>
-                                </div>
-                            </form>
-
-                        </div>
-
-                        <div class="col-xl-12 col-lg-12 col-md-12 layout-spacing">
-                            <form id="about" class="section about">
-                                <div class="info">
-                                    <h5 class="">Invoice Items</h5>
-                                    <div class="col-md-12 text-end mb-5">
-                                        <button type="button" id="preview-invoice" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientI_modal">Add</button>
-                                        <button type="button" id="preview-invoice" class="btn btn-primary" @click="preview" >Preview</button>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-11 mx-auto">
-                                            <div class="custom-table">
-                                                <v-client-table :data="itemsI" :columns="columnsI" :options="table_optionI">
-                                                    <template #actions="props">
-                                                        <div class="actions text-center">
-                                                            <a href="javascript:;" class="cancel me-1" @click="update_rowI(props.row)">
-                                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#clientI_modal">Update</button>
-                                                                <a href="javascript:" class="cancel me-1" @click="submit_form6(props.row)">
-                                                                    <button type="button" class="btn btn-danger btn-sm">Delete</button>
-                                                                </a>
-                                                            </a>
-                                                        </div>
-                                                    </template>
-                                                    <template #salary="props"> ${{ props.row.salary }} </template>
-                                                </v-client-table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
+        <div class="invoice-info-card">
+            <div class="card-header">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke-width="2"/>
+                </svg>
+                <h5>Invoice Information</h5>
             </div>
-
-            <div class="account-settings-footer">
-                <div class="as-footer-container">
-                    <button type="button" class="btn btn-success" @click="preview()">View</button>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Case Number</label>
+                    <input type="text" v-model="invoice.case" class="modern-input" readonly />
+                </div>
+                <div class="info-item">
+                    <label>Client</label>
+                    <input type="text" v-model="invoice.client" class="modern-input" readonly />
+                </div>
+                <div class="info-item">
+                    <label>Invoice Date</label>
+                    <input type="text" v-model="invoice.invoice_date" class="modern-input" readonly />
+                </div>
+                <div class="info-item">
+                    <label>Invoice Due Date</label>
+                    <input type="text" v-model="invoice.invoice_due_date" class="modern-input" readonly />
                 </div>
             </div>
         </div>
 
+        <div class="items-section-card">
+            <div class="section-header">
+                <div class="header-left">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke-width="2"/>
+                        <path d="M9 12h6M9 16h6" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <h5>Invoice Items</h5>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="btn-add-item" data-bs-toggle="modal" data-bs-target="#clientI_modal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Add Item
+                    </button>
+                    <button type="button" class="btn-preview" @click="preview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                        </svg>
+                        Preview
+                    </button>
+                </div>
+            </div>
 
+            <div class="table-container">
+                <v-client-table :data="itemsI" :columns="columnsI" :options="table_optionI">
+                    <template #description="props">
+                        <div class="description-cell">{{ props.row.description }}</div>
+                    </template>
+                    <template #quantity="props">
+                        <div class="quantity-cell">{{ props.row.quantity }}</div>
+                    </template>
+                    <template #rate="props">
+                        <div class="amount-cell">KES {{ props.row.rate }}</div>
+                    </template>
+                    <template #tax="props">
+                        <div class="tax-cell">KES {{ props.row.tax }}</div>
+                    </template>
+                    <template #total_amount="props">
+                        <div class="total-cell">KES {{ props.row.total_amount }}</div>
+                    </template>
+                    <template #actions="props">
+                        <div class="actions text-center">
+                            <a href="javascript:;" class="cancel me-1" @click="update_rowI(props.row)">
+                                <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#clientI_modal">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
+                                    </svg>
+                                    Edit
+                                </button>
+                            </a>
+                            <a href="javascript:" class="cancel" @click="submit_form6(props.row)">
+                                <button type="button" class="btn-delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </a>
+                        </div>
+                    </template>
+                </v-client-table>
+            </div>
+        </div>
 
-        <!-- Add Modal -->
-        <div class="modal fade " id="clientI_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
-            <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header" id="registerModalLabel">
+        <div class="footer-actions">
+            <button type="button" class="btn-view-full" @click="preview()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke-width="2"/>
+                </svg>
+                View Full Invoice
+            </button>
+        </div>
+
+        <!-- Add/Edit Item Modal -->
+        <div class="modal fade" id="clientI_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content modern-modal">
+                    <div class="modal-header">
                         <h4 class="modal-title">{{ modal.title }}</h4>
                         <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
-                        <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
+                        <form class="modern-form" novalidate @submit.stop.prevent="submit_form4">
+                            <div class="form-group">
+                                <label class="form-label">Description *</label>
+                                <textarea v-model="client.description" rows="3" class="modern-input"
+                                          :class="[is_submit_form4 ? (client.description ? 'is-valid' : 'is-invalid') : '']"
+                                          placeholder="Enter item description or service details"></textarea>
+                                <div class="invalid-feedback">Please fill the description</div>
+                            </div>
+
                             <div class="row">
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Description</label>
-                                    <input
-                                        type="text"
-                                        v-model="client.description"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.description ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Description"
-                                    />
-                                    <div class="invalid-feedback">Please fill the desciption</div>
-                                </div>
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Quantity</label>
-                                    <input
-                                        type="number"
-                                        step="0.001"
-                                        v-model="client.quantity"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.quantity ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Quantity"
-                                        @input="computeTotal"
-                                    />
+                                <div class="col-md-6 form-group">
+                                    <label class="form-label">Quantity *</label>
+                                    <input type="number" step="0.001" v-model="client.quantity" class="modern-input"
+                                           :class="[is_submit_form4 ? (client.quantity ? 'is-valid' : 'is-invalid') : '']"
+                                           placeholder="0.00" @input="computeTotal" />
                                     <div class="invalid-feedback">Please fill the quantity</div>
                                 </div>
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Rate</label>
-                                    <input
-                                        type="number"
-                                        step="0.001"
-                                        v-model="client.rate"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.rate ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Rate"
-                                        @input="computeTotal"
-                                    />
+
+                                <div class="col-md-6 form-group">
+                                    <label class="form-label">Rate (KES) *</label>
+                                    <input type="number" step="0.001" v-model="client.rate" class="modern-input"
+                                           :class="[is_submit_form4 ? (client.rate ? 'is-valid' : 'is-invalid') : '']"
+                                           placeholder="0.00" @input="computeTotal" />
                                     <div class="invalid-feedback">Please fill the rate</div>
                                 </div>
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Tax</label>
-                                    <input
-                                        type="number"
-                                        step="0.001"
-                                        v-model="client.tax"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.tax ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Tax"
-                                        readonly
-                                    />
-                                    <div class="invalid-feedback">Please fill the tax</div>
-                                </div>
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Total Amount</label>
-                                    <input
-                                        type="number"
-                                        step="0.001"
-                                        v-model="client.total_amount"
-                                        class="form-control"
-                                        :class="[is_submit_form4 ? (client.total_amount ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Total Amount"
-                                        readonly
-                                    />
-                                    <div class="invalid-feedback">Please fill the total Amount</div>
-                                </div>
-
                             </div>
-                            <button class="btn btn-primary mt-3" type="submit">{{ modal.button }}</button>
+
+                            <div class="calculated-section">
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label class="form-label">Tax (16%)</label>
+                                        <input type="number" step="0.001" v-model="client.tax" class="modern-input calculated"
+                                               placeholder="0.00" readonly />
+                                    </div>
+
+                                    <div class="col-md-6 form-group">
+                                        <label class="form-label">Total Amount</label>
+                                        <input type="number" step="0.001" v-model="client.total_amount" class="modern-input calculated"
+                                               placeholder="0.00" readonly />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn-submit" type="submit">{{ modal.button }}</button>
                         </form>
-
-
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue';
-import '@/assets/sass/scrollspyNav.scss';
-import '@/assets/sass/users/account-setting.scss';
-
-import { useMeta } from '@/composables/use-meta';
-import {useRouter} from "vue-router";
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from "vue-router";
 import axios from "../../../../api";
+import { useMeta } from '@/composables/use-meta';
 useMeta({ title: 'Invoice Items' });
 
 const columnsI = ref(['description', 'quantity', 'rate', 'tax', 'total_amount', 'actions']);
@@ -218,28 +212,19 @@ const table_optionI = ref({
     resizableColumns: false,
 });
 
-
 const modal = ref({title: "", button: ""});
-
 const invoice = ref({});
-
 const is_submit_form4 = ref(false);
 const router = useRouter();
 
-const save = () => {
-    showMessage('Settings saved successfully.');
-};
-
-
 const client = ref({id: "",invoice_id:"",description : "", quantity:0,rate:0, tax:0, total_amount:0});
+
 const submit_form4 = () => {
     is_submit_form4.value = true;
     client.value.invoice_id = localStorage.getItem('invoiceId');
-    if (client.value.invoice_id && client.value.description && client.value.tax && client.value.rate && client.value.total_amount) {
-        //form validated success
-        if(client.value.id > 0)//id exists then update
-        {
-            axios.put(`/api/invoiceItems/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
+    if (client.value.invoice_id && client.value.description && client.value.quantity && client.value.rate) {
+        if(client.value.id > 0) {
+            axios.put(`/api/invoiceItems/${client.value.id}`, client.value)
                 .then(response => {
                     itemsI.value = response.data.data;
                     showMessage('Item updated successfully.');
@@ -250,7 +235,7 @@ const submit_form4 = () => {
                     console.error(error);
                 });
         } else {
-            axios.post('/api/invoiceItems', client.value) // Assuming your API endpoint for client creation is /api/clients
+            axios.post('/api/invoiceItems', client.value)
                 .then(response => {
                     itemsI.value = response.data.data;
                     showMessage('Item added successfully.');
@@ -264,25 +249,23 @@ const submit_form4 = () => {
 
         client.value.id = "";
         client.value.description = "";
-        client.value.quantity =0;
+        client.value.quantity = 0;
         client.value.tax = 0;
         client.value.rate = 0;
-        modal.value.total_amount = 0;
+        client.value.total_amount = 0;
         modal.value.title = "Add Item";
         modal.value.button = "Add";
         is_submit_form4.value = false;
-
     }
 };
+
 const submit_form6 = (item) => {
-    if (confirm('Are you sure want to delete the item ?')) {
+    if (confirm('Are you sure you want to delete this item?')) {
         if (item) {
-            // items.value = items.value.filter((d) => d.id != item.id);
-            axios.delete(`/api/invoiceItems/${item.id}`) // Assuming your API endpoint for client creation is /api/clients
+            axios.delete(`/api/invoiceItems/${item.id}`)
                 .then(response => {
                     itemsI.value = response.data.data;
                     showMessage('Invoice item deleted successfully.');
-                    document.getElementById('closebtn').click();
                 })
                 .catch(error => {
                     showMessage('Error deleting the invoice item. Please try again.');
@@ -290,8 +273,7 @@ const submit_form6 = (item) => {
                 });
         }
     }
-}
-
+};
 
 const showMessage = (msg = '', type = 'success') => {
     const toast = window.Swal.mixin({
@@ -309,7 +291,8 @@ const showMessage = (msg = '', type = 'success') => {
 
 const preview = () => {
     router.push("/invoice-preview");
-}
+};
+
 const update_rowI = (item) => {
     client.value.id = item.id;
     client.value.description = item.description;
@@ -326,7 +309,6 @@ const fetchData = () => {
     modal.value.title = "Add Item";
     modal.value.button = "Add";
 
-
     let invoiceId = localStorage.getItem('invoiceId');
     axios.get(`/api/invoiceItems/${invoiceId}`)
         .then(response => {
@@ -336,7 +318,6 @@ const fetchData = () => {
             console.error('Error fetching items:', error);
         });
 
-
     axios.get(`/api/invoices/${invoiceId}`)
         .then(response => {
             invoice.value = response.data.data;
@@ -344,19 +325,432 @@ const fetchData = () => {
         .catch(error => {
             console.error('Error fetching invoice:', error);
         });
-
-
 };
-
 
 onMounted(() => {
     fetchData();
 });
 
-const computeTotal =() => {
+const computeTotal = () => {
     let totals = client.value.quantity * client.value.rate;
     client.value.tax = (0.16 * totals);
     client.value.total_amount = totals;
+};
+</script>
+
+<style lang="scss" scoped>
+.modern-invoice-items-page {
+    padding: 20px;
+    min-height: 100vh;
 }
 
-</script>
+.invoice-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.header-icon {
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border-radius: 10px;
+    stroke-width: 2;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.modern-input:read-only {
+    background: #f9fafb;
+    cursor: not-allowed;
+}
+
+.modern-input:focus:not(:read-only) {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.items-section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-icon {
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border-radius: 10px;
+    stroke-width: 2;
+}
+
+.header-left h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-add-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-add-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-add-item svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5;
+}
+
+.btn-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-preview:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+}
+
+.btn-preview svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.description-cell {
+    color: #374151;
+    font-size: 14px;
+}
+
+.quantity-cell {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.amount-cell {
+    color: #6366f1;
+    font-weight: 600;
+}
+
+.tax-cell {
+    color: #f59e0b;
+    font-weight: 500;
+}
+
+.total-cell {
+    color: #059669;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-edit svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.btn-view-full {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-view-full:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-view-full svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+.modern-modal .modal-header {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 24px;
+    border: none;
+}
+
+.modern-modal .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modern-modal .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.modern-modal .btn-close:hover {
+    opacity: 1;
+}
+
+.modern-modal .modal-body {
+    padding: 32px;
+}
+
+.modern-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+
+textarea.modern-input {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.modern-input.is-invalid {
+    border-color: #ef4444;
+}
+
+.modern-input.is-valid {
+    border-color: #10b981;
+}
+
+.invalid-feedback {
+    display: none;
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 6px;
+}
+
+.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+.calculated-section {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px dashed #d1d5db;
+}
+
+.modern-input.calculated {
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.btn-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    align-self: flex-start;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        flex-direction: column;
+    }
+
+    .btn-add-item,
+    .btn-preview {
+        justify-content: center;
+    }
+}
+</style>

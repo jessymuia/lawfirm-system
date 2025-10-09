@@ -1,5 +1,5 @@
 <template>
-    <div class="container layout-px-spacing">
+    <div class="modern-page-container">
         <teleport to="#breadcrumb">
             <ul class="navbar-nav flex-row">
                 <li>
@@ -14,176 +14,237 @@
                 </li>
             </ul>
         </teleport>
-        <div class="row justify-content-end">
-            <div class="col-auto">
-                <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#client_modal">Add User</button>
-            </div>
-        </div>
 
-        <div class="row layout-top-spacing">
-            <div class="col-xl-12 col-lg-12 col-sm-12 layout-spacing">
-                <div class="panel br-6 p-0">
-                    <div class="custom-table">
-                        <v-client-table :data="items" :columns="columns" :options="table_option">
-                            <template #actions="props">
-                                <div class="actions text-center">
-<!--                                    <a href="javascript:;" class="cancel" @click="view_row(props.row)">-->
-<!--                                        <button type="button" class="btn btn-primary btn-sm">View</button>-->
-<!--                                    </a>-->
-                                    <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
-                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#client_modal">Update</button>
-                                    </a>
-                                    <!--                                    <router-link :to='view-client'>-->
-                                    <!--                                        <button type="button" class="btn btn-primary btn-sm">View</button>-->
-                                    <!--                                    </router-link>-->
-                                </div>
-                            </template>
-                            <template #salary="props"> ${{ props.row.salary }} </template>
-                        </v-client-table>
-                    </div>
+        <!-- Page Header -->
+        <div class="page-header-section">
+            <div class="header-content">
+                <div>
+                    <h2 class="page-title">Users Management</h2>
+                    <p class="page-subtitle">Manage system users and their permissions</p>
                 </div>
+                <button 
+                    type="button" 
+                    class="btn-primary-modern" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#client_modal"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add User
+                </button>
             </div>
         </div>
 
+        <!-- Table Card -->
+        <div class="modern-table-card">
+            <div class="table-wrapper">
+                <v-client-table :data="items" :columns="columns" :options="table_option">
+                    <template #name="props">
+                        <div class="user-cell">
+                            <div class="user-avatar">
+                                {{ props.row.name.charAt(0).toUpperCase() }}
+                            </div>
+                            <span class="user-name">{{ props.row.name }}</span>
+                        </div>
+                    </template>
+                    
+                    <template #role="props">
+                        <span class="role-badge">{{ props.row.role }}</span>
+                    </template>
+                    
+                    <template #actions="props">
+                        <div class="action-buttons">
+                            <button 
+                                class="btn-action btn-edit" 
+                                @click="update_row(props.row)"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#client_modal"
+                                title="Edit user"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                </v-client-table>
+            </div>
+        </div>
 
-        <!-- Add Modal -->
-        <div class="modal fade" id="client_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
-            <div  class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header" id="registerModalLabel">
-                        <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+        <!-- Modern Modal -->
+        <div class="modal fade" id="client_modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content modern-modal">
+                    <div class="modal-header">
+                        <div>
+                            <h4 class="modal-title">{{ modal.title }}</h4>
+                            <p class="modal-subtitle">Fill in the user information below</p>
+                        </div>
+                        <button 
+                            id="closebtn" 
+                            type="button" 
+                            class="btn-close-modern" 
+                            data-bs-dismiss="modal" 
+                            aria-label="Close"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
                     </div>
+                    
                     <div class="modal-body">
-                        <form class="needs-validation" novalidate @submit.stop.prevent="submit_form4">
-                            <div class="row">
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom01">Name</label>
+                        <form class="modern-form" @submit.stop.prevent="submit_form4">
+                            <div class="form-grid">
+                                <!-- Name -->
+                                <div class="form-group-modern">
+                                    <label for="name">Full Name <span class="required">*</span></label>
                                     <input
                                         type="text"
                                         v-model="client.name"
-                                        class="form-control"
+                                        class="form-control-modern"
                                         :class="[is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom01"
-                                        placeholder="Name"
+                                        id="name"
+                                        placeholder="Enter full name"
                                     />
-                                    <div class="invalid-feedback">Please fill the name</div>
+                                    <div class="error-message" v-if="is_submit_form4 && !client.name">Name is required</div>
                                 </div>
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom02">Email</label>
+
+                                <!-- Email -->
+                                <div class="form-group-modern">
+                                    <label for="email">Email Address <span class="required">*</span></label>
                                     <input
                                         type="email"
                                         v-model="client.email"
-                                        class="form-control"
+                                        class="form-control-modern"
                                         :class="[is_submit_form4 ? (client.email ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom02"
-                                        placeholder="email"
+                                        id="email"
+                                        placeholder="user@example.com"
                                     />
-                                    <div class="invalid-feedback">Please fill the Email</div>
+                                    <div class="error-message" v-if="is_submit_form4 && !client.email">Valid email is required</div>
                                 </div>
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustomUsername">Phone Number</label>
-                                    <div class="input-group">
-                                        <input
-                                            type="text"
-                                            v-model="client.phone_number"
-                                            class="form-control"
-                                            :class="[is_submit_form4 ? (client.phone_number ? 'is-valid' : 'is-invalid') : '']"
-                                            id="validationCustomUsername"
-                                            placeholder="Phone Number"
-                                            aria-describedby="inputGroupPrepend"
-                                        />
-                                        <div class="invalid-feedback">Please input a phone.</div>
-                                    </div>
+
+                                <!-- Phone -->
+                                <div class="form-group-modern">
+                                    <label for="phone">Phone Number <span class="required">*</span></label>
+                                    <input
+                                        type="text"
+                                        v-model="client.phone_number"
+                                        class="form-control-modern"
+                                        :class="[is_submit_form4 ? (client.phone_number ? 'is-valid' : 'is-invalid') : '']"
+                                        id="phone"
+                                        placeholder="+254 712 345 678"
+                                    />
+                                    <div class="error-message" v-if="is_submit_form4 && !client.phone_number">Phone number is required</div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 form-group">
-                                    <label for="validationCustom03">Department</label>
+
+                                <!-- Department -->
+                                <div class="form-group-modern">
+                                    <label for="department">Department <span class="required">*</span></label>
                                     <input
                                         type="text"
                                         v-model="client.department"
-                                        class="form-control"
+                                        class="form-control-modern"
                                         :class="[is_submit_form4 ? (client.department ? 'is-valid' : 'is-invalid') : '']"
-                                        id="validationCustom03"
-                                        placeholder="Department"
+                                        id="department"
+                                        placeholder="e.g., Legal, Admin"
                                     />
-                                    <div class="invalid-feedback">Please provide a valid department.</div>
-                                </div>
-                                <div class="col-md-12 form-group">
-                                    <div class="form-group">
-                                        <label for="date">Hire Date="'##/##/####'" (dd/mm/yyyy)</label>
-                                        <input v-model="client.hire_date" type="text" id="date" class="form-control"
-                                               :class="[is_submit_form4 ? (client.hire_date ? 'is-valid' : 'is-invalid') : '']"
-                                               v-maska="'##/##/####'" placeholder="__/__/____" />
-                                        <div class="invalid-feedback">Please provide a valid date.</div>
-                                    </div>
-
+                                    <div class="error-message" v-if="is_submit_form4 && !client.department">Department is required</div>
                                 </div>
 
-                                <div class="col-md-12">
-                                    <div id="select_menu" class="form-group form-group">
-<!--                                        <select v-model="client.role" class="form-select" :class="[is_submit_form4 ? (client.role ? 'is-valid' : 'is-invalid') : '']" multiple>-->
-<!--                                            <option value="">Select Role</option>-->
-<!--                                            <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>-->
-<!--                                        </select>-->
-<!--                                        <input type="checkbox" v-for="role in roles" :key="role.id" :value="role.id">-->
-<!--                                        <div class="invalid-feedback">Please Select the role</div>-->
-                                        <label>Select Role(s):</label>
-                                        <div v-for="role in roles" :key="role.id" class="form-check">
+                                <!-- Hire Date -->
+                                <div class="form-group-modern">
+                                    <label for="hire_date">Hire Date <span class="required">*</span></label>
+                                    <input 
+                                        v-model="client.hire_date" 
+                                        type="text" 
+                                        id="hire_date" 
+                                        class="form-control-modern"
+                                        :class="[is_submit_form4 ? (client.hire_date ? 'is-valid' : 'is-invalid') : '']"
+                                        v-maska="'##/##/####'" 
+                                        placeholder="DD/MM/YYYY" 
+                                    />
+                                    <div class="error-message" v-if="is_submit_form4 && !client.hire_date">Hire date is required</div>
+                                </div>
+
+                                <!-- Roles -->
+                                <div class="form-group-modern full-width">
+                                    <label>Assign Roles <span class="required">*</span></label>
+                                    <div class="role-checkboxes">
+                                        <label 
+                                            v-for="role in roles" 
+                                            :key="role.id" 
+                                            class="role-checkbox"
+                                        >
                                             <input
                                                 type="checkbox"
                                                 :value="role.id"
                                                 v-model="client.role"
-                                                class="form-check-input"
                                                 :id="'role_' + role.id"
                                             >
-                                            <label class="form-check-label" :for="'role_' + role.id">
-                                                {{ role.name }}
-                                            </label>
-                                        </div>
+                                            <span class="checkbox-label">{{ role.name }}</span>
+                                        </label>
                                     </div>
+                                    <div class="error-message" v-if="is_submit_form4 && !client.role.length">At least one role must be selected</div>
                                 </div>
-
                             </div>
-                            <button class="btn btn-primary mt-3" type="submit">{{ modal.button }}</button>
-                        </form>
 
+                            <div class="modal-footer-actions">
+                                <button type="button" class="btn-secondary-modern" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn-primary-modern">
+                                    {{ modal.button }}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import axios from "../../../api";
-
 import { useMeta } from '@/composables/use-meta';
-import Multiselect from "@suadelabs/vue3-multiselect";
+
 useMeta({ title: 'Users' });
 
 const columns = ref(['name', 'email', 'phone_number', 'department', 'hire_date', 'role', 'actions']);
 const items = ref([]);
-const roles = ref([]); // List of advocates
-const code_arr = ref([]);
-const modal = ref({title: "", button: ""});
+const roles = ref([]);
+const modal = ref({title: "Add User", button: "Add User"});
+const is_submit_form4 = ref(false);
+const client = ref({
+    id: "",
+    name: "",
+    phone_number: "",
+    email: "",
+    department: "",
+    role: [],
+    hire_date: ""
+});
+
 const table_option = ref({
     perPage: 10,
     perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
+    skin: 'table modern-table',
+    columnsClasses: { 
+        actions: 'actions-column',
+        name: 'name-column'
+    },
     pagination: { nav: 'scroll', chunk: 5 },
     texts: {
         count: 'Showing {from} to {to} of {count}',
         filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
+        filterPlaceholder: 'Search users...',
+        limit: 'Show:',
     },
-    sortable: ['name', 'email', 'phone_number', 'department', 'hire_date', 'role',],
+    sortable: ['name', 'email', 'phone_number', 'department', 'hire_date', 'role'],
     sortIcon: {
         base: 'sort-icon-none',
         up: 'sort-icon-asc',
@@ -193,78 +254,46 @@ const table_option = ref({
 });
 
 onMounted(() => {
-    //bind_data();
     fetchData();
 });
 
-const router = useRouter();
-
-
-
-
-
-
-
-const is_submit_form4 = ref(false);
-
-const client = ref({id: "",name:"",phone_number : "",email : "",department : "",role : [],hire_date: ""});
 const submit_form4 = () => {
     is_submit_form4.value = true;
-    if (client.value.name && client.value.phone_number && client.value.email && client.value.department && client.value.role) {
-        //form validated success
-        if(client.value.id > 0)//id exists then update
-        {
-            axios.put(`/api/users/${client.value.id}`, client.value) // Assuming your API endpoint for client creation is /api/clients
-                .then(response => {
-                    items.value = response.data.data;
-                    showMessage('User updated successfully.');
+    
+    if (client.value.name && client.value.phone_number && client.value.email && 
+        client.value.department && client.value.role.length && client.value.hire_date) {
+        
+        const endpoint = client.value.id > 0 
+            ? `/api/users/${client.value.id}` 
+            : '/api/users';
+        const method = client.value.id > 0 ? 'put' : 'post';
+        const successMessage = client.value.id > 0 
+            ? 'User updated successfully.' 
+            : 'User added successfully.';
 
-                    document.getElementById('closebtn').click();
-                })
-                .catch(error => {
-                    showMessage('Error updating user. Please try again.');
-                    console.error(error);
-                });
-        } else {
-            axios.post('/api/users', client.value) // Assuming your API endpoint for client creation is /api/clients
-                .then(response => {
-                    items.value = response.data.data;
-                    showMessage('User added successfully.');
-
-                    document.getElementById('closebtn').click();
-                })
-                .catch(error => {
-                    showMessage('Error adding user. Please try again.');
-                    console.error(error);
-                });
-        }
-
-        client.value.id= "";
-        client.value.name = "";
-        client.value.phone_number = "";
-        client.value.email = "";
-        client.value.department = "";
-        client.value.role = [];
-        client.value.hire_date = "";
-        modal.value.title = "Add User";
-        modal.value.button = "Add";
-
+        axios[method](endpoint, client.value)
+            .then(response => {
+                items.value = response.data.data;
+                showMessage(successMessage);
+                document.getElementById('closebtn').click();
+                resetForm();
+            })
+            .catch(error => {
+                showMessage(`Error ${client.value.id > 0 ? 'updating' : 'adding'} user. Please try again.`, 'error');
+                console.error(error);
+            });
     }
 };
 
 const fetchData = () => {
-    modal.value.title = "Add User";
-    modal.value.button = "Add";
-    // Fetch list of clients
     axios.get('/api/users')
         .then(response => {
             items.value = response.data.data;
         })
         .catch(error => {
-            console.error('Error fetching clients:', error);
+            console.error('Error fetching users:', error);
         });
 
-    // Fetch list of advocates
     axios.get('/api/rolesDropDown')
         .then(response => {
             roles.value = response.data.data;
@@ -273,10 +302,11 @@ const fetchData = () => {
             console.error('Error fetching roles:', error);
         });
 };
+
 const update_row = (item) => {
     modal.value.title = "Update User";
-    modal.value.button = "Update";
-
+    modal.value.button = "Update User";
+    
     client.value.id = item.id;
     client.value.name = item.name;
     client.value.phone_number = item.phone_number;
@@ -284,7 +314,21 @@ const update_row = (item) => {
     client.value.role = item.role_id;
     client.value.department = item.department;
     client.value.hire_date = item.hire_date;
+};
 
+const resetForm = () => {
+    client.value = {
+        id: "",
+        name: "",
+        phone_number: "",
+        email: "",
+        department: "",
+        role: [],
+        hire_date: ""
+    };
+    modal.value.title = "Add User";
+    modal.value.button = "Add User";
+    is_submit_form4.value = false;
 };
 
 const showMessage = (msg = '', type = 'success') => {
@@ -301,3 +345,357 @@ const showMessage = (msg = '', type = 'success') => {
     });
 };
 </script>
+
+<style lang="scss" scoped>
+.modern-page-container {
+    padding: 1.5rem;
+    max-width: 100%;
+}
+
+// Page Header
+.page-header-section {
+    margin-bottom: 2rem;
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    
+    .page-title {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .page-subtitle {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin: 0.25rem 0 0;
+    }
+}
+
+// Modern Buttons
+.btn-primary-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+}
+
+.btn-secondary-modern {
+    padding: 0.625rem 1.25rem;
+    background: var(--neutral-100);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    
+    &:hover {
+        background: var(--neutral-200);
+    }
+}
+
+// Table Card
+.modern-table-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.table-wrapper {
+    padding: 1.5rem;
+    
+    :deep(.modern-table) {
+        width: 100%;
+        
+        thead {
+            th {
+                background: var(--neutral-50);
+                color: var(--text-secondary);
+                font-weight: var(--font-weight-semibold);
+                font-size: var(--font-size-xs);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                padding: 1rem;
+                border-bottom: 2px solid var(--border-light);
+            }
+        }
+        
+        tbody {
+            tr {
+                transition: background var(--transition-fast);
+                
+                &:hover {
+                    background: var(--neutral-50);
+                }
+                
+                td {
+                    padding: 1rem;
+                    border-bottom: 1px solid var(--border-light);
+                    color: var(--text-primary);
+                    font-size: var(--font-size-sm);
+                }
+            }
+        }
+    }
+    
+    :deep(.VueTables__search) {
+        margin-bottom: 1.5rem;
+        
+        input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            
+            &:focus {
+                outline: none;
+                border-color: var(--primary-500);
+                box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            }
+        }
+    }
+    
+    :deep(.VueTables__limit) {
+        margin-bottom: 1.5rem;
+        
+        select {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+        }
+    }
+}
+
+// User Cell
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+}
+
+.user-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+// Role Badge
+.role-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background: var(--primary-100);
+    color: var(--primary-700);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+// Action Buttons
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    
+    &.btn-edit {
+        background: var(--success-100);
+        color: var(--success-700);
+        
+        &:hover {
+            background: var(--success-200);
+            transform: scale(1.1);
+        }
+    }
+}
+
+// Modern Modal
+.modern-modal {
+    border-radius: var(--radius-xl);
+    border: none;
+    box-shadow: var(--shadow-2xl);
+    
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        
+        .modal-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .modal-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin: 0.25rem 0 0;
+        }
+    }
+    
+    .btn-close-modern {
+        background: var(--neutral-100);
+        border: none;
+        border-radius: var(--radius-md);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        
+        &:hover {
+            background: var(--neutral-200);
+        }
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+}
+
+// Modern Form
+.modern-form {
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+        
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .form-group-modern {
+        &.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            
+            .required {
+                color: var(--error-500);
+            }
+        }
+        
+        .form-control-modern {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            transition: all var(--transition-fast);
+            
+            &:focus {
+                outline: none;
+                border-color: var(--primary-500);
+                box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            }
+            
+            &.is-invalid {
+                border-color: var(--error-500);
+            }
+            
+            &.is-valid {
+                border-color: var(--success-500);
+            }
+        }
+        
+        .error-message {
+            margin-top: 0.25rem;
+            font-size: var(--font-size-xs);
+            color: var(--error-600);
+        }
+    }
+    
+    .role-checkboxes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        
+        .role-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            
+            input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+            }
+            
+            .checkbox-label {
+                font-size: var(--font-size-sm);
+                color: var(--text-primary);
+            }
+        }
+    }
+    
+    .modal-footer-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-light);
+    }
+}
+</style>
