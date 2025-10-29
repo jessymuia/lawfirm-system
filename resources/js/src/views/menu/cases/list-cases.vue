@@ -245,8 +245,8 @@ const submit_form4 = () => {
                     document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error updating Cases. Please try again.');
-                    console.error(error);
+                    showMessage('Error...' + error.response.data.message);
+                    console.error(error.response);
                 });
         } else {
             axios.post('/api/cases', client.value) // Assuming your API endpoint for client creation is /api/clients
@@ -256,8 +256,8 @@ const submit_form4 = () => {
                     document.getElementById('closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding case. Please try again.');
-                    console.error(error);
+                    showMessage('Error...' + error.response.data.message);
+                    // console.error(error.response);
                 });
         }
 
