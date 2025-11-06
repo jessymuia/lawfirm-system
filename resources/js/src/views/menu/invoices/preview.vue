@@ -17,7 +17,8 @@
 
         <div class="invoice-layout">
             <div class="invoice-content">
-                <div class="invoice-document">
+                <!-- Main Invoice Card with Elevation -->
+                <div class="elevated-card invoice-document">
                     <div class="invoice-header">
                         <div class="company-info">
                             <div class="company-branding">
@@ -43,13 +44,14 @@
                         </div>
                     </div>
 
-                    <div class="customer-payment-section">
-                        <div class="customer-details">
+                    <!-- Customer & Payment Info Card -->
+                    <div class="info-cards-container">
+                        <div class="info-card customer-card">
                             <h6 class="section-title">Invoice To</h6>
                             <p class="customer-name">{{ invoice.client }}</p>
                             <p class="customer-address">{{ invoice.client_address }}</p>
                         </div>
-                        <div class="payment-info">
+                        <div class="info-card payment-card">
                             <h6 class="section-title">Payment Info</h6>
                             <p><span class="info-label">Bank Name:</span> KCB</p>
                             <p><span class="info-label">Account Number:</span> 1234567890</p>
@@ -104,8 +106,9 @@
                 </div>
             </div>
 
+            <!-- Action Sidebar with Elevation -->
             <div class="invoice-actions">
-                <div class="action-buttons">
+                <div class="elevated-card action-buttons">
                     <router-link to="/view-invoice" class="btn-action btn-back">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -197,21 +200,36 @@ const showMessage = (msg = '', type = 'success') => {
 
 <style lang="scss" scoped>
 .modern-invoice-preview {
-    padding: 20px;
+    padding: 24px;
     min-height: 100vh;
+    background: #f8f9fa;
 }
 
 .invoice-layout {
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 24px;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
     align-items: start;
 }
 
 .invoice-content {
+    width: 100%;
+}
+
+/* Elevated Card Base Styles */
+.elevated-card {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    box-shadow: 6px 6px 20px rgba(0, 0, 0, 0.08), 
+                3px 3px 10px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.elevated-card:hover {
+    transform: translateY(-4px) translateX(-2px);
+    box-shadow: 8px 8px 24px rgba(0, 0, 0, 0.12), 
+                4px 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .invoice-document {
@@ -223,49 +241,57 @@ const showMessage = (msg = '', type = 'success') => {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 40px;
-    padding-bottom: 24px;
-    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 28px;
+    border-bottom: 3px solid #e5e7eb;
 }
 
 .company-branding {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
 }
 
 .company-logo {
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     object-fit: contain;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .company-name {
     margin: 0;
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 700;
     color: #1f2937;
+    letter-spacing: -0.5px;
 }
 
 .invoice-number-section {
     text-align: right;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 12px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .invoice-label {
     margin: 0 0 8px 0;
-    font-size: 14px;
+    font-size: 13px;
     color: #6b7280;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    font-weight: 700;
 }
 
 .invoice-number {
     margin: 0;
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 800;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    letter-spacing: -1px;
 }
 
 .invoice-details-row {
@@ -276,63 +302,81 @@ const showMessage = (msg = '', type = 'success') => {
 
 .company-address p,
 .invoice-dates p {
-    margin: 6px 0;
+    margin: 8px 0;
     color: #6b7280;
     font-size: 14px;
+    line-height: 1.6;
 }
 
 .date-label {
-    font-weight: 600;
+    font-weight: 700;
     color: #374151;
     margin-right: 8px;
 }
 
-.customer-payment-section {
+/* Info Cards with Elevation */
+.info-cards-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 40px;
-    padding: 24px;
-    background: #f9fafb;
-    border-radius: 8px;
+    gap: 24px;
+    margin-bottom: 44px;
+}
+
+.info-card {
+    padding: 28px;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 12px;
+    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.06);
+    border-left: 4px solid #6366f1;
+    transition: all 0.3s;
+}
+
+.info-card:hover {
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 .section-title {
-    margin: 0 0 16px 0;
-    font-size: 14px;
-    font-weight: 700;
+    margin: 0 0 18px 0;
+    font-size: 13px;
+    font-weight: 800;
     color: #1f2937;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .customer-name {
-    margin: 8px 0;
-    font-size: 16px;
-    font-weight: 600;
+    margin: 10px 0;
+    font-size: 18px;
+    font-weight: 700;
     color: #1f2937;
 }
 
 .customer-address {
-    margin: 4px 0;
+    margin: 6px 0;
     color: #6b7280;
     font-size: 14px;
+    line-height: 1.6;
 }
 
-.payment-info p {
-    margin: 8px 0;
+.info-card p {
+    margin: 10px 0;
     color: #6b7280;
     font-size: 14px;
+    line-height: 1.6;
 }
 
 .info-label {
-    font-weight: 500;
+    font-weight: 700;
     color: #374151;
     margin-right: 8px;
 }
 
 .invoice-table-section {
-    margin-bottom: 32px;
+    margin-bottom: 36px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .invoice-table {
@@ -346,12 +390,12 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .invoice-table th {
-    padding: 14px 16px;
+    padding: 16px 18px;
     text-align: left;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .invoice-table th.text-right {
@@ -360,6 +404,11 @@ const showMessage = (msg = '', type = 'success') => {
 
 .invoice-table tbody tr {
     border-bottom: 1px solid #e5e7eb;
+    transition: background 0.2s;
+}
+
+.invoice-table tbody tr:hover {
+    background: #f8fafc;
 }
 
 .invoice-table tbody tr:last-child {
@@ -367,146 +416,153 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .invoice-table td {
-    padding: 16px;
+    padding: 18px;
     color: #374151;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 500;
 }
 
 .invoice-table td.text-right {
     text-align: right;
+    font-weight: 600;
 }
 
 .totals-section {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
 }
 
 .totals-content {
-    width: 400px;
+    width: 420px;
+    padding: 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 12px;
+    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.06);
 }
 
 .total-row {
     display: flex;
     justify-content: space-between;
-    padding: 12px 0;
+    padding: 14px 0;
     border-bottom: 1px solid #e5e7eb;
 }
 
 .total-label {
     color: #6b7280;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .total-value {
     color: #374151;
-    font-weight: 500;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 15px;
 }
 
 .total-row.grand-total {
     border-bottom: none;
-    border-top: 2px solid #1f2937;
-    padding: 16px 0;
-    margin-top: 8px;
+    border-top: 3px solid #1f2937;
+    padding: 20px 0;
+    margin-top: 10px;
 }
 
 .grand-total .total-label {
     color: #1f2937;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
 }
 
 .grand-total .total-value {
-    color: #1f2937;
-    font-size: 18px;
-    font-weight: 700;
+    color: #6366f1;
+    font-size: 20px;
+    font-weight: 800;
 }
 
 .invoice-note {
-    padding: 20px;
-    background: #eff6ff;
+    padding: 24px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     border-left: 4px solid #6366f1;
-    border-radius: 6px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .invoice-note p {
     margin: 0;
     color: #374151;
     font-size: 14px;
+    line-height: 1.6;
 }
 
+/* Action Sidebar */
 .invoice-actions {
     position: sticky;
-    top: 20px;
+    top: 24px;
 }
 
 .action-buttons {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 28px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .btn-action {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 14px 24px;
+    gap: 12px;
+    padding: 16px 28px;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .btn-action svg {
     width: 20px;
     height: 20px;
-    stroke-width: 2;
+    stroke-width: 2.5;
 }
 
 .btn-back {
-    background: #374151;
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
     color: white;
 }
 
 .btn-back:hover {
-    background: #1f2937;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(55, 65, 81, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(55, 65, 81, 0.35);
 }
 
 .btn-print {
-    background: #6b7280;
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
     color: white;
 }
 
 .btn-print:hover {
-    background: #4b5563;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.35);
 }
 
 .btn-post {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     color: white;
 }
 
 .btn-post:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.45);
 }
 
 @media print {
     .modern-invoice-preview {
         padding: 0;
+        background: white;
     }
 
     .invoice-layout {
@@ -519,6 +575,15 @@ const showMessage = (msg = '', type = 'success') => {
 
     .invoice-document {
         padding: 20px;
+        box-shadow: none;
+    }
+
+    .elevated-card {
+        box-shadow: none;
+    }
+
+    .elevated-card:hover {
+        transform: none;
     }
 }
 
@@ -534,32 +599,37 @@ const showMessage = (msg = '', type = 'success') => {
 
     .btn-action {
         flex: 1;
-        min-width: 140px;
+        min-width: 160px;
     }
 }
 
 @media (max-width: 768px) {
+    .modern-invoice-preview {
+        padding: 16px;
+    }
+
     .invoice-document {
-        padding: 24px;
+        padding: 28px;
     }
 
     .invoice-header {
         flex-direction: column;
-        gap: 20px;
+        gap: 24px;
     }
 
     .invoice-number-section {
         text-align: left;
+        width: 100%;
     }
 
     .invoice-details-row {
         flex-direction: column;
-        gap: 20px;
+        gap: 24px;
     }
 
-    .customer-payment-section {
+    .info-cards-container {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 20px;
     }
 
     .totals-content {

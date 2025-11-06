@@ -242,7 +242,6 @@ const toggleMobileMenu = () => {
         top: 60px;
     }
 
-    
     @media (max-width: 991px) {
         transform: translateX(-100%);
     }
@@ -364,21 +363,6 @@ const toggleMobileMenu = () => {
         letter-spacing: 0.5px;
         color: rgba(255, 255, 255, 0.5);
         padding: 0 0.5rem;
-    }
-}
-
-:global(.main-container) {
-    margin-left: 260px;
-    transition: margin var(--transition-base);
-
-    @media (max-width: 991px) {
-        margin-left: 0;
-    }
-}
-
-:global(.sidebar-closed) {
-    :global(.main-container) {
-        margin-left: 0;
     }
 }
 

@@ -187,3 +187,25 @@ body {
     display: none !important;
 }
 </style>
+<style lang="scss">
+/* Force full width - no centering */
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#content,
+.main-content,
+.content-wrapper {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Only the main-content should respect sidebar */
+#content {
+    @media (min-width: 992px) {
+        margin-left: 260px !important;
+    }
+}
+</style>
