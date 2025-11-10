@@ -24,6 +24,11 @@
                     </router-link>
                 </div>
 
+                <!-- Breadcrumb in Header (Compact) -->
+                <div class="header-breadcrumb">
+                    <div id="breadcrumb" class="breadcrumb-portal"></div>
+                </div>
+
                 <!-- Right Section -->
                 <div class="header-actions">
                     <!-- Theme Toggle -->
@@ -133,24 +138,6 @@
             </header>
         </div>
 
-        <!-- BREADCRUMB HEADER -->
-        <div class="breadcrumb-header">
-            <div class="breadcrumb-content">
-                <button 
-                    class="sidebar-toggle-btn"
-                    @click="$store.commit('toggleSideBar', !$store.state.is_show_sidebar)"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                
-                <div id="breadcrumb" class="breadcrumb-portal"></div>
-            </div>
-        </div>
-
         <!-- OVERLAY FOR MOBILE -->
         <div 
             class="header-overlay" 
@@ -186,8 +173,10 @@ const logout = () => {
     z-index: var(--z-fixed);
     background: var(--header-bg);
     border-bottom: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
     transition: all var(--transition-base);
+    margin: 0;
+    padding: 0;
 }
 
 .modern-header {
@@ -197,7 +186,8 @@ const logout = () => {
     padding: 0 1.5rem;
     height: 70px;
     max-width: 100%;
-    margin: 0 auto;
+    margin: 0;
+    gap: 1.5rem;
 }
 
 // Logo Section
@@ -205,6 +195,7 @@ const logout = () => {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-shrink: 0;
 
     .mobile-menu-toggle {
         display: none;
@@ -255,11 +246,50 @@ const logout = () => {
     }
 }
 
+// Breadcrumb in Header (Compact)
+.header-breadcrumb {
+    flex: 1;
+    min-width: 0;
+    
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.breadcrumb-portal {
+    :deep(.breadcrumb) {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-size: var(--font-size-sm);
+    }
+    
+    :deep(.breadcrumb-item) {
+        color: var(--text-secondary);
+        
+        &.active {
+            color: var(--text-primary);
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+            
+            &:hover {
+                color: var(--primary-600);
+            }
+        }
+    }
+}
+
 // Header Actions
 .header-actions {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-shrink: 0;
 }
 
 .action-item {
@@ -406,53 +436,6 @@ const logout = () => {
     }
 }
 
-// Breadcrumb Header
-.breadcrumb-header {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    z-index: calc(var(--z-fixed) - 1);
-    background: var(--background);
-    border-bottom: 1px solid var(--border-light);
-    padding: 0.875rem 1.5rem;
-    transition: all var(--transition-base);
-}
-
-.breadcrumb-content {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.sidebar-toggle-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    padding: 0.5rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
-
-    &:hover {
-        background: var(--neutral-100);
-        color: var(--primary-600);
-    }
-
-    @media (max-width: 991px) {
-        display: none;
-    }
-}
-
-.breadcrumb-portal {
-    flex: 1;
-}
-
 // Header Overlay
 .header-overlay {
     position: fixed;
@@ -476,15 +459,9 @@ const logout = () => {
     }
 }
 
-// Adjust main content for fixed headers
-:global(#content) {
-    padding-top: 140px; // 70px top header + 70px breadcrumb header
-}
-
 // Dark mode adjustments
 body.dark {
-    .modern-header-container,
-    .breadcrumb-header {
+    .modern-header-container {
         background: var(--surface);
         border-color: var(--border-color);
     }
@@ -499,23 +476,11 @@ body.dark {
     .modern-header {
         padding: 0 1rem;
     }
-
-    .breadcrumb-header {
-        padding: 0.75rem 1rem;
-    }
 }
 
 @media (max-width: 576px) {
     .modern-header {
         height: 60px;
-    }
-
-    .breadcrumb-header {
-        top: 60px;
-    }
-
-    :global(#content) {
-        padding-top: 120px;
     }
 }
 </style>

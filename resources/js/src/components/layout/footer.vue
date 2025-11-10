@@ -39,7 +39,7 @@ const currentYear = computed(() => new Date().getFullYear());
     background: var(--card-bg);
     border-top: 1px solid var(--border-light);
     padding: 1.25rem 1.5rem;
-    margin-top: auto;
+    margin-top: 30px;
     transition: all var(--transition-base);
 
     @media (max-width: 768px) {
