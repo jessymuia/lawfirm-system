@@ -1,4 +1,4 @@
-<template>
+ <template>
     <div class="app-wrapper">
         <!-- Header -->
         <Header></Header>
@@ -53,11 +53,10 @@ import appSettings from '@/components/app-settings.vue';
 .main-container {
     display: flex;
     flex: 1;
-    margin-top: 140px; // Header (70px) + Breadcrumb (70px)
     position: relative;
     
     @media (max-width: 576px) {
-        margin-top: 120px; // Header (60px) + Breadcrumb (60px)
+        margin-top: 10px;
     }
 }
 
@@ -89,7 +88,7 @@ import appSettings from '@/components/app-settings.vue';
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 140px);
+    min-height: calc(100vh - 70px);
     transition: margin-left var(--transition-base);
     
     // Desktop: push content when sidebar is visible
@@ -107,7 +106,7 @@ import appSettings from '@/components/app-settings.vue';
     }
 
     @media (max-width: 576px) {
-        min-height: calc(100vh - 120px);
+        min-height: calc(100vh - 60px);
     }
 }
 
@@ -185,5 +184,28 @@ body {
 .overlay,
 .search-overlay {
     display: none !important;
+}
+</style>
+
+<style lang="scss">
+/* Force full width - no centering */
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#content,
+.main-content,
+.content-wrapper {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Only the main-content should respect sidebar */
+#content {
+    @media (min-width: 992px) {
+        margin-left: 260px !important;
+    }
 }
 </style>
