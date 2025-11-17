@@ -29,8 +29,8 @@
                 <div class="text-center">
                     <img src="@/assets/images/features_overview.svg" alt="..." class="img-fluid" />
                 </div>
-                <h5 class="mb-0 text-center">TEMPLATE CUSTOMIZER</h5>
-                <p class="text-center">Set preferences that will be cookied for your live preview demonstration.</p>
+                <h5 class="mb-0 text-center">APP CUSTOMIZER</h5>
+                <p class="text-center">Set preferences that will be cookied for your liking.</p>
                 <hr />
 
                 <h6 class="mb-1">Color Scheme</h6>
@@ -109,10 +109,10 @@
                 <h6 class="mb-1">Navigation Position</h6>
                 <p class="small text-muted mb-3">Select the primary navigation paradigm for your app.</p>
                 <div class="btn-group-toggle row mb-4 mx-0">
-                    <div class="text-color radio-primary col-6 ps-0 mb-3 custom-control custom-radio">
-                        <input type="radio" id="horizontal" v-model="$store.state.menu_style" class="custom-control-input" value="horizontal" @change="setMenuStyle" />
-                        <label class="custom-control-label" for="horizontal">Horizontal</label>
-                    </div>
+<!--                    <div class="text-color radio-primary col-6 ps-0 mb-3 custom-control custom-radio">-->
+<!--                        <input type="radio" id="horizontal" v-model="$store.state.menu_style" class="custom-control-input" value="horizontal" @change="setMenuStyle" />-->
+<!--                        <label class="custom-control-label" for="horizontal">Horizontal</label>-->
+<!--                    </div>-->
                     <div class="text-color radio-primary col-6 ps-0 mb-3 custom-control custom-radio">
                         <input type="radio" id="vertical" v-model="$store.state.menu_style" class="custom-control-input" value="vertical" @change="setMenuStyle" />
                         <label class="custom-control-label" for="vertical">Vertical</label>

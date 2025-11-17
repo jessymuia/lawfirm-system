@@ -77,6 +77,11 @@ class CasesController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\Response|JsonResponse
     {
+        $request->validate([
+            'case_number' => 'required|unique:cases',
+        ],[
+            'case_number.unique' => 'Case number already exists',
+        ]);
         Cases::create([
             "case_number" => $request->case_number,
             "description" => $request->description,
