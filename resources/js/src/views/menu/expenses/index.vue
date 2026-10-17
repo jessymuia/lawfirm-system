@@ -23,33 +23,69 @@
                     </svg>
                     <h4>Expenses Management</h4>
                 </div>
-                <button type="button" class="btn-add-expense" data-bs-toggle="modal" data-bs-target="#client_modal">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    Add New Expense
-                </button>
+                <div class="header-button-group">
+                    <button type="button" class="btn-export" @click="exportCsv" :disabled="exporting">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ exporting ? 'Exporting...' : 'Export CSV' }}
+                    </button>
+                    <button type="button" class="btn-add-expense" @click="openAddModal" data-bs-toggle="modal" data-bs-target="#client_modal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Add New Expense
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="table-container">
             <div class="table-card">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #case="props">
-                        <div class="case-badge">{{ props.row.case }}</div>
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/expenses"
+                    table-id="expenses-list"
+                    :selectable="true"
+                    :columns="[
+                        { key: 'case', label: 'Case' },
+                        { key: 'expense_date', label: 'Date' },
+                        { key: 'amount', label: 'Amount' },
+                        { key: 'category_name', label: 'Category' },
+                        { key: 'description', label: 'Description' },
+                        { key: 'vendor', label: 'Vendor' },
+                        { key: 'payment_method', label: 'Payment Method' },
+                        { key: 'invoice_number', label: 'Invoice #' },
+                        { key: 'user', label: 'Recorded By' },
+                    ]"
+                    :sortable-columns="['amount', 'description', 'vendor', 'payment_method', 'invoice_number']"
+                    :searchable-columns="['description', 'vendor', 'invoice_number']"
+                    empty-title="No expenses yet"
+                    empty-description="Add your first expense to get started."
+                    empty-action-label="Add New Expense"
+                    @empty-action="openAddModal"
+                >
+                    <template #bulk-actions="{ selectedIds, clearSelection }">
+                        <button type="button" class="btn-toolbar" @click="bulkDeleteExpenses(selectedIds, clearSelection)">Delete Selected</button>
+                        <button type="button" class="btn-toolbar" @click="bulkExportExpenses(selectedIds)">Export Selected</button>
                     </template>
-                    <template #expense_date="props">
-                        <div class="date-cell">{{ props.row.expense_date }}</div>
+                    <template #cell-case="{ row }">
+                        <div class="case-badge">{{ row.case }}</div>
                     </template>
-                    <template #amount="props">
-                        <div class="amount-cell">${{ props.row.amount }}</div>
+                    <template #cell-expense_date="{ row }">
+                        <div class="date-cell">{{ row.expense_date }}</div>
                     </template>
-                    <template #category_name="props">
-                        <span class="category-badge">{{ props.row.category_name }}</span>
+                    <template #cell-amount="{ row }">
+                        <div class="amount-cell">${{ row.amount }}</div>
                     </template>
-                    <template #actions="props">
+                    <template #cell-category_name="{ row }">
+                        <span class="category-badge">{{ row.category_name }}</span>
+                    </template>
+                    <template #actions="{ row }">
                         <div class="actions text-center">
-                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                            <a href="javascript:;" class="cancel me-1" @click="update_row(row)">
                                 <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#client_modal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -58,9 +94,18 @@
                                     Edit
                                 </button>
                             </a>
+                            <a href="javascript:;" class="cancel" @click="delete_row(row)">
+                                <button type="button" class="btn-delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </a>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -79,18 +124,20 @@
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">Case *</label>
-                                        <select v-model="client.case_id" class="modern-select" :class="[is_submit_form4 ? (client.case_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Case</option>
-                                            <option v-for="data in cases" :key="data.id" :value="data.id">{{ data.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please select the case</div>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/casesDropDown"
+                                            v-model="client.case_id"
+                                            :initial-label="client.case_name"
+                                            placeholder="Search cases..."
+                                            :invalid="is_submit_form4 && !client.case_id"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.case_id ? 'display:block' : ''">Please select the case</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
-                                        <label class="form-label">Expense Date * (dd/mm/yyyy)</label>
-                                        <input v-model="client.expense_date" type="text" class="modern-input"
-                                               :class="[is_submit_form4 ? (client.expense_date ? 'is-valid' : 'is-invalid') : '']"
-                                               v-maska="'##/##/####'" placeholder="__/__/____" />
+                                        <label class="form-label">Expense Date *</label>
+                                        <AppDatePicker v-model="client.expense_date"
+                                               :invalid="is_submit_form4 && !client.expense_date" />
                                         <div class="invalid-feedback">Please provide a valid date</div>
                                     </div>
 
@@ -150,11 +197,14 @@
 
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">User/Advocate *</label>
-                                        <select v-model="client.user_id" class="modern-select" :class="[is_submit_form4 ? (client.user_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select User</option>
-                                            <option v-for="data in users" :key="data.id" :value="data.id">{{ data.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please select the user</div>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/advocates"
+                                            v-model="client.user_id"
+                                            :initial-label="client.user_name"
+                                            placeholder="Search users..."
+                                            :invalid="is_submit_form4 && !client.user_id"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.user_id ? 'display:block' : ''">Please select the user</div>
                                     </div>
                                 </div>
                             </div>
@@ -169,76 +219,126 @@
 </template>
 
 <script setup>
+import { confirmAction } from '@/composables/use-confirm';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import AppDatePicker from '@/components/ui/app-date-picker.vue';
+import { useFileDownload } from '@/composables/use-file-download';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+import SearchSelect from '@/components/ui/search-select.vue';
+import { useModalDirtyGuard } from '@/composables/use-modal-dirty-guard';
+
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { setErrorsFromResponse, clearErrors } = useFormErrors();
+const { downloadFile } = useFileDownload();
+const exporting = ref(false);
+
+const exportCsv = () => {
+    exporting.value = true;
+    downloadFile('/api/v1/export/expenses', `expenses-${new Date().toISOString().slice(0, 10)}.csv`)
+        .finally(() => { exporting.value = false; });
+};
+
+const openAddModal = () => {
+    clearErrors();
+    client.value = {
+        id: "", case_id: "", case_name: "", expense_date: "", amount: "", category: "",
+        description: "", vendor: "", payment_method: "", invoice_number: "", user_id: "", user_name: ""
+    };
+    is_submit_form4.value = false;
+    modal.value.title = "Add Expense";
+    modal.value.button = "Add";
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
 useMeta({ title: 'Expenses' });
 
-const columns = ref(['case', 'expense_date','amount','category_name','description','vendor','payment_method','invoice_number','user', 'actions']);
-const items = ref([]);
-const cases = ref([]);
+const tableRef = ref(null);
+
+const bulkDeleteExpenses = (selectedIds, clearSelection) => {
+    if (!selectedIds.length) return;
+
+    confirmAction({
+        title: `Delete ${selectedIds.length} expense${selectedIds.length > 1 ? 's' : ''}?`,
+        text: 'This will delete every selected expense. This can be undone by an administrator.',
+        confirmText: 'Yes, delete all',
+        danger: true,
+    }).then((ok) => {
+        if (!ok) return;
+
+        axios.post('/api/v1/expenses/bulk-delete', { ids: selectedIds })
+            .then(() => {
+                showMessage(`Deleted ${selectedIds.length} expense${selectedIds.length > 1 ? 's' : ''}.`);
+                clearSelection();
+                tableRef.value?.refresh();
+            })
+            .catch((error) => {
+                const message = error.response?.data?.message || 'Error deleting selected expenses. Please try again.';
+                showMessage(message, 'error');
+            });
+    });
+};
+
+const bulkExportExpenses = (selectedIds) => {
+    if (!selectedIds.length) return;
+    downloadFile('/api/v1/export/expenses', `expenses-selected-${new Date().toISOString().slice(0, 10)}.csv`, { ids: selectedIds.join(',') });
+};
 const types = ref([]);
-const users = ref([]);
-const modal = ref({title: "", button: ""});
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['case', 'expense_date','amount','category_name','description','vendor','payment_method','invoice_number','user'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const modal = ref({title: "Add Expense", button: "Add"});
 
 onMounted(() => {
-    fetchData();
+    fetchDropdowns();
 });
 
 const router = useRouter();
 const is_submit_form4 = ref(false);
-const client = ref({id: "",case_id:"",expense_date : "",amount:"",category:"",description:"",vendor:"",payment_method:"",invoice_number:"",user_id:""});
+const client = ref({id: "",case_id:"",case_name:"",expense_date : "",amount:"",category:"",description:"",vendor:"",payment_method:"",invoice_number:"",user_id:"",user_name:""});
+
+// UI-15: closing this modal with unsaved edits now asks for confirmation.
+// Bug fix (found via a real E2E run): clearDirtyGuard() must be called
+// on a successful save, before the modal auto-closes — see
+// list-clients.vue's identical fix for the full explanation.
+const { clear: clearDirtyGuard } = useModalDirtyGuard('client_modal', () => ({ ...client.value }));
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.case_id  && client.value.expense_date && client.value.payment_method && client.value.amount && client.value.payment_method && client.value.invoice_number && client.value.user_id) {
         if(client.value.id > 0) {
-            axios.put(`/api/expenses/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/expenses/${client.value.id}`, client.value)
+                .then(() => {
                     showMessage('Expense updated successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating expense. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating expense. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/expenses', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/expenses', client.value)
+                .then(() => {
                     showMessage('Expense added successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding expense. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding expense. Please try again.'), 'error');
                 });
         }
 
         client.value.id = "";
         client.value.case_id = "";
+        client.value.case_name = "";
         client.value.expense_date = "";
         client.value.amount = "";
         client.value.category = "";
@@ -247,52 +347,28 @@ const submit_form4 = () => {
         client.value.payment_method = "";
         client.value.invoice_number = "";
         client.value.user_id = "";
+        client.value.user_name = "";
         modal.value.title = "Add Expense";
         modal.value.button = "Add";
         is_submit_form4.value = false;
     }
 };
 
-const fetchData = () => {
-    modal.value.title = "Add Expense";
-    modal.value.button = "Add";
-    
-    axios.get('/api/expenses')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching expenses:', error);
-        });
-
-    axios.get('/api/expense-categories')
+const fetchDropdowns = () => {
+    axios.get('/api/v1/expense-categories/options')
         .then(response => {
             types.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching categories:', error);
-        });
-
-    axios.get('/api/casesDropDown')
-        .then(response => {
-            cases.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching cases:', error);
-        });
-
-    axios.get('/api/advocates')
-        .then(response => {
-            users.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching advocates:', error);
+            showMessage('Could not load categories. Please try refreshing the page.', 'error');
         });
 };
 
 const update_row = (item) => {
     client.value.id = item.id;
     client.value.case_id = item.case_id;
+    client.value.case_name = item.case;
     client.value.expense_date = item.expense_date;
     client.value.amount = item.amount;
     client.value.category = item.category;
@@ -301,22 +377,17 @@ const update_row = (item) => {
     client.value.payment_method = item.payment_method;
     client.value.invoice_number = item.invoice_number;
     client.value.user_id = item.user_id;
+    client.value.user_name = item.user;
 
     modal.value.title = "Update Expense";
     modal.value.button = "Update";
 };
 
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/expenses/${item.id}`,
+        itemLabel: `this ${item.amount} expense`,
+        onSuccess: () => { tableRef.value?.refresh(); },
     });
 };
 </script>
@@ -353,7 +424,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 48px;
     height: 48px;
     padding: 12px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px;
     flex-shrink: 0;
@@ -366,12 +437,41 @@ const showMessage = (msg = '', type = 'success') => {
     color: #1f2937;
 }
 
+.header-button-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: white;
+    color: #c2410c;
+    border: 1.5px solid #c2410c;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(249, 115, 22, 0.08);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
 .btn-add-expense {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;
@@ -420,7 +520,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .amount-cell {
     font-weight: 600;
-    color: #059669;
+    color: var(--primary-700);
     font-size: 15px;
 }
 
@@ -439,7 +539,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 6px;
@@ -460,8 +560,34 @@ const showMessage = (msg = '', type = 'success') => {
     stroke-width: 2;
 }
 
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #e7515a, #c53040);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 81, 90, 0.3);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 20px 24px;
@@ -545,7 +671,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .modern-input.is-valid,
 .modern-select.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -565,7 +691,7 @@ const showMessage = (msg = '', type = 'success') => {
     justify-content: center;
     gap: 8px;
     padding: 14px 32px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;

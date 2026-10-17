@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        'api/platform/*',      // the operator console signs in and calls with a bearer token, never a cookie session
+        'api/v1/csp-report',   // SEC-14: browsers post violation reports themselves, without a CSRF token
     ];
 }

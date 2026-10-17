@@ -1,5 +1,11 @@
  <template>
     <div class="app-wrapper">
+        <!-- UI-33: skip-link — first focusable element on the page,
+             visually hidden until focused, jumps keyboard/screen-reader
+             users straight past the header/sidebar to the actual page
+             content. -->
+        <a href="#content" class="skip-link">Skip to main content</a>
+
         <!-- Header -->
         <Header></Header>
 
@@ -7,42 +13,83 @@
         <div
             class="main-container"
             id="container"
-            :class="[!$store.state.is_show_sidebar ? 'sidebar-closed' : '', $store.state.menu_style === 'collapsible-vertical' ? 'collapsible-vertical-mobile' : '']"
+            :class="[!app.is_show_sidebar ? 'sidebar-closed' : '', app.menu_style === 'collapsible-vertical' ? 'collapsible-vertical-mobile' : '']"
         >
             <!-- Overlay for mobile -->
             <div 
                 class="sidebar-overlay" 
-                :class="{ show: !$store.state.is_show_sidebar }" 
-                @click="$store.commit('toggleSideBar', !$store.state.is_show_sidebar)"
+                :class="{ show: app.is_show_sidebar }" 
+                @click="app.toggleSideBar(!app.is_show_sidebar)"
             ></div>
 
             <!-- Sidebar -->
             <Sidebar></Sidebar>
 
             <!-- Content Area -->
-            <div id="content" class="main-content">
+            <main id="content" class="main-content" tabindex="-1">
                 <div class="content-wrapper">
+                    <AppBreadcrumbs />
+                    <AccountNotice />
                     <router-view />
                 </div>
 
                 <!-- Footer -->
                 <Footer></Footer>
-            </div>
-
-            <!-- App Settings -->
-            <app-settings />
+            </main>
         </div>
+
+        <!-- UI-9: global search palette, Ctrl/Cmd-K -->
+        <global-search ref="globalSearchRef" />
     </div>
 </template>
 
 <script setup>
+import { useAppStore } from '@/stores/app';
+
+const app = useAppStore();   // ENG-14: layout state (Pinia)
+import { ref, provide, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useRoute } from 'vue-router';
+import AccountNotice from '@/components/account-notice.vue';
 import Header from '@/components/layout/header.vue';
 import Sidebar from '@/components/layout/sidebar.vue';
 import Footer from '@/components/layout/footer.vue';
-import appSettings from '@/components/app-settings.vue';
+import GlobalSearch from '@/components/global-search.vue';
+import AppBreadcrumbs from '@/components/app-breadcrumbs.vue';
+
+// Phones and tablets (< 992px): the menu is a drawer. It starts closed, closes when a page is opened, and closes when the
+// window grows back to desktop width so the desktop sidebar is shown again.
+const route = useRoute();
+const narrow = window.matchMedia('(max-width: 991px)');
+const closeOnNarrow = () => { if (narrow.matches) app.toggleSideBar(false); };
+const onBreakpoint = (e) => app.toggleSideBar(!e.matches);
+onMounted(() => { closeOnNarrow(); narrow.addEventListener('change', onBreakpoint); });
+onBeforeUnmount(() => narrow.removeEventListener('change', onBreakpoint));
+watch(() => route.fullPath, closeOnNarrow);
+
+const globalSearchRef = ref(null);
+provide('openGlobalSearch', () => globalSearchRef.value?.open());
 </script>
 
 <style lang="scss" scoped>
+.skip-link {
+    position: absolute;
+    top: -60px;
+    left: 8px;
+    z-index: 2000;
+    padding: 10px 16px;
+    background: var(--primary-600);
+    color: var(--text-inverse);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top 0.15s ease;
+
+    &:focus {
+        top: 8px;
+    }
+}
+
 .app-wrapper {
     min-height: 100vh;
     display: flex;

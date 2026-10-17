@@ -2,10 +2,15 @@
 
 namespace Database\Factories;
 
+use App\Models\Cases;
+use App\Models\Client;
+use App\Models\Court;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Spatie\Permission\Models\Role;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cases>
+ * @extends Factory<Cases>
  */
 class CasesFactory extends Factory
 {
@@ -21,27 +26,49 @@ class CasesFactory extends Factory
 
         return [
             //
-            'case_number' => 'CN' . $this->faker->randomNumber(5),
+            'case_number' => 'CN'.$this->faker->unique()->randomNumber(6),
             'description' => $this->faker->sentence(),
-            'client_id' => \App\Models\Client::query()->inRandomOrder()->first()->id,
-            'assigned_to' => \App\Models\User::query()
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', 'advocate');
-                })
-                ->inRandomOrder()->first()->id,
+            // Self-sufficient: each dependency creates its own related
+            // record if none exists, instead of erroring against
+            // ->first()->id on an empty query result (null) in a fresh
+            // test database.
+            'client_id' => function () {
+                return Client::query()->inRandomOrder()->first()?->id
+                    ?? Client::factory()->create()->id;
+            },
+            'assigned_to' => function () {
+                $advocate = User::query()
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', 'advocate');
+                    })
+                    ->inRandomOrder()->first();
+
+                if ($advocate) {
+                    return $advocate->id;
+                }
+
+                $advocate = User::factory()->create();
+                $role = Role::findOrCreate('advocate', 'web');
+                $advocate->assignRole($role);
+
+                return $advocate->id;
+            },
             'start_date' => $start_date,
             'end_date' => $end_date > now() ? null : $end_date,
             'case_type' => $this->faker->randomElement([
                 'civil', 'criminal', 'family', 'land', 'commercial', 'constitutional',
-                'labour and employment', 'administrative', 'appellate', 'election petitions'
+                'labour and employment', 'administrative', 'appellate', 'election petitions',
             ]),
             'police_station' => $this->faker->randomElement([
                 'Kilimani', 'Central', 'Kasarani', 'Kileleshwa', 'Langata', 'Kibera',
                 'Meru', 'Nakuru', 'Mombasa', 'Kisumu', 'Eldoret', 'Kakamega', 'Kisii',
-                'Syokimau', 'Kitengela', 'Ruiru', 'Thika', 'Kiambu', 'Kikuyu', 'Kericho'
+                'Syokimau', 'Kitengela', 'Ruiru', 'Thika', 'Kiambu', 'Kikuyu', 'Kericho',
             ]),
-            'court_id' => \App\Models\Court::query()->inRandomOrder()->first()->id,
-            'opposing_party' => $this->faker->name()
+            'court_id' => function () {
+                return Court::query()->inRandomOrder()->first()?->id
+                    ?? Court::factory()->create()->id;
+            },
+            'opposing_party' => $this->faker->name(),
         ];
     }
 }

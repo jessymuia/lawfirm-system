@@ -5,6 +5,20 @@
 *.md diff=markdown
 *.php diff=php
 
+# Executable scripts with a shebang line (#!/usr/bin/env php,
+# #!/bin/bash) must always check out with LF, on every platform.
+# A CRLF line ending puts a trailing \r into the shebang itself,
+# which breaks these scripts the moment they're actually run on
+# Linux/WSL/a real server/CI (they're not run directly on Windows,
+# which doesn't use the shebang line at all -- so this was invisible
+# there, but would fail with "bad interpreter" / "$'\r': command not
+# found" the first time either script actually executes).
+artisan text eol=lf
+*.sh text eol=lf
+
 /.github export-ignore
 CHANGELOG.md export-ignore
 
+# Generated files are compared byte for byte in CI (php artisan api:openapi --check): always LF, on every platform.
+docs/openapi.json text eol=lf
+resources/js/src/api/*.generated.ts text eol=lf

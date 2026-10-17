@@ -2,119 +2,104 @@
 
 namespace App\Http\Controllers;
 
+use App\Catalog\HandlesCatalogRows;
 use App\Constants\ModulePermissions;
 use App\Models\Court;
-use App\Models\CourtType;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class CourtController extends Controller
 {
-    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
-    {
-        return response()->json([
-            'success' => $success,
-            'message'=>$message,
-            'data' => $data
-        ], $statusCode);
-    }
+    use HandlesCatalogRows;
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index(): \Illuminate\Http\Response|JsonResponse
+    public function index(): Response|JsonResponse
     {
-        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_COURTS))
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_COURTS)) {
             abort(403);
-        $courts = Court::all();
-        $courts = $courts->map(function ($row) {
-            return [
-                "id" => $row->id,
-                "name" => $row->name,
-                "type" => $row->type,
-                "court_type" => CourtType::find($row->type)->name
-            ];
-        });
+        }
 
-        return $this->response(true,'success',$courts,200);
-    }
+        $query = Court::with('courtType')->orderBy('id', 'desc');
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $courts = $this->paginatedOrFull(
+            request(),
+            $query,
+            fn ($row) => \App\Http\Resources\V1\CourtResource::make($row)->resolve(),
+            25,
+            sortableColumns: ['name'],
+            searchableColumns: ['name', 'alias']
+        );
+
+        return $this->response(true, 'success', $courts, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function store(Request $request): \Illuminate\Http\Response|JsonResponse
+    public function store(\App\Http\Requests\Court\StoreRequest $request): Response|JsonResponse
     {
-        Court::create([
-            "name" => $request->name,
-            "type" => $request->type
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_COURTS)) {
+            abort(403);
+        }
+
+        $court = Court::create([
+            'name' => $request->name,
+            'type' => $request->type,
         ]);
 
-        return $this->index();
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Court  $court
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Court $court)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Court  $court
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Court $court)
-    {
-        //
+        return $this->response(true, 'success', \App\Http\Resources\V1\CourtResource::make($court->load('courtType'))->resolve(), 201);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Court  $court
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(Request $request, $id): \Illuminate\Http\Response|JsonResponse
+    public function update(\App\Http\Requests\Court\UpdateRequest $request, $id): Response|JsonResponse
     {
-        $court = Court::find($id);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_COURTS)) {
+            abort(403);
+        }
+
+        $court = Court::findOrFail($id);
+        if ($court->is_system) {
+            // TEN-11: a firm can only give a system row a local name.
+            return $this->response(true, 'success', \App\Http\Resources\V1\CourtResource::make($this->updateCatalogAlias($request, $court)->load('courtType'))->resolve(), 200);
+        }
+
         $court->name = $request->name;
         $court->type = $request->type;
         $court->updated_by = auth()->user()->id;
         $court->save();
 
-        return $this->index();
+        return $this->response(true, 'success', \App\Http\Resources\V1\CourtResource::make($court->fresh('courtType'))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Court  $court
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Court $court)
+    public function destroy($id)
     {
-        //
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_COURTS)) {
+            abort(403);
+        }
+
+        $court = Court::findOrFail($id);
+        $this->refuseSystemDelete($court);
+        $court->deleted_by = auth()->user()->id;
+        $court->save();
+
+        $court->delete();
+
+        return $this->response(true, 'success', ['id' => (int) $id], 200);
     }
 }

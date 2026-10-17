@@ -26,7 +26,7 @@
                     </svg>
                     <h4>Expense Categories</h4>
                 </div>
-                <button type="button" class="btn-add-category" data-bs-toggle="modal" data-bs-target="#client_modal">
+                <button type="button" class="btn-add-category" @click="openAddModal" data-bs-toggle="modal" data-bs-target="#client_modal">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
                     </svg>
@@ -37,18 +37,28 @@
 
         <div class="table-container">
             <div class="table-card">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #name="props">
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/expense-categories"
+                    :columns="[{ key: 'name', label: 'Name' }]"
+                    :sortable-columns="['name']"
+                    :searchable-columns="['name']"
+                    empty-title="No categories yet"
+                    empty-description="Add your first expense category to get started."
+                    empty-action-label="Add Category"
+                    @empty-action="openAddModal"
+                >
+                    <template #cell-name="{ row }">
                         <div class="category-name">
                             <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M7 7h10M7 12h10" stroke-width="2" stroke-linecap="round"/>
                             </svg>
-                            {{ props.row.name }}
+                            {{ row.name }}
                         </div>
                     </template>
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="actions text-center">
-                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                            <a href="javascript:;" class="cancel me-1" @click="update_row(row)">
                                 <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#client_modal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -57,9 +67,18 @@
                                     Edit
                                 </button>
                             </a>
+                            <a href="javascript:;" class="cancel" @click="delete_row(row)">
+                                <button type="button" class="btn-delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </a>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -79,10 +98,11 @@
                                     type="text"
                                     v-model="client.name"
                                     class="modern-input"
-                                    :class="[is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '']"
+                                    :class="[hasError('name') ? 'is-invalid' : (is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '')]"
                                     placeholder="e.g., Travel, Court Fees, Legal Research"
+                                    @input="clearErrors('name')"
                                 />
-                                <div class="invalid-feedback">Please fill the category name</div>
+                                <div class="invalid-feedback">{{ hasError('name') ? fieldError('name') : 'Please fill the category name' }}</div>
                             </div>
 
                             <button class="btn-submit" type="submit">{{ modal.button }}</button>
@@ -95,39 +115,23 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+
 useMeta({ title: 'Expense Categories' });
 
-const columns = ref(['name', 'actions']);
-const items = ref([]);
-const modal = ref({title: "", button: ""});
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['name'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
 
-onMounted(() => {
-    fetchData();
-});
+const tableRef = ref(null);
+const modal = ref({title: "Add Expense Category", button: "Add"});
 
 const router = useRouter();
 const is_submit_form4 = ref(false);
@@ -135,28 +139,27 @@ const client = ref({id: "", name: ""});
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.name) {
         if(client.value.id > 0) {
-            axios.put(`/api/expense-categories/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/expense-categories/${client.value.id}`, client.value)
+                .then(() => {
                     showMessage('Category updated successfully.');
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating category. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating category. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/expense-categories', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/expense-categories', client.value)
+                .then(() => {
                     showMessage('Expense category added successfully.');
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding category. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding category. Please try again.'), 'error');
                 });
         }
 
@@ -168,37 +171,32 @@ const submit_form4 = () => {
     }
 };
 
-const fetchData = () => {
-    modal.value.title = "Add Expense Category";
-    modal.value.button = "Add";
-    
-    axios.get('/api/expense-categories')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching categories:', error);
-        });
-};
-
 const update_row = (item) => {
+    clearErrors();
     client.value.id = item.id;
     client.value.name = item.name;
     modal.value.title = "Update Expense Category";
     modal.value.button = "Update";
 };
 
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
+const openAddModal = () => {
+    clearErrors();
+    client.value.id = "";
+    client.value.name = "";
+    is_submit_form4.value = false;
+    modal.value.title = "Add Expense Category";
+    modal.value.button = "Add";
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
+
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/expense-categories/${item.id}`,
+        itemLabel: item.name,
+        onSuccess: () => { tableRef.value?.refresh(); },
     });
 };
 </script>
@@ -235,7 +233,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 48px;
     height: 48px;
     padding: 12px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px;
     flex-shrink: 0;
@@ -253,7 +251,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;
@@ -306,7 +304,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 6px;
@@ -327,8 +325,34 @@ const showMessage = (msg = '', type = 'success') => {
     stroke-width: 2;
 }
 
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #e7515a, #c53040);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 81, 90, 0.3);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 20px 24px;
@@ -393,7 +417,7 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .modern-input.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -413,7 +437,7 @@ const showMessage = (msg = '', type = 'success') => {
     justify-content: center;
     gap: 8px;
     padding: 14px 32px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;

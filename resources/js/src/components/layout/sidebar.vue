@@ -1,22 +1,23 @@
 <template>
-    <div class="modern-sidebar-wrapper" :class="{ 'sidebar-collapsed': !$store.state.is_show_sidebar }">
+    <div class="modern-sidebar-wrapper" :class="{ 'sidebar-collapsed': !app.is_show_sidebar }">
         <nav class="modern-sidebar">
             <!-- Sidebar Header -->
             <div class="sidebar-header">
                 <div class="sidebar-brand">
                     <router-link to="/" class="brand-link">
-                        <img src="@/assets/images/logo.svg" class="brand-logo" alt="logo" />
-                        <span class="brand-text">Ouma Njoga</span>
+                        <img :src="branding.logo_url || defaultLogo" class="brand-logo" alt="" />
+                        <span class="brand-text" data-testid="brand-name">{{ branding.name }}</span>
                     </router-link>
                 </div>
             </div>
 
             <!-- Sidebar Menu -->
-            <perfect-scrollbar 
-                class="sidebar-menu" 
-                tag="ul" 
+            <!-- UI-15: the scroller adds its own rails (divs), so the list sits inside it rather than being it -->
+            <perfect-scrollbar
+                class="sidebar-menu"
                 :options="{ wheelSpeed: 0.5, swipeEasing: true, minScrollbarLength: 40, maxScrollbarLength: 300, suppressScrollX: true }"
             >
+              <ul class="sidebar-menu-list">
                 <!-- Dashboard -->
                 <li v-if="hasPermission('view-dashboard')" class="menu-item">
                     <router-link to="/" class="menu-link" @click="toggleMobileMenu">
@@ -104,8 +105,18 @@
                     </router-link>
                 </li>
 
+                <!-- FUN-19: Today (hearing day, on a phone) -->
+                <li class="menu-item">
+                    <router-link to="/today" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                        </svg>
+                        <span class="menu-text">Today</span>
+                    </router-link>
+                </li>
+
                 <!-- Hearings -->
-                <li v-if="hasPermission('list-clients')" class="menu-item">
+                <li v-if="hasPermission('list-hearings')" class="menu-item">
                     <router-link to="/hearings" class="menu-link" @click="toggleMobileMenu">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -117,8 +128,41 @@
                     </router-link>
                 </li>
 
+                <!-- Hearings Calendar -->
+                <li v-if="hasPermission('list-hearings')" class="menu-item">
+                    <router-link to="/hearings/calendar" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"></path>
+                        </svg>
+                        <span class="menu-text">Calendar</span>
+                    </router-link>
+                </li>
+
+                <!-- FUN-16: Court diary and calendar sync -->
+                <li v-if="hasPermission('list-hearings')" class="menu-item">
+                    <router-link to="/court-diary" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        <span class="menu-text">Court Diary</span>
+                    </router-link>
+                </li>
+                <li class="menu-item">
+                    <router-link to="/calendar-sync" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        <span class="menu-text">Calendar Sync</span>
+                    </router-link>
+                </li>
+
                 <!-- Hearing Types -->
-                <li v-if="hasPermission('list-clients')" class="menu-item">
+                <li v-if="hasPermission('list-hearings')" class="menu-item">
                     <router-link to="/hearingtypes" class="menu-link" @click="toggleMobileMenu">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
@@ -144,7 +188,7 @@
                 </li>
 
                 <!-- Expenses -->
-                <li v-if="hasPermission('list-invoice')" class="menu-item">
+                <li v-if="hasPermission('list-expenses')" class="menu-item">
                     <router-link to="/expenses" class="menu-link" @click="toggleMobileMenu">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="1" x2="12" y2="23"></line>
@@ -155,7 +199,7 @@
                 </li>
 
                 <!-- Expense Categories -->
-                <li v-if="hasPermission('list-invoice')" class="menu-item">
+                <li v-if="hasPermission('list-expenses')" class="menu-item">
                     <router-link to="/expense-categories" class="menu-link" @click="toggleMobileMenu">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -195,16 +239,157 @@
                         <span class="menu-text">Roles</span>
                     </router-link>
                 </li>
+
+                <!-- FUN-14: Document templates -->
+                <li v-if="hasPermission('list-documents')" class="menu-item">
+                    <router-link to="/document-templates" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 13h6M9 17h3"></path>
+                        </svg>
+                        <span class="menu-text">Templates</span>
+                    </router-link>
+                </li>
+
+                <!-- FUN-17: Partner reports -->
+                <li v-if="hasPermission('view-partner-reports')" class="menu-item">
+                    <router-link to="/reports" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <span class="menu-text">Partner Reports</span>
+                    </router-link>
+                </li>
+
+                <!-- FUN-12: Trust accounting -->
+                <li v-if="(hasPermission('reconcile-trust-accounts') || hasPermission('list-trust-transactions')) && features.entitled('trust_accounting')" class="menu-item">
+                    <router-link to="/trust" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 21h18"></path><path d="M5 21V10l7-5 7 5v11"></path><path d="M9 21v-6h6v6"></path>
+                        </svg>
+                        <span class="menu-text">Trust Accounting</span>
+                    </router-link>
+                </li>
+
+                <!-- FUN-18: Offices & practice groups -->
+                <li v-if="hasPermission('manage-organisation')" class="menu-item">
+                    <router-link to="/settings/organisation" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                            <line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line>
+                            <line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line>
+                            <path d="M10 22v-4h4v4"></path>
+                        </svg>
+                        <span class="menu-text">Offices &amp; Groups</span>
+                    </router-link>
+                </li>
+
+                <!-- FUN-9: Conflicts -->
+                <li v-if="hasPermission('run-conflict-checks')" class="menu-item">
+                    <router-link to="/conflicts" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span class="menu-text">Conflicts</span>
+                    </router-link>
+                </li>
+
+                <!-- PLAT-13: Subscription (plan, trial) -->
+                <li v-if="firmBilling && hasPermission('manage-subscription')" class="menu-item">
+                    <router-link to="/settings/subscription" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                        <span class="menu-text">Subscription</span>
+                    </router-link>
+                </li>
+
+                <!-- UI-13: Branding (logo, colour, letterhead) -->
+                <li v-if="hasPermission('manage-branding')" class="menu-item">
+                    <router-link to="/settings/branding" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="13.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="10.5" r="2.5"></circle><circle cx="8.5" cy="7.5" r="2.5"></circle><circle cx="6.5" cy="12.5" r="2.5"></circle>
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.7-.7 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.7 1.7-1.7h2c3.1 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"></path>
+                        </svg>
+                        <span class="menu-text">Branding</span>
+                    </router-link>
+                </li>
+
+                <!-- DATA-14: Currencies and tax -->
+                <li v-if="hasPermission('manage-finance-settings')" class="menu-item">
+                    <router-link to="/settings/finance" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <span class="menu-text">Currencies and tax</span>
+                    </router-link>
+                </li>
+
+                <!-- SEC-13: Compliance (legal holds, retention, data-subject requests) -->
+                <li v-if="hasPermission('manage-compliance')" class="menu-item">
+                    <router-link to="/settings/compliance" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        <span class="menu-text">Compliance</span>
+                    </router-link>
+                </li>
+
+                <li v-if="hasPermission('manage-ethical-screens')" class="menu-item">
+                    <router-link to="/settings/ethical-walls" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"></line></svg>
+                        <span class="menu-text">Ethical walls</span>
+                    </router-link>
+                </li>
+
+                <li v-if="hasPermission('manage-api-access') && features.entitled('api_access')" class="menu-item">
+                    <router-link to="/settings/api-access" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="8 9 4 12 8 15"></polyline><polyline points="16 9 20 12 16 15"></polyline><line x1="14" y1="5" x2="10" y2="19"></line></svg>
+                        <span class="menu-text">API access</span>
+                    </router-link>
+                </li>
+
+                <!-- PLAT-8: Support access (approve, limit and review platform-staff sessions) -->
+                <li v-if="hasPermission('manage-support-access')" class="menu-item">
+                    <router-link to="/settings/support-access" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                        </svg>
+                        <span class="menu-text">Support access</span>
+                    </router-link>
+                </li>
+
+                <!-- SEC-12: Security (two-factor policy, single sign-on) -->
+                <li v-if="hasPermission('manage-security-settings')" class="menu-item">
+                    <router-link to="/settings/security" class="menu-link" @click="toggleMobileMenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span class="menu-text">Security</span>
+                    </router-link>
+                </li>
+              </ul>
             </perfect-scrollbar>
         </nav>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
+import { onMounted, ref, watch } from 'vue';
+import { useAppStore } from '@/stores/app';
+import { useFeatures, loadFeatures } from '@/composables/use-features';
+import { useRoute } from 'vue-router';
+import { branding } from '@/branding';   // UI-13
+import defaultLogo from '@/assets/images/logo.svg';
 
-const store = useStore();
+const app = useAppStore();
+const features = useFeatures();
+const featRoute = useRoute();
+watch(() => featRoute.path, () => loadFeatures());   // PLAT-1/3: hide what the plan does not include
+// plans and payments are the platform operator's job; the firm only sees them when self-service billing is switched on
+const firmBilling = document.getElementById('app')?.dataset.firmBilling === '1';
 const userPermissions = JSON.parse(localStorage.getItem("permissions") || "[]");
 
 onMounted(() => {
@@ -220,7 +405,7 @@ const hasPermission = (permission) => {
 
 const toggleMobileMenu = () => {
     if (window.innerWidth < 992) {
-        store.commit('toggleSideBar', !store.state.is_show_sidebar);
+        app.toggleSideBar(!app.is_show_sidebar);
     }
 };
 </script>
@@ -268,7 +453,6 @@ const toggleMobileMenu = () => {
             .brand-logo {
                 height: 32px;
                 width: auto;
-                filter: brightness(0) invert(1);
             }
 
             .brand-text {
@@ -284,8 +468,12 @@ const toggleMobileMenu = () => {
 .sidebar-menu {
     flex: 1;
     padding: 1rem 0;
+}
+
+.sidebar-menu-list {
     list-style: none;
     margin: 0;
+    padding: 0;
 }
 
 .menu-item {

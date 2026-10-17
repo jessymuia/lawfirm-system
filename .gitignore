@@ -14,6 +14,39 @@ yarn-error.log
 /.vscode
 public/js/
 public/css
-package-lock.json
-composer.lock
 public/mix-manifest.json
+# ENG-13: Vite output and its dev-server marker
+/public/build
+/public/hot
+
+# ENG-6: backup:run's default local destination (config/backup.php) —
+# these are generated backup artifacts, not source, and the whole point
+# of storing them outside storage/app is that they're a separate,
+# off-server concern in production (BACKUP_DISK=s3) — they don't belong
+# in version control either way.
+/storage/backups
+
+# tests-e2e is its own npm project (Playwright) with its own lockfile
+# and node_modules — keep it out of the main app's ignore-then-track
+# dance entirely.
+/tests-e2e/node_modules
+/tests-e2e/test-results
+/tests-e2e/playwright-report
+
+
+# PLAT-5: real self-host config
+deploy/selfhost/.env
+
+# Scratch output of firm exports and test runs: never commit.
+/storage/app/tmp-exports/
+/storage/logs/*.log
+/build/
+/storage/app/cases/
+/storage/app/tenants/
+/storage/app/portability/
+/storage/framework/schema/
+
+# test and local firm databases (TEN-2): never committed
+/database/tenants/*.sqlite
+/storage/framework/drills
+dump.rdb

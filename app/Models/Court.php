@@ -3,19 +3,35 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Catalog\CatalogRow;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $type
+ * @property int $status
+ * @property int $archive
+ * @property string|null $catalog_key
+ * @property bool $is_system
+ * @property string|null $alias
+ * @property-read CourtType|null $courtType
+ */
 class Court extends DefaultAppModel
 {
-    use HasFactory;
+    use CatalogRow, HasFactory;
+
     protected $fillable = [
-        'id',
         'name',
         'type',
-        'status',
-        'created_by',
         'updated_by',
         'deleted_by',
     ];
+
+    /** @return BelongsTo<CourtType, $this> */
+    public function courtType(): BelongsTo
+    {
+        return $this->belongsTo(CourtType::class, 'type')->withTrashed();
+    }
 }

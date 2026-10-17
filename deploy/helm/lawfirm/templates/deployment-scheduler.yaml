@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lawfirm.fullname" . }}-scheduler
+  labels:
+    {{- include "lawfirm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "lawfirm.selector" . | nindent 6 }}
+      app.kubernetes.io/component: scheduler
+  template:
+    metadata:
+      labels:
+        {{- include "lawfirm.selector" . | nindent 8 }}
+        app.kubernetes.io/component: scheduler
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.persistence.enabled (eq .Values.persistence.accessMode "ReadWriteOnce") }}
+      # A ReadWriteOnce volume attaches to one node: keep this pod beside the web pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  {{- include "lawfirm.selector" . | nindent 18 }}
+                  app.kubernetes.io/component: web
+      {{- end }}
+      containers:
+        - name: scheduler
+          image: {{ include "lawfirm.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["scheduler"]
+          env:
+            {{- include "lawfirm.env" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.scheduler.resources | nindent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage
+      volumes:
+        {{- include "lawfirm.storageVolume" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

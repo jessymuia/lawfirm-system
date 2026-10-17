@@ -24,7 +24,7 @@
                     </svg>
                     <h4>Hearings Management</h4>
                 </div>
-                <button type="button" class="btn-add-hearing" data-bs-toggle="modal" data-bs-target="#client_modal">
+                <button type="button" class="btn-add-hearing" @click="openAddModal" data-bs-toggle="modal" data-bs-target="#client_modal">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
                     </svg>
@@ -35,33 +35,55 @@
 
         <div class="table-container">
             <div class="table-card">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #case="props">
-                        <div class="case-badge">{{ props.row.case }}</div>
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/hearings"
+                    table-id="hearings-list"
+                    :selectable="true"
+                    :columns="[
+                        { key: 'case', label: 'Case' },
+                        { key: 'court', label: 'Court' },
+                        { key: 'hearing_date', label: 'Hearing Date' },
+                        { key: 'hearing_type_name', label: 'Type' },
+                        { key: 'notes', label: 'Notes' },
+                        { key: 'outcome', label: 'Outcome' },
+                    ]"
+                    :sortable-columns="['hearing_date']"
+                    :searchable-columns="['notes', 'outcome']"
+                    empty-title="No hearings yet"
+                    empty-description="Add your first hearing to get started."
+                    empty-action-label="Add New Hearing"
+                    @empty-action="openAddModal"
+                >
+                    <template #bulk-actions="{ selectedIds, clearSelection }">
+                        <button type="button" class="btn-toolbar" @click="bulkDeleteHearings(selectedIds, clearSelection)">Delete Selected</button>
                     </template>
-                    <template #court="props">
+                    <template #cell-case="{ row }">
+                        <a href="javascript:;" class="case-badge cross-link" @click="goToCase(row.case_id)">{{ row.case }}</a>
+                    </template>
+                    <template #cell-court="{ row }">
                         <div class="court-name">
                             <svg class="court-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M3 21h18M4 21V10l8-7 8 7v11M9 21v-6h6v6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            {{ props.row.court }}
+                            {{ row.court }}
                         </div>
                     </template>
-                    <template #hearing_date="props">
+                    <template #cell-hearing_date="{ row }">
                         <div class="date-cell">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                                 <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/>
                             </svg>
-                            {{ props.row.hearing_date }}
+                            {{ row.hearing_date }}
                         </div>
                     </template>
-                    <template #hearing_type_name="props">
-                        <span class="type-badge">{{ props.row.hearing_type_name }}</span>
+                    <template #cell-hearing_type_name="{ row }">
+                        <span class="type-badge">{{ row.hearing_type_name }}</span>
                     </template>
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="actions text-center">
-                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                            <a href="javascript:;" class="cancel me-1" @click="update_row(row)">
                                 <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#client_modal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -70,9 +92,18 @@
                                     Edit
                                 </button>
                             </a>
+                            <a href="javascript:;" class="cancel" @click="delete_row(row)">
+                                <button type="button" class="btn-delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </a>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -91,27 +122,33 @@
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">Case *</label>
-                                        <select v-model="client.case_id" class="modern-select" :class="[is_submit_form4 ? (client.case_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Case</option>
-                                            <option v-for="data in cases" :key="data.id" :value="data.id">{{ data.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please select the case</div>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/casesDropDown"
+                                            v-model="client.case_id"
+                                            :initial-label="client.case_name"
+                                            placeholder="Search cases..."
+                                            :invalid="is_submit_form4 && !client.case_id"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.case_id ? 'display:block' : ''">Please select the case</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">Court *</label>
-                                        <select v-model="client.court_id" class="modern-select" :class="[is_submit_form4 ? (client.court_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Court</option>
-                                            <option v-for="data in courts" :key="data.id" :value="data.id">{{ data.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please select the court</div>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/courts"
+                                            :paginated="true"
+                                            v-model="client.court_id"
+                                            :initial-label="client.court_name"
+                                            placeholder="Search courts..."
+                                            :invalid="is_submit_form4 && !client.court_id"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.court_id ? 'display:block' : ''">Please select the court</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
-                                        <label class="form-label">Hearing Date * (dd/mm/yyyy)</label>
-                                        <input v-model="client.hearing_date" type="text" class="modern-input"
-                                               :class="[is_submit_form4 ? (client.hearing_date ? 'is-valid' : 'is-invalid') : '']"
-                                               v-maska="'##/##/####'" placeholder="__/__/____" />
+                                        <label class="form-label">Hearing Date *</label>
+                                        <AppDatePicker v-model="client.hearing_date"
+                                               :invalid="is_submit_form4 && !client.hearing_date" />
                                         <div class="invalid-feedback">Please provide a valid date</div>
                                     </div>
 
@@ -144,6 +181,28 @@
                                                   placeholder="Enter hearing outcome or decision"></textarea>
                                         <div class="invalid-feedback">Please fill the outcome</div>
                                     </div>
+
+                                    <!-- FUN-16: court diary details (optional) -->
+                                    <div class="col-md-4 form-group">
+                                        <label class="form-label" for="client-time">Time</label>
+                                        <input id="client-time" v-model="client.start_time" type="time" class="modern-input" />
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label class="form-label" for="client-duration">Length (minutes)</label>
+                                        <input id="client-duration" v-model="client.duration_minutes" type="number" min="5" max="720" step="5" class="modern-input" placeholder="60" />
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label class="form-label" for="client-courtroom">Courtroom</label>
+                                        <input id="client-courtroom" v-model="client.courtroom" type="text" maxlength="64" class="modern-input" placeholder="e.g. Court 4" />
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="form-label" for="client-officer">Before (judge / magistrate)</label>
+                                        <input id="client-officer" v-model="client.judicial_officer" type="text" maxlength="120" class="modern-input" />
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="form-label" for="client-efiling">E-filing reference</label>
+                                        <input id="client-efiling" v-model="client.efiling_reference" type="text" maxlength="64" class="modern-input" placeholder="Judiciary e-filing case number" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -157,148 +216,167 @@
 </template>
 
 <script setup>
+import { confirmAction } from '@/composables/use-confirm';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import AppDatePicker from '@/components/ui/app-date-picker.vue';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+import SearchSelect from '@/components/ui/search-select.vue';
+import { useModalDirtyGuard } from '@/composables/use-modal-dirty-guard';
+
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { setErrorsFromResponse, clearErrors } = useFormErrors();
 useMeta({ title: 'Hearings' });
 
-const columns = ref(['case', 'court','hearing_date','hearing_type_name','notes','outcome', 'actions']);
-const items = ref([]);
+const tableRef = ref(null);
+
+const bulkDeleteHearings = (selectedIds, clearSelection) => {
+    if (!selectedIds.length) return;
+
+    confirmAction({
+        title: `Delete ${selectedIds.length} hearing${selectedIds.length > 1 ? 's' : ''}?`,
+        text: 'This will delete every selected hearing. This can be undone by an administrator.',
+        confirmText: 'Yes, delete all',
+        danger: true,
+    }).then((ok) => {
+        if (!ok) return;
+
+        axios.post('/api/v1/hearings/bulk-delete', { ids: selectedIds })
+            .then(() => {
+                showMessage(`Deleted ${selectedIds.length} hearing${selectedIds.length > 1 ? 's' : ''}.`);
+                clearSelection();
+                tableRef.value?.refresh();
+            })
+            .catch((error) => {
+                const message = error.response?.data?.message || 'Error deleting selected hearings. Please try again.';
+                showMessage(message, 'error');
+            });
+    });
+};
 const types = ref([]);
-const cases = ref([]);
-const courts = ref([]);
-const modal = ref({title: "", button: ""});
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['case', 'court','hearing_date','hearing_type_name','notes','outcome'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const modal = ref({title: "Add Hearing", button: "Add"});
 
 onMounted(() => {
-    fetchData();
+    fetchDropdowns();
 });
 
 const router = useRouter();
+
+// UI-9: the case-details route has no id URL param — it reads
+// localStorage (see cases/list-cases.vue's view_row) — so a cross-link
+// to a case follows that same pattern rather than a plain router-link.
+const goToCase = (caseId) => {
+    if (!caseId) return;
+    localStorage.setItem('caseId', caseId);
+    router.push('/view-case');
+};
 const is_submit_form4 = ref(false);
-const client = ref({id: "",case_id:"",court_id : "", hearing_date:"",hearing_type:"", notes:"", outcome:""});
+const client = ref({id: "",case_id:"",case_name:"",court_id : "",court_name:"", hearing_date:"",hearing_type:"", notes:"", outcome:"", start_time: "", duration_minutes: "", courtroom: "", judicial_officer: "", efiling_reference: ""});
+
+// UI-15: closing this modal with unsaved edits now asks for confirmation.
+// Bug fix (found via a real E2E run): clearDirtyGuard() must be called
+// on a successful save, before the modal auto-closes — see
+// list-clients.vue's identical fix for the full explanation.
+const { clear: clearDirtyGuard } = useModalDirtyGuard('client_modal', () => ({ ...client.value }));
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.case_id && client.value.hearing_type && client.value.hearing_date && client.value.court_id) {
         if(client.value.id > 0) {
-            axios.put(`/api/hearings/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/hearings/${client.value.id}`, client.value)
+                .then(() => {
                     showMessage('Hearing updated successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating hearing. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating hearing. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/hearings', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/hearings', client.value)
+                .then(() => {
                     showMessage('Hearing added successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding hearing. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding hearing. Please try again.'), 'error');
                 });
         }
 
         client.value.id = "";
         client.value.case_id = "";
+        client.value.case_name = "";
         client.value.court_id = "";
+        client.value.court_name = "";
         client.value.hearing_date = "";
         client.value.hearing_type = "";
         client.value.notes = "";
         client.value.outcome = "";
+        Object.assign(client.value, { start_time: "", duration_minutes: "", courtroom: "", judicial_officer: "", efiling_reference: "" });
         modal.value.title = "Add Hearing";
         modal.value.button = "Add";
         is_submit_form4.value = false;
     }
 };
 
-const fetchData = () => {
+const openAddModal = () => {
+    client.value = {id: "",case_id:"",case_name:"",court_id : "",court_name:"", hearing_date:"",hearing_type:"", notes:"", outcome:"", start_time: "", duration_minutes: "", courtroom: "", judicial_officer: "", efiling_reference: ""};
     modal.value.title = "Add Hearing";
     modal.value.button = "Add";
-    
-    axios.get('/api/hearings')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching hearings:', error);
-        });
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
 
-    axios.get('/api/hearingtypes')
+const fetchDropdowns = () => {
+    axios.get('/api/v1/hearingtypes/options')
         .then(response => {
             types.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching types:', error);
-        });
-
-    axios.get('/api/casesDropDown')
-        .then(response => {
-            cases.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching cases:', error);
-        });
-
-    axios.get('/api/courts')
-        .then(response => {
-            courts.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching courts:', error);
+            showMessage('Could not load types. Please try refreshing the page.', 'error');
         });
 };
 
 const update_row = (item) => {
     client.value.id = item.id;
     client.value.case_id = item.case_id;
+    client.value.case_name = item.case;
     client.value.court_id = item.court_id;
+    client.value.court_name = item.court;
     client.value.hearing_date = item.hearing_date;
     client.value.notes = item.notes;
     client.value.outcome = item.outcome;
+    client.value.start_time = item.start_time || "";
+    client.value.duration_minutes = item.duration_minutes || "";
+    client.value.courtroom = item.courtroom || "";
+    client.value.judicial_officer = item.judicial_officer || "";
+    client.value.efiling_reference = item.efiling_reference || "";
     client.value.hearing_type = item.hearing_type;
 
     modal.value.title = "Update Hearing";
     modal.value.button = "Update";
 };
 
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/hearings/${item.id}`,
+        itemLabel: `the hearing for ${item.case} on ${item.hearing_date}`,
+        onSuccess: () => { tableRef.value?.refresh(); },
+        restoreUrl: `/api/v1/hearings/${item.id}/restore`,
+        onRestore: () => { tableRef.value?.refresh(); },
     });
 };
 </script>
@@ -307,6 +385,17 @@ const showMessage = (msg = '', type = 'success') => {
 .modern-hearings-page {
     padding: 20px;
     min-height: 100vh;
+}
+
+.cross-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--primary-600);
+        text-decoration: underline;
+    }
 }
 
 .page-header-card {
@@ -335,7 +424,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 48px;
     height: 48px;
     padding: 12px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px;
     flex-shrink: 0;
@@ -353,7 +442,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;
@@ -406,7 +495,7 @@ const showMessage = (msg = '', type = 'success') => {
 .court-icon {
     width: 18px;
     height: 18px;
-    color: #14b8a6;
+    color: var(--primary-600);
     flex-shrink: 0;
     stroke-width: 2;
 }
@@ -422,7 +511,7 @@ const showMessage = (msg = '', type = 'success') => {
 .date-cell svg {
     width: 16px;
     height: 16px;
-    color: #14b8a6;
+    color: var(--primary-600);
     stroke-width: 2;
 }
 
@@ -441,7 +530,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 6px;
@@ -462,8 +551,34 @@ const showMessage = (msg = '', type = 'success') => {
     stroke-width: 2;
 }
 
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #e7515a, #c53040);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 81, 90, 0.3);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 20px 24px;
@@ -542,7 +657,7 @@ textarea.modern-input {
 .modern-input:focus,
 .modern-select:focus {
     outline: none;
-    border-color: #14b8a6;
+    border-color: var(--primary-600);
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
@@ -553,7 +668,7 @@ textarea.modern-input {
 
 .modern-input.is-valid,
 .modern-select.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -573,7 +688,7 @@ textarea.modern-input {
     justify-content: center;
     gap: 8px;
     padding: 14px 32px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;

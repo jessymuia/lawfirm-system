@@ -2,155 +2,228 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Clients\DeleteClients;
+use App\Actions\Clients\RegisterClient;
+use App\Actions\Clients\UpdateClient;
 use App\Constants\ModulePermissions;
+use App\Models\Cases;
 use App\Models\Client;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class ClientController extends Controller
 {
-    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
-    {
-        return response()->json([
-            'success' => $success,
-            'message'=>$message,
-            'data' => $data
-        ], $statusCode);
-    }
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index(): \Illuminate\Http\Response|JsonResponse
+    public function index(): Response|JsonResponse
     {
-        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_CLIENTS))
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_CLIENTS)) {
             abort(403);
-        $clients = Client::all();
-        $clients = $clients->map(function ($row) {
-           return [
-               "id" => $row->id,
-               "name" => $row->name,
-               "phone_number" => $row->phone_number,
-               "extra_phone_number" => $row->extra_phone_number,
-               "address" => $row->address,
-               "advocate" => User::find($row->advocate_id)->name,
-               "advocate_id" => $row->advocate_id
-           ];
-        });
-        return $this->response(true,'success', $clients,200);
+        }
 
-    }
+        $query = Client::with('advocate')->orderBy('id', 'desc');
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $clients = $this->paginatedOrFull(
+            request(),
+            $query,
+            fn ($row) => \App\Http\Resources\V1\ClientResource::make($row)->resolve(),
+            25,
+            ['name', 'phone_number', 'address'],
+            ['name', 'phone_number', 'address']
+        );
+
+        return $this->response(true, 'success', $clients, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function store(Request $request): \Illuminate\Http\Response|JsonResponse
+    public function store(\App\Http\Requests\Client\StoreRequest $request): Response|JsonResponse
     {
-        try {
-            Client::create([
-                'name' => $request->name,
-                'phone_number' => $request->phone_number,
-                'extra_phone_number' => $request->extra_phone_number ?? null,
-                'address' => $request->address,
-                'advocate_id' => $request->advocate,
-                "created_by" => auth()->user()->id
-            ]);
-
-            sendCustomSMS($request->phone_number,"Welcome. You have been registered to the system");
-
-            return $this->index();
-        }catch (\Exception $exception) {
-            Log::error($exception->getMessage().
-                " ".$exception->getLine().
-                " ".$exception->getFile().
-                " ".$exception->getTraceAsString()
-            );
-            return $this->response(false,'An error occurred',[],500);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_CLIENTS)) {
+            abort(403);
         }
+
+        // ENG-9: conflict clearance (FUN-9) and the welcome SMS live in the action; a refused check answers with its reason
+        $client = app(RegisterClient::class)->handle([
+            'name' => $request->name,
+            'phone_number' => $request->phone_number,
+            'extra_phone_number' => $request->extra_phone_number ?? null,
+            'address' => $request->address,
+            'advocate_id' => $request->advocate,
+            'ebilling_client_id' => $request->input('ebilling_client_id'),   // FUN-13
+        ], Auth::user(), $request->integer('conflict_check_id') ?: null);
+
+        return $this->response(true, 'success', \App\Http\Resources\V1\ClientResource::make($client->load('advocate'))->resolve(), 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Client  $client
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Client $client)
+    public function show($id)
     {
-        //
-    }
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_CLIENTS)) {
+            abort(403);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Client  $client
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Client $client)
-    {
-        //
+        // DATA-9: the client page URL carries the public id; the SPA's own calls may still use the integer id.
+        $client = Client::isPublicId($id)
+            ? Client::with('advocate')->wherePublicId($id)->firstOrFail()
+            : Client::with('advocate')->findOrFail($id);
+
+        $cases = Cases::where('client_id', $client->id)
+            ->orderByDesc('id')
+            ->get(['id', 'case_number', 'description', 'lifecycle_status', 'created_at'])
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'case_number' => $c->case_number,
+                'title' => $c->case_number,
+                'description' => $c->description,
+                'status' => $c->lifecycle_status,
+                'created_at' => $c->created_at,
+            ]);
+
+        return $this->response(true, 'success', [
+            'id' => $client->id,
+            'public_id' => $client->publicId(),
+            'name' => $client->name,
+            'phone_number' => $client->phone_number,
+            'extra_phone_number' => $client->extra_phone_number,
+            'address' => $client->address,
+            'advocate' => $client->advocate->name ?? 'Unknown user',
+            'advocate_id' => $client->advocate_id,
+            'created_at' => $client->created_at,
+            'updated_at' => $client->updated_at,
+            'cases' => $cases,
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Client  $client
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\Client\UpdateRequest $request, $id)
     {
-        $client = Client::findOrFail($id);
-        $client->update([
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_CLIENTS)) {
+            abort(403);
+        }
+
+        $client = app(UpdateClient::class)->handle(Client::findOrFail($id), [   // ENG-9
             'name' => $request->name,
             'phone_number' => $request->phone_number,
             'extra_phone_number' => $request->extra_phone_number,
             'address' => $request->address,
             'advocate_id' => $request->advocate,
-            "updated_by" => auth()->user()->id
-        ]);
+        ] + ($request->exists('ebilling_client_id') ? $request->only('ebilling_client_id') : []), Auth::user());   // FUN-13: only when sent
 
-        return $this->index();
+        return $this->response(true, 'success', \App\Http\Resources\V1\ClientResource::make($client->fresh('advocate'))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Client  $client
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Client $client)
+    public function destroy($id)
     {
-        //
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_CLIENTS)) {
+            abort(403);
+        }
+
+        app(DeleteClients::class)->handle([Client::findOrFail($id)], Auth::user());   // ENG-9
+
+        return $this->response(true, 'success', ['id' => (int) $id], 200);
     }
 
-    public function clientsDropDown(): JsonResponse
+    /**
+     * UI-20: bulk delete — see CasesController::destroyMany for the
+     * general pattern this mirrors.
+     */
+    public function destroyMany(\App\Http\Requests\Client\DestroyManyRequest $request)
     {
-        $clients = Client::all();
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_CLIENTS)) {
+            abort(403);
+        }
+
+        // ENG-9: all or nothing, a client under a legal hold (SEC-13) refuses the whole batch
+        $deleted = app(DeleteClients::class)->handle(Client::whereIn('id', $request->input('ids'))->get(), Auth::user());
+
+        return $this->response(true, 'success', ['deleted' => $deleted], 200);
+    }
+
+    /**
+     * UI-24: undo for the toast shown right after destroy().
+     */
+    public function restore($id)
+    {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_CLIENTS)) {
+            abort(403);
+        }
+
+        $client = app(DeleteClients::class)->restore(Client::withTrashed()->findOrFail($id));
+
+        return $this->response(true, 'success', $client, 200);
+    }
+
+    public function clientsDropDown(Request $request): JsonResponse
+    {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_CLIENTS)) {
+            abort(403);
+        }
+
+        // UI-16: typeahead-friendly — filter server-side and cap results
+        // instead of shipping every client to the browser on modal open.
+        $query = Client::query()->orderBy('name');
+
+        if ($request->filled('search')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $request->input('search'));
+            $query->where('name', 'like', '%'.$search.'%');
+        }
+
+        $clients = $query->limit((int) $request->input('per_page', 20))->get();
         $clients = $clients->map(function ($row) {
-           return [
-               "id" => $row->id,
-               "name" => $row->name
-           ];
+            return [
+                'id' => $row->id,
+                'name' => $row->name,
+            ];
         });
 
-        return $this->response(true,'success',$clients,200);
+        return $this->response(true, 'success', $clients, 200);
+    }
+
+    /**
+     * UI-17: debounced existence check the frontend calls while typing,
+     * shown as a non-blocking warning hint before submit — the DB-level
+     * unique constraint on (phone_number, deleted_at) (see DATA-5
+     * migration) remains the actual authority; this is purely a UX
+     * shortcut so the person finds out before they submit, not after.
+     */
+    public function checkPhoneExists(Request $request): JsonResponse
+    {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_CLIENTS)) {
+            abort(403);
+        }
+
+        $phone = $request->input('phone_number');
+        if (! $phone) {
+            return $this->response(true, 'success', ['exists' => false], 200);
+        }
+
+        $query = Client::where('phone_number', $phone);
+        if ($request->filled('exclude_id')) {
+            $query->where('id', '!=', $request->input('exclude_id'));
+        }
+
+        return $this->response(true, 'success', ['exists' => $query->exists()], 200);
     }
 }

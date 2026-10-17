@@ -2,11 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Spatie\Permission\Models\Role;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Client>
+ * @extends Factory<Client>
  */
 class ClientFactory extends Factory
 {
@@ -17,17 +19,30 @@ class ClientFactory extends Factory
      */
     public function definition()
     {
-        // fetch random advocate id from present advocates
-        $advocateIds = User::query()->whereHas('roles', function ($query) {
-            $query->where('name', 'advocate');
-        })->pluck('id')->toArray();
         return [
             //
-            "name" => $this->faker->name(),
-            "phone_number" => $this->faker->phoneNumber(),
-            "extra_phone_number" => $this->faker->phoneNumber(),
-            "address" => $this->faker->address(),
-            "advocate_id" => $this->faker->randomElement($advocateIds),
+            'name' => $this->faker->name(),
+            'phone_number' => $this->faker->unique()->numerify('07########'),
+            'extra_phone_number' => $this->faker->numerify('07########'),
+            'address' => $this->faker->address(),
+            // Self-sufficient: creates its own advocate user if none
+            // exists, instead of erroring against Faker::randomElement([])
+            // in a fresh test database with no seeded advocates.
+            'advocate_id' => function () {
+                $advocateIds = User::query()->whereHas('roles', function ($query) {
+                    $query->where('name', 'advocate');
+                })->pluck('id')->toArray();
+
+                if (! empty($advocateIds)) {
+                    return $this->faker->randomElement($advocateIds);
+                }
+
+                $advocate = User::factory()->create();
+                $role = Role::findOrCreate('advocate', 'web');
+                $advocate->assignRole($role);
+
+                return $advocate->id;
+            },
         ];
     }
 }

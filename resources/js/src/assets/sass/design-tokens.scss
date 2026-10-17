@@ -3,27 +3,31 @@
 // =============================================
 
 :root {
-  // Primary Brand Colors
-  --primary-50: #f0f9ff;
-  --primary-100: #e0f2fe;
-  --primary-200: #bae6fd;
-  --primary-300: #7dd3fc;
-  --primary-400: #38bdf8;
-  --primary-500: #0ea5e9;
-  --primary-600: #0284c7;
-  --primary-700: #0369a1;
-  --primary-800: #075985;
-  --primary-900: #0c4a6e;
+  // Primary Brand Colors: branding.ts palette('#0e6b50'), the firm's colour replaces them at runtime (UI-13); 600 is
+  // readable on white (UI-15)
+  --primary-50: #f3f8f6;
+  --primary-100: #e2edea;
+  --primary-200: #c3dad3;
+  --primary-300: #93bcb0;
+  --primary-400: #629f8d;
+  --primary-500: #32816a;
+  --primary-600: #0e6b50;
+  --primary-700: #0b5842;
+  --primary-800: #094634;
+  --primary-900: #073628;
+
+  // Secondary text (labels, hints, captions): AA on white and the light tints (UI-15); body.dark sets its own
+  --text-muted: #59675f;
 
   // Secondary/Accent Colors
-  --accent-50: #fef3c7;
-  --accent-100: #fde68a;
-  --accent-200: #fcd34d;
-  --accent-300: #fbbf24;
-  --accent-400: #f59e0b;
-  --accent-500: #d97706;
-  --accent-600: #b45309;
-  --accent-700: #92400e;
+  --accent-50: #f5f0e4;
+  --accent-100: #ebe0c5;
+  --accent-200: #d9c38f;
+  --accent-300: #c6a960;
+  --accent-400: #ad8d46;
+  --accent-500: #92743a;
+  --accent-600: #765d30;
+  --accent-700: #5c4827;
 
   // Success Colors
   --success-50: #f0fdf4;
@@ -46,32 +50,64 @@
   --error-700: #b91c1c;
 
   // Neutral Colors (Light Mode)
-  --neutral-50: #fafafa;
-  --neutral-100: #f4f4f5;
-  --neutral-200: #e4e4e7;
-  --neutral-300: #d4d4d8;
-  --neutral-400: #a1a1aa;
-  --neutral-500: #71717a;
-  --neutral-600: #52525b;
-  --neutral-700: #3f3f46;
-  --neutral-800: #27272a;
-  --neutral-900: #18181b;
+  --neutral-50: #f8f8f4;
+  --neutral-100: #f0f1eb;
+  --neutral-200: #e3e6dd;
+  --neutral-300: #cdd3c8;
+  --neutral-400: #a3ada1;
+  --neutral-500: #748176;
+  --neutral-600: #59665d;
+  --neutral-700: #3f4c44;
+  --neutral-800: #29372f;
+  --neutral-900: #192820;
 
   // Semantic Colors
-  --background: #ffffff;
-  --surface: #ffffff;
-  --card-bg: #ffffff;
-  --sidebar-bg: #1e293b;
-  --header-bg: #ffffff;
+  --background: #f4f5f0;
+  --surface: #fbfbf8;
+  --card-bg: #fffefa;
+  --sidebar-bg: #13392d;
+  --header-bg: #fbfbf8;
   
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-  --text-tertiary: #a1a1aa;
+  --text-primary: #192820;
+  --text-secondary: #3f4c44;
+  // UI-10: WCAG AA contrast. The previous #a1a1aa measured ~2.6:1 against
+  // this background, failing AA even at large-text size (needs ≥3:1, and
+  // body text needs ≥4.5:1). #6b7280 measures ~4.83:1 — passes AA for
+  // normal-size body text while staying visibly lighter than
+  // --text-secondary.
+  --text-tertiary: #59675f;
   --text-inverse: #ffffff;
 
-  --border-color: #e4e4e7;
-  --border-light: #f4f4f5;
-  --divider: #e4e4e7;
+  --border-color: #d9ded5;
+  --border-light: #e8ebe4;
+  --divider: #d9ded5;
+
+  // Shared aliases used by the shell and controls. Keep these tied to the
+  // semantic tokens so the application has one palette source of truth.
+  --app-bg: var(--background);
+  --ink: var(--text-primary);
+  --brass: var(--accent-400);
+  --ui-radius: var(--radius-md);
+  --ui-radius-lg: var(--radius-lg);
+
+  // UI-2/Phase 5 prep: semantic status colors — these were already the
+  // de-facto standard across the app (e.g. #e7515a for every delete
+  // confirmation and destructive action), just never exposed as a
+  // reusable token, so every usage hardcoded the same hex independently
+  // (see scripts/audit-hardcoded-colors.js's report — these five values
+  // alone account for over 170 of the ~660 raw hex literals found).
+  // Values are UNCHANGED from current usage; this only names them, it
+  // does not restyle anything. #ef4444 is kept as a distinct token
+  // rather than silently merged into --color-danger even though both
+  // read as "red" — reconciling that into a single red is a real visual
+  // change that belongs in the actual branding pass (5.1), not a
+  // same-value token extraction like this one.
+  --color-danger: #e7515a;
+  --color-danger-alt: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #92743a;
+  --color-teal: #14b8a6;
+  --color-orange: #f97316;
 
   // Shadows
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -99,11 +135,12 @@
   --radius-full: 9999px;
 
   // Typography
-  --font-sans: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Public Sans', 'Segoe UI', sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-mono: 'Fira Code', 'Monaco', 'Consolas', monospace;
 
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.9375rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.25rem;
@@ -137,31 +174,38 @@
 
 // Dark Mode Colors
 body.dark {
-  --background: #0f172a;
-  --surface: #1e293b;
-  --card-bg: #1e293b;
-  --sidebar-bg: #0f172a;
-  --header-bg: #1e293b;
+  --text-muted: #b0bcb4;
+  --background: #131c18;
+  --surface: #1b2721;
+  --card-bg: #202d26;
+  --sidebar-bg: #101a15;
+  --header-bg: #1b2721;
   
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #64748b;
-  --text-inverse: #0f172a;
+  --text-primary: #edf1e9;
+  --text-secondary: #c4cec5;
+  // UI-10: the previous #64748b measured ~3.75:1 against this background
+  // — passes AA for large text only, fails for normal body text (needs
+  // ≥4.5:1). #94a3b8 measures ~6.97:1.
+  --text-tertiary: #aab8ac;
+  --text-inverse: #101a15;
 
-  --border-color: #334155;
-  --border-light: #1e293b;
-  --divider: #334155;
+  --border-color: #39483e;
+  --border-light: #2b3930;
+  --divider: #39483e;
+  --app-bg: var(--background);
+  --ink: var(--text-primary);
+  --brass: var(--accent-400);
 
-  --neutral-50: #1e293b;
-  --neutral-100: #334155;
-  --neutral-200: #475569;
-  --neutral-300: #64748b;
-  --neutral-400: #94a3b8;
-  --neutral-500: #cbd5e1;
-  --neutral-600: #e2e8f0;
-  --neutral-700: #f1f5f9;
-  --neutral-800: #f8fafc;
-  --neutral-900: #ffffff;
+  --neutral-50: #202d26;
+  --neutral-100: #29372f;
+  --neutral-200: #39483e;
+  --neutral-300: #536257;
+  --neutral-400: #7d8c7f;
+  --neutral-500: #aab8ac;
+  --neutral-600: #c4cec5;
+  --neutral-700: #dce4dc;
+  --neutral-800: #edf1e9;
+  --neutral-900: #f7f8f3;
 
   // Adjusted shadows for dark mode
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
@@ -257,6 +301,32 @@ body.dark .glass {
 
 .animate-slide-in {
   animation: slideIn var(--transition-base) ease-out;
+}
+
+/*
+ * UI-34: prefers-reduced-motion — every transition/animation in this
+ * kit reads from --transition-fast/--transition-base rather than
+ * hardcoding durations (see the two vars above), so overriding just
+ * those two here neutralizes motion app-wide without hunting down
+ * every individual `transition:` declaration. The 0.01ms (not 0s) is
+ * deliberate: some browsers/testing tools treat a literal 0-duration
+ * transition as "no transition" and skip firing its transitionend
+ * event, which can leave JS that waits on that event hanging.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0.01ms;
+    --transition-base: 0.01ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 

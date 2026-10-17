@@ -1,0 +1,8 @@
+Law Management System {{ .Chart.AppVersion }} installed as release "{{ .Release.Name }}".
+
+The migrate hook has already run app:install. If this was the first install and you did not set
+secrets.installAdminPassword, read the generated admin password ONCE from the hook logs:
+  kubectl logs job/{{ include "lawfirm.fullname" . }}-migrate-{{ .Release.Revision }}
+(The finished job is kept for 24 hours. Better: set secrets.installAdminPassword and change it after first login.)
+
+Open: {{ .Values.app.url }}

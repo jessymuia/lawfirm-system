@@ -26,3 +26,9 @@
 
 /*custom css*/
 @import 'style.scss';
+
+/*one visual language: sizes, cards, controls, tables (loaded last)*/
+@import 'ui-polish.scss';
+
+/*print rules*/
+@import 'print.scss';

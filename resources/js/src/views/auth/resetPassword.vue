@@ -7,7 +7,7 @@
                         <div class="form-content">
                             <h1 class="">Password Recovery</h1>
                             <p class="signup-link">Enter your email and instructions will sent to you!</p>
-                            <form class="text-start">
+                            <form class="text-start" @submit.prevent="passRecFunc">
                                 <div class="form">
                                     <div id="password-field" class="field-wrapper input">
                                         <svg
@@ -25,7 +25,15 @@
                                             <circle cx="12" cy="12" r="4"></circle>
                                             <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
                                         </svg>
-                                        <input v-model="client.password" type="password" class="form-control" placeholder="Password" />
+                                        <input
+                                            v-model="client.password"
+                                            type="password"
+                                            class="form-control"
+                                            :class="{ 'is-invalid': hasError('password') }"
+                                            placeholder="Password"
+                                            @input="clearErrors('password')"
+                                        />
+                                        <div class="invalid-feedback" v-if="hasError('password')">{{ fieldError('password') }}</div>
                                     </div>
                                     <div id="cpassowrd-field" class="field-wrapper input">
                                         <svg
@@ -43,11 +51,19 @@
                                             <circle cx="12" cy="12" r="4"></circle>
                                             <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
                                         </svg>
-                                        <input v-model="client.password_confirmation" type="password" class="form-control" placeholder="Confirm Password" />
+                                        <input
+                                            v-model="client.password_confirmation"
+                                            type="password"
+                                            class="form-control"
+                                            :class="{ 'is-invalid': hasError('password_confirmation') }"
+                                            placeholder="Confirm Password"
+                                            @input="clearErrors('password_confirmation')"
+                                        />
+                                        <div class="invalid-feedback" v-if="hasError('password_confirmation')">{{ fieldError('password_confirmation') }}</div>
                                     </div>
                                     <div class="d-sm-flex justify-content-between">
                                         <div class="field-wrapper">
-                                            <button @click="passRecFunc()" type="button" class="btn btn-primary">Reset</button>
+                                            <button type="submit" class="btn btn-primary">Reset</button>
                                         </div>
                                         <div class="field-wrapper">
                                             <router-link to="/login">Go To Login</router-link>
@@ -75,11 +91,15 @@
 import '@/assets/sass/authentication/auth.scss';
 
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useFormErrors } from '@/composables/use-form-errors';
 import axios from "../../api";
-import {ref, onMounted} from "vue";
+import {ref} from "vue";
 import { useRoute, useRouter } from 'vue-router';
 useMeta({ title: 'Password Recovery Cover' });
 
+const { showMessage } = useToast();
+const { errors, hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
 const route = useRoute();
 const router = useRouter();
 
@@ -87,36 +107,29 @@ const is_submit_form4 = ref(false);
 const client = ref({token: "", password: "", password_confirmation: ""});
 const passRecFunc = () => {
     is_submit_form4.value = true;
+    clearErrors();
     client.value.token = route.params.token;
-    if (client.value.token && (client.value.password === client.value.password_confirmation)) {
-        axios.post('/api/password-reset', client.value) // Assuming your API endpoint for client creation is /api/clients
-            .then(response => {
-                showMessage(response.data.message);
-                router.push("/login");
-            })
-            .catch(error => {
-                showMessage('Error recovering password. Please check the token in email.');
-                console.error(error);
-            });
+
+    if (!client.value.password || !client.value.password_confirmation) {
+        return;
     }
+
+    // UI-6: this used to silently do nothing at all on a mismatch — no
+    // toast, no inline error, nothing — since the whole request was
+    // gated behind this comparison. Surfacing it as a real field error
+    // means a mismatch is never a dead click.
+    if (client.value.password !== client.value.password_confirmation) {
+        errors.password_confirmation = ['Passwords do not match.'];
+        return;
+    }
+
+    axios.post('/api/v1/password-reset', client.value)
+        .then(response => {
+            showMessage(response.data.message);
+            router.push("/login");
+        })
+        .catch(error => {
+            showMessage(setErrorsFromResponse(error, 'Error resetting password. Please check the token in your email.'), 'error');
+        });
 }
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
-    });
-};
-
-onMounted(() => {
-});
-
-
 </script>

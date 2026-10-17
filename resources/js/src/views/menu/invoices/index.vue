@@ -24,56 +24,89 @@
                     </svg>
                     <h4>Invoices Management</h4>
                 </div>
-                <button type="button" class="btn-add-invoice" data-bs-toggle="modal" data-bs-target="#client_modal">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    Add New Invoice
-                </button>
+                <div class="header-button-group">
+                    <button type="button" class="btn-export" @click="exportCsv" :disabled="exporting">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ exporting ? 'Exporting...' : 'Export CSV' }}
+                    </button>
+                    <button type="button" class="btn-add-invoice" @click="openAddModal" data-bs-toggle="modal" data-bs-target="#client_modal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Add New Invoice
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="table-container">
             <div class="table-card">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #case="props">
-                        <div class="case-badge">{{ props.row.case }}</div>
+                <DataTable
+:viewable="false"
+                    ref="tableRef"
+                    fetch-url="/api/v1/invoices"
+                    table-id="invoices-list"
+                    :selectable="true"
+                    :columns="[
+                        { key: 'invoice_number', label: 'Invoice #' },
+                        { key: 'case', label: 'Case' },
+                        { key: 'client', label: 'Client' },
+                        { key: 'invoice_date', label: 'Invoice Date' },
+                        { key: 'invoice_due_date', label: 'Due Date' },
+                        { key: 'status', label: 'Status' },
+                    ]"
+                    :sortable-columns="['invoice_date', 'invoice_due_date']"
+                    :searchable-columns="['invoice_number']"
+                    :filter-params="['payment_status', 'workflow_status']"
+                    empty-title="No invoices yet"
+                    empty-description="Add your first invoice to get started."
+                    empty-action-label="Add New Invoice"
+                    @empty-action="openAddModal"
+                >
+                    <template #bulk-actions="{ selectedIds, clearSelection }">
+                        <button type="button" class="btn-toolbar" @click="bulkDeleteInvoices(selectedIds, clearSelection)">Delete Selected</button>
+                        <button type="button" class="btn-toolbar" @click="bulkExportInvoices(selectedIds)">Export Selected</button>
                     </template>
-                    <template #client="props">
-                        <div class="client-name">
+                    <template #cell-case="{ row }">
+                        <a href="javascript:;" class="case-badge cross-link" @click="goToCase(row.case_id)">{{ row.case }}</a>
+                    </template>
+                    <template #cell-client="{ row }">
+                        <router-link :to="{ name: 'client-details', params: { id: row.client_public_id || row.client_id } }" class="client-name cross-link">
                             <svg class="client-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <circle cx="12" cy="7" r="4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            {{ props.row.client }}
-                        </div>
+                            {{ row.client }}
+                        </router-link>
                     </template>
-                    <template #invoice_date="props">
+                    <template #cell-invoice_date="{ row }">
                         <div class="date-cell">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                                 <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/>
                             </svg>
-                            {{ props.row.invoice_date }}
+                            {{ row.invoice_date }}
                         </div>
                     </template>
-                    <template #invoice_due_date="props">
+                    <template #cell-invoice_due_date="{ row }">
                         <div class="due-date-cell">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <circle cx="12" cy="12" r="10" stroke-width="2"/>
                                 <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round"/>
                             </svg>
-                            {{ props.row.invoice_due_date }}
+                            {{ row.invoice_due_date }}
                         </div>
                     </template>
-                    <template #status="props">
-                        <span :class="['status-badge', `status-${props.row.status?.toLowerCase()}`]">
-                            {{ props.row.status || 'Pending' }}
-                        </span>
+                    <template #cell-status="{ row }">
+                        <InvoiceStatus :payment-status="row.payment_status" :status="row.status" :due-date="row.invoice_due_date" />
                     </template>
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="actions text-center">
-                            <a v-if="props.row.delete" href="javascript:" class="cancel me-1" @click="view_row(props.row.id)">
+                            <a v-if="row.delete" href="javascript:" class="cancel me-1" @click="view_row(row.id)">
                                 <button type="button" class="btn-items">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -81,7 +114,7 @@
                                     Items
                                 </button>
                             </a>
-                            <a v-if="props.row.delete" href="javascript:" class="cancel me-1" @click="update_row(props.row)">
+                            <a v-if="row.delete" href="javascript:" class="cancel me-1" @click="update_row(row)">
                                 <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#client_modal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -90,7 +123,7 @@
                                     Edit
                                 </button>
                             </a>
-                            <a v-if="props.row.delete" href="javascript:" class="cancel" @click="submit_form6(props.row)">
+                            <a v-if="row.delete" href="javascript:" class="cancel" @click="submit_form6(row)">
                                 <button type="button" class="btn-delete">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -100,7 +133,7 @@
                             </a>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -119,35 +152,48 @@
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">Case *</label>
-                                        <select v-model="client.case_id" class="modern-select" :class="[is_submit_form4 ? (client.case_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Case</option>
-                                            <option v-for="data in cases" :key="data.id" :value="data.id">{{ data.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please select the case</div>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/casesDropDown"
+                                            v-model="client.case_id"
+                                            :initial-label="client.case_name"
+                                            placeholder="Search cases..."
+                                            :invalid="is_submit_form4 && !client.case_id"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.case_id ? 'display:block' : ''">Please select the case</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">Client *</label>
-                                        <select v-model="client.client_id" class="modern-select" :class="[is_submit_form4 ? (client.client_id ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select Client</option>
-                                            <option v-for="data in clients" :key="data.id" :value="data.id">{{ data.name }}</option>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/clientsDropDown"
+                                            v-model="client.client_id"
+                                            :initial-label="client.client_name"
+                                            placeholder="Search clients..."
+                                            :invalid="is_submit_form4 && !client.client_id"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.client_id ? 'display:block' : ''">Please select the client</div>
+                                    </div>
+
+                                    <!-- DATA-14: shown when the firm invoices in more than one currency -->
+                                    <div v-if="currencies.length > 1" class="col-md-6 form-group">
+                                        <label class="form-label" for="invoice-currency">Currency</label>
+                                        <select id="invoice-currency" v-model="client.currency" class="form-control">
+                                            <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
                                         </select>
-                                        <div class="invalid-feedback">Please select the client</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
-                                        <label class="form-label">Invoice Date * (dd/mm/yyyy)</label>
-                                        <input v-model="client.invoice_date" type="text" class="modern-input"
-                                               :class="[is_submit_form4 ? (client.invoice_date ? 'is-valid' : 'is-invalid') : '']"
-                                               v-maska="'##/##/####'" placeholder="__/__/____" />
+                                        <label class="form-label">Invoice Date *</label>
+                                        <AppDatePicker v-model="client.invoice_date"
+                                               :invalid="is_submit_form4 && !client.invoice_date" />
                                         <div class="invalid-feedback">Please provide a valid date</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
-                                        <label class="form-label">Due Date * (dd/mm/yyyy)</label>
-                                        <input v-model="client.invoice_due_date" type="text" class="modern-input"
-                                               :class="[is_submit_form4 ? (client.invoice_due_date ? 'is-valid' : 'is-invalid') : '']"
-                                               v-maska="'##/##/####'" placeholder="__/__/____" />
+                                        <label class="form-label">Due Date *</label>
+                                        <AppDatePicker v-model="client.invoice_due_date"
+                                               :invalid="is_submit_form4 && !client.invoice_due_date"
+                                               :min-date="client.invoice_date || null" />
                                         <div class="invalid-feedback">Please provide a valid due date</div>
                                     </div>
                                 </div>
@@ -163,78 +209,149 @@
 </template>
 
 <script setup>
+import { confirmAction } from '@/composables/use-confirm';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import AppDatePicker from '@/components/ui/app-date-picker.vue';
+import InvoiceStatus from '@/components/ui/invoice-status.vue';
+import { useFileDownload } from '@/composables/use-file-download';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+import SearchSelect from '@/components/ui/search-select.vue';
+import { useModalDirtyGuard } from '@/composables/use-modal-dirty-guard';
+
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { setErrorsFromResponse, clearErrors } = useFormErrors();
+const { downloadFile } = useFileDownload();
+const exporting = ref(false);
+
+const exportCsv = () => {
+    exporting.value = true;
+    downloadFile('/api/v1/export/invoices', `invoices-${new Date().toISOString().slice(0, 10)}.csv`)
+        .finally(() => { exporting.value = false; });
+};
+
+const openAddModal = () => {
+    clearErrors();
+    client.value = { id: "", case_id: "", case_name: "", client_id: "", client_name: "", invoice_date: "", invoice_due_date: "", currency: baseCurrency.value };
+    is_submit_form4.value = false;
+    modal.value.title = "Add Invoice";
+    modal.value.button = "Add";
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
 useMeta({ title: 'Invoices' });
 
-const columns = ref(['case', 'client','invoice_date','invoice_due_date','status','actions']);
-const items = ref([]);
-const cases = ref([]);
-const clients = ref([]);
-const modal = ref({title: "", button: ""});
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['case', 'client','invoice_date','invoice_due_date'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const tableRef = ref(null);
+
+const bulkDeleteInvoices = (selectedIds, clearSelection) => {
+    if (!selectedIds.length) return;
+
+    confirmAction({
+        title: `Delete ${selectedIds.length} invoice${selectedIds.length > 1 ? 's' : ''}?`,
+        text: 'Only invoices you have rights to delete (your own drafts, or any if you\'re an admin) will actually be removed.',
+        confirmText: 'Yes, delete all',
+        danger: true,
+    }).then((ok) => {
+        if (!ok) return;
+
+        axios.post('/api/v1/invoices/bulk-delete', { ids: selectedIds })
+            .then((response) => {
+                const { deleted, skipped } = response.data.data;
+                if (skipped.length) {
+                    showMessage(`Deleted ${deleted.length}. Skipped ${skipped.length} you don't have rights to delete.`, 'warning');
+                } else {
+                    showMessage(`Deleted ${deleted.length} invoice${deleted.length > 1 ? 's' : ''}.`);
+                }
+                clearSelection();
+                tableRef.value?.refresh();
+            })
+            .catch((error) => {
+                const message = error.response?.data?.message || 'Error deleting selected invoices. Please try again.';
+                showMessage(message, 'error');
+            });
+    });
+};
+
+const bulkExportInvoices = (selectedIds) => {
+    if (!selectedIds.length) return;
+    downloadFile('/api/v1/export/invoices', `invoices-selected-${new Date().toISOString().slice(0, 10)}.csv`, { ids: selectedIds.join(',') });
+};
+const modal = ref({title: "Add Invoice", button: "Add"});
 
 onMounted(() => {
-    fetchData();
+    axios.get('/api/v1/finance/settings').then(({ data }) => {
+        currencies.value = data.data.invoice_currencies;
+        baseCurrency.value = data.data.base_currency;
+        if (!client.value.id) client.value.currency = baseCurrency.value;
+    }).catch(() => {});
 });
 
 const router = useRouter();
+
+// UI-9: the case-details route has no id URL param — it reads
+// localStorage (see cases/list-cases.vue's view_row) — so a cross-link
+// to a case follows that same pattern rather than a plain router-link.
+const goToCase = (caseId) => {
+    if (!caseId) return;
+    localStorage.setItem('caseId', caseId);
+    router.push('/view-case');
+};
 const is_submit_form4 = ref(false);
-const client = ref({id: "",case_id:"",client_id:"",invoice_date:"",invoice_due_date:""});
+const client = ref({id: "",case_id:"",case_name:"",client_id:"",client_name:"",invoice_date:"",invoice_due_date:"",currency:""});
+// DATA-14: the currencies the firm invoices in (its base currency first)
+const currencies = ref([]);
+const baseCurrency = ref('');
+
+// UI-15: closing this modal with unsaved edits now asks for confirmation.
+// Bug fix (found via a real E2E run): clearDirtyGuard() must be called
+// on a successful save, before the modal auto-closes — see
+// list-clients.vue's identical fix for the full explanation.
+const { clear: clearDirtyGuard } = useModalDirtyGuard('client_modal', () => ({ ...client.value }));
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.case_id && client.value.invoice_date && client.value.invoice_due_date && client.value.client_id) {
         if(client.value.id > 0) {
-            axios.put(`/api/invoices/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/invoices/${client.value.id}`, client.value)
+                .then(() => {
                     showMessage('Invoice updated successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating invoice. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating invoice. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/invoices', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/invoices', client.value)
+                .then(() => {
                     showMessage('Invoice added successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding invoice. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding invoice. Please try again.'), 'error');
                 });
         }
 
         client.value.id = "";
         client.value.client_id = "";
+        client.value.client_name = "";
         client.value.case_id = "";
+        client.value.case_name = "";
         client.value.invoice_date = "";
         client.value.invoice_due_date = "";
+        client.value.currency = baseCurrency.value;
         modal.value.title = "Add Invoice";
         modal.value.button = "Add";
         is_submit_form4.value = false;
@@ -242,56 +359,23 @@ const submit_form4 = () => {
 };
 
 const submit_form6 = (item) => {
-    if (confirm('Are you sure you want to delete this invoice?')) {
-        if (item) {
-            axios.delete(`/api/invoices/${item.id}`)
-                .then(response => {
-                    items.value = response.data.data;
-                    showMessage('Invoice deleted successfully.');
-                })
-                .catch(error => {
-                    showMessage('Error deleting the invoice. Please try again.');
-                    console.error(error);
-                });
-        }
-    }
-};
-
-const fetchData = () => {
-    modal.value.title = "Add Invoice";
-    modal.value.button = "Add";
-    
-    axios.get('/api/invoices')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching invoices:', error);
-        });
-
-    axios.get('/api/casesDropDown')
-        .then(response => {
-            cases.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching cases:', error);
-        });
-
-    axios.get('/api/clientsDropDown')
-        .then(response => {
-            clients.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching clients:', error);
-        });
+    if (!item) return;
+    confirmDelete({
+        url: `/api/v1/invoices/${item.id}`,
+        itemLabel: `invoice ${item.invoice_number || ''}`.trim(),
+        onSuccess: () => { tableRef.value?.refresh(); },
+    });
 };
 
 const update_row = (item) => {
     client.value.id = item.id;
     client.value.client_id = item.client_id;
+    client.value.client_name = item.client;
     client.value.case_id = item.case_id;
+    client.value.case_name = item.case;
     client.value.invoice_date = item.invoice_date;
     client.value.invoice_due_date = item.invoice_due_date;
+    client.value.currency = item.currency;
 
     modal.value.title = "Update Invoice";
     modal.value.button = "Update";
@@ -301,26 +385,23 @@ const view_row = (itemId) => {
     localStorage.setItem("invoiceId", itemId);
     router.push("/view-invoice");
 };
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
-    });
-};
 </script>
 
 <style lang="scss" scoped>
 .modern-invoices-page {
     padding: 20px;
     min-height: 100vh;
+}
+
+.cross-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--primary-600);
+        text-decoration: underline;
+    }
 }
 
 .page-header-card {
@@ -349,7 +430,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 48px;
     height: 48px;
     padding: 12px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border-radius: 12px;
     flex-shrink: 0;
@@ -362,24 +443,53 @@ const showMessage = (msg = '', type = 'success') => {
     color: #1f2937;
 }
 
+.header-button-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: white;
+    color: var(--primary-600);
+    border: 1.5px solid var(--primary-600);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(2, 132, 199, 0.08);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
 .btn-add-invoice {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 .btn-add-invoice:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
 }
 
 .btn-add-invoice svg {
@@ -403,7 +513,7 @@ const showMessage = (msg = '', type = 'success') => {
     display: inline-block;
     padding: 6px 12px;
     background: #e0e7ff;
-    color: #3730a3;
+    color: var(--primary-800);
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
@@ -420,7 +530,7 @@ const showMessage = (msg = '', type = 'success') => {
 .client-icon {
     width: 18px;
     height: 18px;
-    color: #6366f1;
+    color: var(--primary-600);
     flex-shrink: 0;
     stroke-width: 2;
 }
@@ -436,7 +546,7 @@ const showMessage = (msg = '', type = 'success') => {
 .date-cell svg {
     width: 16px;
     height: 16px;
-    color: #6366f1;
+    color: var(--primary-600);
     stroke-width: 2;
 }
 
@@ -483,7 +593,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 6px;
@@ -495,7 +605,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-items:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 .btn-items svg {
@@ -509,7 +619,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 6px;
@@ -557,7 +667,7 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 20px 24px;
@@ -630,8 +740,8 @@ const showMessage = (msg = '', type = 'success') => {
 .modern-input:focus,
 .modern-select:focus {
     outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--primary-600);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
 }
 
 .modern-input.is-invalid,
@@ -641,7 +751,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .modern-input.is-valid,
 .modern-select.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -661,7 +771,7 @@ const showMessage = (msg = '', type = 'success') => {
     justify-content: center;
     gap: 8px;
     padding: 14px 32px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
@@ -669,13 +779,13 @@ const showMessage = (msg = '', type = 'success') => {
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
     align-self: flex-start;
 }
 
 .btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
 }
 
 @media (max-width: 768px) {

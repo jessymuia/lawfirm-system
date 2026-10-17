@@ -45,7 +45,7 @@
     padding: 9px 20px;
 
     svg {
-        color: #888ea8;
+        color: var(--text-muted);
         margin-right: 6px;
         vertical-align: text-top;
         width: 20px;
@@ -287,7 +287,7 @@
         width: 100%;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
-        border-bottom: 3px solid #888ea8;
+        border-bottom: 3px solid var(--text-muted);
 
         .note-title {
             font-size: 16px;

@@ -25,6 +25,7 @@
                 <button 
                     type="button" 
                     class="btn-primary-modern" 
+                    @click="openAddModal"
                     data-bs-toggle="modal" 
                     data-bs-target="#client_modal"
                 >
@@ -40,42 +41,71 @@
         <!-- Table Card -->
         <div class="modern-table-card">
             <div class="table-wrapper">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #name="props">
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/users"
+                    :columns="[
+                        { key: 'name', label: 'Name' },
+                        { key: 'email', label: 'Email' },
+                        { key: 'phone_number', label: 'Phone' },
+                        { key: 'department', label: 'Department' },
+                        { key: 'hire_date', label: 'Hire Date' },
+                        { key: 'role', label: 'Role' },
+                    ]"
+                    :sortable-columns="['name', 'email', 'phone_number', 'department', 'hire_date']"
+                    :searchable-columns="['name', 'email', 'phone_number', 'department']"
+                    empty-title="No users yet"
+                    empty-description="Add your first user to get started."
+                    empty-action-label="Add User"
+                    @empty-action="openAddModal"
+                >
+                    <template #cell-name="{ row }">
                         <div class="user-cell">
                             <div class="user-avatar">
-                                {{ props.row.name.charAt(0).toUpperCase() }}
+                                {{ row.name.charAt(0).toUpperCase() }}
                             </div>
-                            <span class="user-name">{{ props.row.name }}</span>
+                            <span class="user-name">{{ row.name }}</span>
                         </div>
                     </template>
                     
-                    <template #role="props">
-                        <span class="role-badge">{{ props.row.role }}</span>
+                    <template #cell-role="{ row }">
+                        <span class="role-badge">{{ row.role }}</span>
                     </template>
                     
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="action-buttons">
                             <button 
                                 class="btn-action btn-edit" 
-                                @click="update_row(props.row)"
+                                @click="update_row(row)"
                                 data-bs-toggle="modal" 
                                 data-bs-target="#client_modal"
                                 title="Edit user"
+                                aria-label="Edit user"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
                             </button>
+                            <button
+                                class="btn-action btn-delete"
+                                @click="delete_row(row)"
+                                title="Deactivate user"
+                                aria-label="Deactivate user"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                </svg>
+                            </button>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
         <!-- Modern Modal -->
-        <div class="modal fade" id="client_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="client_modal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content modern-modal">
                     <div class="modal-header">
@@ -159,16 +189,34 @@
                                 <!-- Hire Date -->
                                 <div class="form-group-modern">
                                     <label for="hire_date">Hire Date <span class="required">*</span></label>
-                                    <input 
-                                        v-model="client.hire_date" 
-                                        type="text" 
-                                        id="hire_date" 
-                                        class="form-control-modern"
-                                        :class="[is_submit_form4 ? (client.hire_date ? 'is-valid' : 'is-invalid') : '']"
-                                        v-maska="'##/##/####'" 
-                                        placeholder="DD/MM/YYYY" 
-                                    />
+                                    <AppDatePicker v-model="client.hire_date"
+                                        :invalid="is_submit_form4 && !client.hire_date" />
                                     <div class="error-message" v-if="is_submit_form4 && !client.hire_date">Hire date is required</div>
+                                </div>
+
+                                <!-- FUN-18: office and practice group (shown once the firm has set them up) -->
+                                <div v-if="offices.length" class="form-group-modern">
+                                    <label for="office_id">Office</label>
+                                    <select id="office_id" v-model="client.office_id" class="form-control">
+                                        <option :value="null">None</option>
+                                        <option v-for="o in offices" :key="o.id" :value="o.id">{{ o.name }}</option>
+                                    </select>
+                                </div>
+                                <div v-if="practiceGroups.length" class="form-group-modern">
+                                    <label for="practice_group_id">Practice group</label>
+                                    <select id="practice_group_id" v-model="client.practice_group_id" class="form-control">
+                                        <option :value="null">None</option>
+                                        <option v-for="g in practiceGroups" :key="g.id" :value="g.id">{{ g.name }}</option>
+                                    </select>
+                                </div>
+
+                                <!-- FUN-13: how this person appears on LEDES e-bills -->
+                                <div class="form-group-modern">
+                                    <label for="timekeeper_class">Timekeeper classification</label>
+                                    <select id="timekeeper_class" v-model="client.timekeeper_class" class="form-control">
+                                        <option :value="null">Not a timekeeper / not set</option>
+                                        <option v-for="k in timekeeperClasses" :key="k.code" :value="k.code">{{ k.name }} ({{ k.code }})</option>
+                                    </select>
                                 </div>
 
                                 <!-- Roles -->
@@ -209,13 +257,24 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useOrganisation } from '@/composables/use-organisation';
+import { useUtbms } from '@/composables/use-utbms';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useFormErrors } from '@/composables/use-form-errors';
+import AppDatePicker from '@/components/ui/app-date-picker.vue';
+import DataTable from '@/components/ui/data-table.vue';
 
 useMeta({ title: 'Users' });
 
-const columns = ref(['name', 'email', 'phone_number', 'department', 'hire_date', 'role', 'actions']);
-const items = ref([]);
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
+
+const tableRef = ref(null);
 const roles = ref([]);
 const modal = ref({title: "Add User", button: "Add User"});
 const is_submit_form4 = ref(false);
@@ -226,84 +285,67 @@ const client = ref({
     email: "",
     department: "",
     role: [],
-    hire_date: ""
+    hire_date: "",
+    office_id: null,
+    practice_group_id: null,
+    timekeeper_class: null,
 });
+const { offices, practiceGroups } = useOrganisation();
+const { timekeeperClasses } = useUtbms();
 
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table modern-table',
-    columnsClasses: { 
-        actions: 'actions-column',
-        name: 'name-column'
-    },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search users...',
-        limit: 'Show:',
-    },
-    sortable: ['name', 'email', 'phone_number', 'department', 'hire_date', 'role'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
-
+// PLAT-13: the onboarding checklist's "invite a colleague" step lands here with ?new=1.
+const route = useRoute();
 onMounted(() => {
-    fetchData();
+    fetchRoles();
+    if (route.query.new === '1') openAddModal();
 });
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
-    
-    if (client.value.name && client.value.phone_number && client.value.email && 
+    clearErrors();
+
+    if (client.value.name && client.value.phone_number && client.value.email &&
         client.value.department && client.value.role.length && client.value.hire_date) {
-        
-        const endpoint = client.value.id > 0 
-            ? `/api/users/${client.value.id}` 
-            : '/api/users';
-        const method = client.value.id > 0 ? 'put' : 'post';
-        const successMessage = client.value.id > 0 
-            ? 'User updated successfully.' 
-            : 'User added successfully.';
+
+        const isUpdate = client.value.id > 0;
+        const endpoint = isUpdate ? `/api/v1/users/${client.value.id}` : '/api/v1/users';
+        const method = isUpdate ? 'put' : 'post';
+        const successMessage = isUpdate ? 'User updated successfully.' : 'User added successfully.';
 
         axios[method](endpoint, client.value)
-            .then(response => {
-                items.value = response.data.data;
+            .then(() => {
                 showMessage(successMessage);
                 document.getElementById('closebtn').click();
                 resetForm();
+                tableRef.value?.refresh(isUpdate ? undefined : 1);
             })
             .catch(error => {
-                showMessage(`Error ${client.value.id > 0 ? 'updating' : 'adding'} user. Please try again.`, 'error');
-                console.error(error);
+                showMessage(setErrorsFromResponse(error, `Error ${isUpdate ? 'updating' : 'adding'} user. Please try again.`), 'error');
             });
     }
 };
 
-const fetchData = () => {
-    axios.get('/api/users')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching users:', error);
-        });
+const openAddModal = () => {
+    resetForm();
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
 
-    axios.get('/api/rolesDropDown')
+const fetchRoles = () => {
+    axios.get('/api/v1/rolesDropDown')
         .then(response => {
             roles.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching roles:', error);
+            showMessage('Could not load roles. Please try refreshing the page.', 'error');
         });
 };
 
 const update_row = (item) => {
+    clearErrors();
     modal.value.title = "Update User";
     modal.value.button = "Update User";
     
@@ -314,6 +356,18 @@ const update_row = (item) => {
     client.value.role = item.role_id;
     client.value.department = item.department;
     client.value.hire_date = item.hire_date;
+    client.value.office_id = item.office_id ?? null;
+    client.value.practice_group_id = item.practice_group_id ?? null;
+    client.value.timekeeper_class = item.timekeeper_class ?? null;
+};
+
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/users/${item.id}`,
+        itemLabel: `${item.name}'s account`,
+        warning: `${item.name} will no longer be able to sign in, and will be removed from your user list. Their cases and records stay in the firm.`,
+        onSuccess: () => { tableRef.value?.refresh(); },
+    });
 };
 
 const resetForm = () => {
@@ -324,25 +378,15 @@ const resetForm = () => {
         email: "",
         department: "",
         role: [],
-        hire_date: ""
+        hire_date: "",
+        office_id: null,
+        practice_group_id: null,
+        timekeeper_class: null,
     };
     modal.value.title = "Add User";
     modal.value.button = "Add User";
     is_submit_form4.value = false;
-};
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
-    });
+    clearErrors();
 };
 </script>
 
@@ -551,7 +595,18 @@ const showMessage = (msg = '', type = 'success') => {
         color: var(--success-700);
         
         &:hover {
-            background: var(--success-200);
+            background: var(--success-500);
+            transform: scale(1.1);
+        }
+    }
+
+    &.btn-delete {
+        background: var(--error-100);
+        color: var(--error-700);
+
+        &:hover {
+            background: var(--error-500);
+            color: white;
             transform: scale(1.1);
         }
     }

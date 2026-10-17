@@ -1,0 +1,108 @@
+# Rebuilt for the exported copy; the repository's own copy (if any) wins. Runs on every pull request and push to main.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (SQLite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite, pdo_mysql
+          coverage: pcov
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan migrations:lint
+      - run: php artisan release:check
+      - run: php artisan api:openapi --check
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --memory-limit=1G
+      - run: php artisan test --coverage-clover build/clover.xml
+      - run: php scripts/coverage-floors.php build/clover.xml
+
+  backend-mysql:
+    name: backend (MySQL 8)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: lawfirm_test
+          MYSQL_ROOT_PASSWORD: secret
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -psecret" --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: lawfirm_test
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_mysql
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint -- --quiet
+      - run: npm run type-check
+      - run: node scripts/audit-hardcoded-colors.js
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [frontend]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: lawfirm
+          MYSQL_ROOT_PASSWORD: secret
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -psecret" --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      TENANCY_MODE: single
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: lawfirm
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_mysql
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: npm ci && npm run build
+      - run: cd tests-e2e && npm ci && npx playwright install --with-deps chromium
+      - run: php artisan migrate --force && php artisan db:seed --force
+      - run: php artisan serve --port=8000 &
+      - run: cd tests-e2e && npx playwright test

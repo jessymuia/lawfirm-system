@@ -56,6 +56,18 @@ return [
             'throw' => false,
         ],
 
+        // ENG-6: default destination for `backup:run`. Deliberately a
+        // sibling of storage/app (not nested inside it) so backing up
+        // storage/app never has to exclude the backup archives it just
+        // wrote. In production, set BACKUP_DISK=s3 in config/backup.php —
+        // a backup on the same disk as the database it's protecting is
+        // not a backup against server loss.
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('backups'),
+            'throw' => false,
+        ],
+
     ],
 
     /*

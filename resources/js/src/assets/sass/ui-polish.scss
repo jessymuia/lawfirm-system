@@ -1,0 +1,542 @@
+// =============================================
+// One visual language for the whole app: readable sizes, calm surfaces, consistent controls.
+// Loaded last, so it sets the defaults every screen builds on; screens can still override locally.
+//   Text: 15.5px body, 14.5px tables and controls, 13.5px captions. Radius: 10px controls, 14px cards.
+// =============================================
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 0.97rem;            // ~15.5px
+  line-height: 1.55;
+  letter-spacing: 0;
+  color: var(--text-secondary, #52525b);
+  background: var(--app-bg);
+  -webkit-font-smoothing: antialiased;
+}
+body.dark { background: var(--app-bg); }
+
+h1, h2, h3 { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; }
+h4, h5, h6 { font-family: var(--font-sans); color: var(--text-primary, #16211d); font-weight: 700; line-height: 1.25; }
+h1 { font-size: 1.75rem; } h2 { font-size: 1.4rem; } h3 { font-size: 1.2rem; } h4 { font-size: 1.05rem; } h5, h6 { font-size: 0.97rem; }
+
+a { text-underline-offset: 2px; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary-500) 45%, transparent); outline-offset: 2px; }
+
+// ---- cards -------------------------------------------------------------------------------------------------------
+.elevated-card {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #e4e4e7);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: none;
+  margin-bottom: 20px;
+  overflow: hidden;
+
+  > .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border-light, #f1f1f3); background: transparent; }
+  > .card-body, > .card-content { padding: 20px 22px; }
+  .card-title { margin: 0; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; color: var(--text-primary, #18181b); }
+}
+
+// ---- forms -------------------------------------------------------------------------------------------------------
+.form-label, label.form-label { font-size: 0.9rem; font-weight: 600; color: var(--text-primary, #27272a); margin-bottom: 6px; }
+
+.form-control, .form-select, .modern-input, .modern-select {
+  font-size: 0.95rem;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--neutral-300, #d4d4d8);
+  border-radius: var(--ui-radius);
+  background-color: var(--card-bg, #fff);
+  color: var(--text-primary, #18181b);
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder { color: var(--neutral-400, #a1a1aa); }
+  &:focus { border-color: var(--primary-500); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-500) 20%, transparent); outline: 0; }
+  &:disabled, &[readonly] { background-color: var(--neutral-100, #f4f4f5); }
+}
+textarea.form-control { min-height: 96px; }
+
+// ---- buttons -----------------------------------------------------------------------------------------------------
+.btn {
+  font-size: 0.95rem; font-weight: 600; border-radius: var(--ui-radius); padding: 8px 18px; letter-spacing: 0;
+  &.btn-sm { font-size: 0.875rem; padding: 5px 12px; }
+}
+.btn-primary { background: var(--primary-600); border-color: var(--primary-600); color: #fff;
+  &:hover, &:focus { background: var(--primary-700); border-color: var(--primary-700); color: #fff; } }
+.btn-outline-primary { color: var(--primary-700); border-color: var(--primary-400);
+  &:hover { background: var(--primary-600); border-color: var(--primary-600); color: #fff; } }
+
+// ---- tables ------------------------------------------------------------------------------------------------------
+.table { font-size: 0.93rem; color: var(--text-secondary, #3f3f46);
+  thead th { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted, #626779); background: var(--neutral-50, #fafafa); border-bottom: 1px solid var(--border-color, #e4e4e7); padding: 11px 14px; white-space: nowrap; }
+  tbody td { padding: 12px 14px; vertical-align: middle; border-color: var(--border-light, #f1f1f3); }
+  tbody tr:hover { background: color-mix(in srgb, var(--primary-50) 70%, transparent); }
+}
+
+// ---- modals ------------------------------------------------------------------------------------------------------
+.modal-content { border: 0; border-radius: var(--ui-radius-lg); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25); }
+.modal-header { padding: 16px 22px; border-bottom: 1px solid var(--border-light, #f1f1f3); }
+.modal-title { font-size: 1.15rem; font-weight: 700; }
+.modal-body { padding: 20px 22px; }
+
+// ---- small things ------------------------------------------------------------------------------------------------
+.badge { font-size: 0.78rem; font-weight: 700; padding: 0.4em 0.75em; border-radius: 999px; }
+.breadcrumb-one .breadcrumb { font-size: 0.9rem; }
+small, .small, .hint { font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  body { font-size: 0.95rem; }
+  .elevated-card > .card-header, .elevated-card > .card-body { padding-left: 16px; padding-right: 16px; }
+}
+
+
+// ---- sidebar: the one bold element ------------------------------------------------------------------------------
+body .modern-sidebar-wrapper {
+  background: var(--primary-900);
+  border-right: 0;
+  .sidebar-header { padding: 1.35rem 1.4rem 1.2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
+  .sidebar-brand .brand-link .brand-text { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; line-height: 1.2; letter-spacing: 0; }
+  .menu-item { margin: 1px 0.7rem; }
+  .menu-item .menu-link {
+    padding: 0.62rem 0.9rem; gap: 0.8rem; border-radius: var(--ui-radius);
+    font-size: 0.95rem; font-weight: 500; color: rgba(255, 255, 255, 0.74);
+    svg { width: 19px; height: 19px; opacity: 0.85; transform: none !important; }
+    &:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+    &.router-link-active, &.active {
+      background: rgba(255, 255, 255, 0.11); box-shadow: none; color: #fff; font-weight: 600;
+      &::before { left: -0.7rem; width: 3px; height: 58%; border-radius: 0 3px 3px 0; background: var(--brass); }
+    }
+  }
+  // section captions (Management, Finance…): quiet sentence-case text, not shouting capitals
+  .menu-title, .menu-section-title, .sidebar-section, .divider-text {
+    text-transform: none; letter-spacing: 0; font-size: 0.8rem; font-weight: 600; color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+// ---- header ------------------------------------------------------------------------------------------------------
+body .modern-header-container { background: #fff; border-bottom: 1px solid var(--border-color); }
+body.dark .modern-header-container { background: var(--header-bg); }
+
+// ---- page chrome -------------------------------------------------------------------------------------------------
+.breadcrumb-one .breadcrumb { font-size: 0.88rem; color: var(--text-muted); }
+.breadcrumb-one .breadcrumb-item.active span { color: var(--text-primary); font-weight: 600; }
+
+// figures that matter get the serif: dashboard and summary numbers
+[class*="stat-value"], [class*="stat-number"], [class*="metric-value"], [class*="kpi-value"], .total-value, .pay-due strong {
+  font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em;
+}
+
+// ---- tables: sentence-case headers, calm rows -------------------------------------------------------------------
+.table thead th { text-transform: none; letter-spacing: 0; font-size: 0.86rem; font-weight: 600; color: var(--text-muted); background: var(--neutral-50); }
+.table tbody tr:hover { background: var(--neutral-50); }
+
+// ---- buttons: solid, no gradients -------------------------------------------------------------------------------
+body .btn-primary, body .btn.btn-primary { background: var(--primary-600); background-image: none; border-color: var(--primary-600); box-shadow: none; color: #fff;
+  &:hover, &:focus, &:active { background: var(--primary-700); border-color: var(--primary-700); box-shadow: none; color: #fff; } }
+body .btn-outline-primary { color: var(--primary-700); border-color: var(--primary-400); background: transparent; box-shadow: none;
+  &:hover { background: var(--primary-600); border-color: var(--primary-600); color: #fff; } }
+.btn-submit, .btn-record-payment, .btn-submit-trust { background-image: none; }
+.form-label, .form-control, .form-select, label, .btn, .table { letter-spacing: 0; }
+.btn-light, .btn-outline-secondary { border-color: var(--border-color); color: var(--text-secondary); background: #fff; }
+
+// ---- focus & motion ----------------------------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+body .modern-sidebar-wrapper [class*="divider"] .divider-text { text-transform: none; letter-spacing: 0; font-size: 0.82rem; font-weight: 600; color: rgba(255, 255, 255, 0.52); padding: 0 0.25rem; }
+
+// ---- dialogs: one clear, visible close button; the dimmed area is inert -----------------------------------------
+body .modal .btn-close-modern, body .modal .btn-close-injected {
+  width: 38px; height: 38px; flex: none; display: inline-grid; place-items: center; padding: 0;
+  border: 1px solid var(--border-color); border-radius: 10px; background: #fff !important; color: #3c4a44 !important; cursor: pointer; opacity: 1 !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  svg { width: 20px; height: 20px; stroke: currentColor !important; opacity: 1 !important; }
+  &:hover { background: #fdecea !important; border-color: #f3b4ae; color: #b42318 !important; }
+}
+.modal-header { align-items: flex-start; gap: 12px; }
+.modal-header .btn-close-injected { margin-left: auto; }
+.modal-dialog { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+.modal.modal-static .modal-dialog { transform: scale(1.015); }   // a click outside nudges the dialog; it does not close
+
+// a tall form scrolls inside the dialog, so the header (and its close button) never leaves the screen
+body .modal-content { max-height: calc(100vh - 3rem); display: flex; flex-direction: column; }
+body .modal-content > .modal-body, body .modal-content > form > .modal-body { overflow-y: auto; }
+
+/* every modal's close button is a visible × that follows the header colour (dark on light headers, white on green ones) */
+body .modal .modal-header .modal-title { color: inherit !important; }
+body .modal .modal-header .btn-close {
+  position: relative; flex-shrink: 0; margin-left: auto;
+  width: 36px !important; height: 36px !important; padding: 0 !important;
+  background: rgba(255, 255, 255, .14) !important; background-image: none !important;
+  border: 1px solid currentColor !important; border-radius: 8px; opacity: .9 !important; filter: none !important;
+  color: inherit;
+}
+body .modal .modal-header .btn-close::before {
+  content: "\00d7"; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 24px; line-height: 1; color: inherit;
+}
+body .modal .modal-header .btn-close:hover { opacity: 1 !important; background: rgba(214, 69, 69, .18) !important; }
+
+/* confirmation dialogs (see composables/use-confirm.js) */
+.swal2-popup.confirm-popup { border-radius: 16px; padding: 26px 26px 22px; font-family: inherit; width: min(440px, 92vw); }
+.confirm-popup .swal2-title { font-family: inherit; font-size: 1.25rem; font-weight: 700; color: var(--text-primary, #16211d); padding: .2rem 0 0; }
+.confirm-popup .confirm-text { color: #55645d; line-height: 1.5; margin: .4rem 0 0; }
+.confirm-popup .confirm-note { color: #b42318; font-weight: 600; font-size: .86rem; margin: .5rem 0 0; }
+.confirm-popup .swal2-actions { gap: 10px; margin-top: 1.3rem; }
+.confirm-popup .swal2-input-label { color: #3c4a44; font-weight: 600; font-size: .9rem; justify-content: flex-start; margin: 1rem 0 .3rem; }
+.confirm-popup .swal2-textarea, .confirm-popup .swal2-input { margin: 0; width: 100%; border-radius: 10px; border: 1px solid #cfd8d3; font-size: .95rem; box-shadow: none; }
+.confirm-popup .swal2-textarea:focus, .confirm-popup .swal2-input:focus { border-color: var(--primary-600, #0e6b50); box-shadow: 0 0 0 3px rgba(14, 107, 80, .15); }
+.confirm-btn { border: 1px solid transparent; border-radius: 10px; padding: 10px 20px; font-weight: 600; font-size: .92rem; cursor: pointer; }
+.confirm-primary { background: var(--primary-600, #0e6b50); color: #fff; }
+.confirm-primary:hover { background: var(--primary-700, #0a5a43); }
+.confirm-danger { background: #c62f2f; color: #fff; }
+.confirm-danger:hover { background: #a82424; }
+.confirm-cancel { background: #fff; color: #3c4a44; border-color: #cfd8d3; }
+.confirm-cancel:hover { background: #f3f6f4; }
+.confirm-popup .swal2-validation-message { border-radius: 8px; }
+
+/* older SweetAlert dialogs (payments, subscription, trust…) share the same look */
+.swal2-popup:not(.swal2-toast) { border-radius: 16px; font-family: inherit; }
+.swal2-popup:not(.swal2-toast) .swal2-title { font-size: 1.25rem; font-weight: 700; }
+.swal2-styled.swal2-confirm { border-radius: 10px !important; font-weight: 600; background-color: var(--primary-600, #0e6b50) !important; }
+.swal2-styled.swal2-cancel { border-radius: 10px !important; font-weight: 600; }
+
+/* one look for row actions in every module: View (outline), Edit (soft green), Delete (soft red) */
+body .btn-action, body .btn-action-table, body .btn-action-header {
+  display: inline-flex !important; align-items: center; justify-content: center; gap: 6px;
+  min-width: 36px; height: 36px; padding: 0 11px !important; border-radius: 9px !important;
+  font-size: .82rem !important; font-weight: 600 !important; line-height: 1; cursor: pointer;
+  border: 1px solid transparent !important; box-shadow: none !important; transform: none !important;
+  transition: background .15s, border-color .15s, color .15s;
+}
+body .btn-action.btn-view { background: #fff !important; color: var(--primary-700, #0a5a43) !important; border-color: var(--primary-300, #9fcab9) !important; }
+body .btn-action.btn-view:hover { background: var(--primary-50, #eef6f2) !important; border-color: var(--primary-600, #0e6b50) !important; }
+body .btn-action.btn-edit, body .btn-action-table.btn-edit, body .btn-action-header.btn-edit { background: var(--primary-100, #dcece5) !important; color: var(--primary-800, #08493a) !important; }
+body .btn-action.btn-edit:hover, body .btn-action-table.btn-edit:hover, body .btn-action-header.btn-edit:hover { background: var(--primary-600, #0e6b50) !important; color: #fff !important; }
+body .btn-action.btn-delete, body .btn-action-table.btn-delete, body .btn-action-header.btn-delete { background: #fdecec !important; color: #b42318 !important; }
+body .btn-action.btn-delete:hover, body .btn-action-table.btn-delete:hover, body .btn-action-header.btn-delete:hover { background: #c62f2f !important; color: #fff !important; }
+body .btn-action svg { flex-shrink: 0; }
+body .action-buttons, body .row-actions, body .actions { display: flex; gap: 6px; align-items: center; justify-content: flex-start; flex-wrap: nowrap; }
+
+/* page header cards and primary "Add" buttons look the same everywhere */
+body .btn-add, body .btn-add-new, body .btn-primary-modern, body .btn-submit {
+  background: linear-gradient(145deg, var(--primary-500, #148a67), var(--primary-700, #0a5a43)) !important; color: #fff !important; border: none !important; border-radius: 10px !important; font-weight: 600;
+}
+
+/* settings-style pages: one centred column, one card look, tables that never clip */
+body .trust-page, body .organisation-page, body .branding-page, body .finance-page, body .compliance-page,
+body .security-settings-page, body .reports-page, body .conflicts-page, body .layout-px-spacing { max-width: 1240px; margin: 0 auto; padding: 22px 24px 40px; }
+body .page-header-modern { background: #fff; border: 1px solid var(--border-light, #e3ebe6); border-radius: 16px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(16, 33, 27, .04); }
+body .page-header-modern .page-title { margin: 0; font-size: 1.35rem !important; font-weight: 700; color: var(--text-primary, #16211d); }
+body .page-header-modern .page-subtitle { margin: 2px 0 0; color: #5b6b64; font-size: .92rem; }
+body .elevated-card, body .trust-page .card, body .organisation-page .card { background: #fff; border: 1px solid var(--border-light, #e3ebe6); border-radius: 16px; box-shadow: 0 1px 2px rgba(16, 33, 27, .04); overflow: hidden; }
+body .elevated-card .card-header { padding: 16px 22px !important; border-bottom: 1px solid var(--border-light, #eef2ef) !important; background: #fff !important; }
+body .elevated-card .card-title, body .elevated-card .card-header h2 { font-family: inherit !important; font-size: 1.05rem !important; font-weight: 700 !important; margin: 0; }
+body .elevated-card .card-body { padding: 18px 22px !important; overflow-x: auto; }
+body .elevated-card .table, body .branding-page .table, body .finance-page .table { width: 100%; }
+body .elevated-card .table th { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: #5b6b64; font-weight: 700; }
+body .elevated-card input.form-control, body .elevated-card select.form-control, body .elevated-card textarea.form-control,
+body .branding-page input, body .finance-page input, body .security-settings-page input[type=text], body .security-settings-page input:not([type]) { border-radius: 10px; border: 1px solid #cfd8d3; padding: 8px 12px; }
+body .btn-outline-primary, body .btn-outline-secondary { border-radius: 9px; font-weight: 600; }
+body .btn-outline-primary { color: var(--primary-700, #0a5a43); border-color: var(--primary-300, #9fcab9); }
+body .btn-outline-primary:hover { background: var(--primary-600, #0e6b50); border-color: var(--primary-600, #0e6b50); color: #fff; }
+/* leftover purple / orange outline buttons → brand */
+body .btn-outline-purple, body .btn-secondary { border-radius: 9px; }
+
+// ---- Chambers system: shared tokens and controls ---------------------------------------------------------------
+// A paper-and-forest workspace, with brass reserved for orientation and emphasis.
+html { background: var(--app-bg); }
+body { color: var(--text-secondary); background: var(--app-bg); }
+body.dark { color: var(--text-secondary); background: var(--app-bg); }
+
+// Shell. The sidebar keeps the firm's runtime brand scale; the paper header stays quiet.
+body .modern-header-container {
+  background: var(--header-bg);
+  border-color: var(--border-color);
+  box-shadow: 0 1px 0 rgba(27, 43, 35, .025);
+}
+body.dark .modern-header-container { background: var(--header-bg); }
+body .modern-sidebar-wrapper { background: var(--sidebar-bg); }
+body .modern-sidebar-wrapper .menu-item .menu-link {
+  border-radius: 6px;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+body .modern-sidebar-wrapper .menu-item .menu-link.router-link-active,
+body .modern-sidebar-wrapper .menu-item .menu-link.active {
+  background: rgba(255, 255, 255, .1);
+}
+body .modern-sidebar-wrapper .menu-item .menu-link.router-link-active::before,
+body .modern-sidebar-wrapper .menu-item .menu-link.active::before {
+  background: var(--brass);
+}
+body .content-wrapper { color: var(--text-secondary); }
+
+// Surfaces and page titles share a single border, radius and shadow language.
+body .elevated-card,
+body .trust-page .card,
+body .organisation-page .card,
+body .page-header-modern,
+body .lms-page-header,
+body .dashboard-panel,
+body .stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: 0 1px 2px rgba(27, 43, 35, .035);
+}
+body .page-header-modern,
+body .lms-page-header { padding: 18px 22px; }
+body .lms-ph-icon {
+  background: var(--primary-700);
+  border: 1px solid color-mix(in srgb, var(--brass) 52%, var(--primary-700));
+  border-radius: 9px;
+  box-shadow: none;
+}
+body .page-header-modern .page-title,
+body .lms-ph-text h1 { color: var(--text-primary); }
+body .page-header-modern .page-subtitle,
+body .lms-ph-text p { color: var(--text-tertiary); }
+body.dark .elevated-card,
+body.dark .trust-page .card,
+body.dark .organisation-page .card,
+body.dark .page-header-modern,
+body.dark .lms-page-header,
+body.dark .dashboard-panel,
+body.dark .stat-card { box-shadow: 0 1px 2px rgba(0, 0, 0, .12); }
+
+// One control geometry, including validation, disabled, hover and keyboard focus.
+body .form-control,
+body .form-select,
+body .modern-input,
+body .modern-select,
+body .table-search-input,
+body .preset-select,
+body .search-select-input,
+body .flatpickr-input {
+  min-height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ui-radius);
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: .9rem;
+  line-height: 1.4;
+  box-shadow: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+body textarea.form-control { min-height: 96px; }
+body .form-control::placeholder,
+body .table-search-input::placeholder { color: var(--text-tertiary); opacity: .85; }
+body .form-control:focus,
+body .form-select:focus,
+body .modern-input:focus,
+body .modern-select:focus,
+body .table-search-input:focus,
+body .preset-select:focus,
+body .search-select-input:focus,
+body .flatpickr-input:focus {
+  border-color: var(--primary-600);
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-600) 18%, transparent);
+  outline: 0;
+}
+body .form-control:disabled,
+body .form-select:disabled,
+body .form-control[readonly] {
+  background-color: var(--neutral-100);
+  color: var(--text-tertiary);
+  opacity: 1;
+  cursor: not-allowed;
+}
+body .form-label,
+body label.form-label,
+body .form-group label,
+body .field-wrapper label {
+  color: var(--text-primary);
+  font-size: .86rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: .38rem;
+}
+body .form-text,
+body .hint,
+body .help-text,
+body .invalid-feedback { font-size: .81rem; line-height: 1.45; }
+body .invalid-feedback,
+body .text-danger { color: #a33431 !important; }
+body.dark .invalid-feedback,
+body.dark .text-danger { color: #f08d83 !important; }
+body .form-control.is-invalid,
+body .form-select.is-invalid,
+body .modern-input.is-invalid,
+body .search-select.is-invalid .search-select-input,
+body .app-date-picker.is-invalid {
+  border-color: #b94b43 !important;
+  background-image: none;
+}
+body .form-control.is-invalid:focus,
+body .form-select.is-invalid:focus,
+body .search-select.is-invalid .search-select-input:focus,
+body .app-date-picker.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(185, 75, 67, .15);
+}
+body .form-control.is-valid,
+body .form-select.is-valid { border-color: #438166; background-image: none; }
+body input[type="checkbox"],
+body input[type="radio"] { accent-color: var(--primary-600); }
+
+// Flat, assured actions; the firm's configured green remains the source of truth.
+body .btn { border-radius: var(--ui-radius); font-weight: 600; }
+body .btn-primary,
+body .btn.btn-primary,
+body .btn-add,
+body .btn-add-new,
+body .btn-primary-modern,
+body .btn-submit,
+body .btn-login {
+  color: #fff !important;
+  background: var(--primary-700) !important;
+  background-image: none !important;
+  border: 1px solid var(--primary-700) !important;
+  box-shadow: none !important;
+}
+body .btn-primary:hover:not(:disabled),
+body .btn.btn-primary:hover:not(:disabled),
+body .btn-add:hover:not(:disabled),
+body .btn-add-new:hover:not(:disabled),
+body .btn-primary-modern:hover:not(:disabled),
+body .btn-submit:hover:not(:disabled),
+body .btn-login:hover:not(:disabled) {
+  background: var(--primary-800) !important;
+  border-color: var(--primary-800) !important;
+}
+body .btn-primary:disabled,
+body .btn-submit:disabled,
+body .btn-login:disabled { opacity: .56; cursor: not-allowed; }
+body .btn-outline-primary { color: var(--primary-700); border-color: var(--primary-500); }
+body .btn-outline-primary:hover { color: #fff; background: var(--primary-700); border-color: var(--primary-700); }
+body.dark .btn-light,
+body.dark .btn-outline-secondary { color: var(--text-secondary); background: var(--surface); border-color: var(--border-color); }
+
+// Tables are dense work surfaces: clear labels, quiet separators, restrained hover.
+body .table,
+body .app-data-table .app-table { color: var(--text-secondary); }
+body .table thead th,
+body .app-data-table .app-table th {
+  color: var(--text-secondary);
+  background: var(--neutral-100);
+  border-bottom: 1px solid var(--border-color);
+  font-size: .78rem;
+  font-weight: 650;
+  letter-spacing: .015em;
+  text-transform: none;
+}
+body .table tbody td,
+body .app-data-table .app-table td {
+  border-color: var(--border-light);
+  color: var(--text-secondary);
+}
+body .table tbody tr:hover,
+body .app-data-table .app-table tbody tr:hover { background: color-mix(in srgb, var(--primary-50) 60%, var(--card-bg)); }
+body .app-data-table .table-search-input { max-width: 340px; }
+body .app-data-table .btn-toolbar,
+body .app-data-table .preset-select {
+  min-height: 36px;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-color: var(--border-color);
+  border-radius: var(--ui-radius);
+  font-size: .82rem;
+}
+body .app-data-table .column-menu {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+body .app-data-table .column-menu-item:hover { background: var(--neutral-100); }
+body .app-data-table .bulk-action-bar {
+  background: color-mix(in srgb, var(--primary-100) 58%, var(--card-bg));
+  border-color: var(--primary-200);
+}
+body .app-data-table .pagination-controls button {
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+body .app-data-table .pagination-controls button:disabled { opacity: .5; cursor: not-allowed; }
+body.dark .app-data-table .table-wrapper { background-color: var(--card-bg); }
+
+// Dialogs: neutral paper header, clear hierarchy, accessible close affordance.
+body .modal-content,
+body .crud-modal-content {
+  color: var(--text-secondary);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: 0 20px 54px rgba(16, 30, 22, .22);
+}
+body .modal .modal-header,
+body .crud-modal-content .modal-header {
+  color: var(--text-primary);
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  border-top: 3px solid var(--brass);
+}
+body .modal .modal-title { color: var(--text-primary) !important; font-weight: 650; }
+body .crud-modal-content .modal-header .modal-title { color: var(--text-primary) !important; }
+body .crud-modal-content .crud-close {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  background: var(--surface);
+}
+body .crud-modal-content .crud-close:hover { color: var(--text-primary); background: var(--neutral-100); }
+body .modal .modal-header .btn-close {
+  color: var(--text-secondary);
+  background: var(--neutral-100) !important;
+  border-color: var(--border-color) !important;
+}
+body .modal .modal-header .btn-close:hover { background: var(--neutral-200) !important; }
+body .modal-body { color: var(--text-secondary); }
+body .crud-modal-actions { border-color: var(--border-color); }
+body .crud-modal-content .btn-cancel {
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-color: var(--border-color);
+}
+body .crud-modal-content .btn-cancel:hover { background: var(--neutral-100); }
+body .crud-modal-content .btn-submit { padding: 9px 20px; }
+body.dark .modal .modal-header .btn-close { color: var(--text-secondary); }
+
+// Search-select, datepicker and row detail popup follow the same layered surface language.
+body .search-select-listbox,
+body .app-data-table .column-menu,
+body .record-dialog,
+body .flatpickr-calendar {
+  color: var(--text-secondary);
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-lg);
+}
+body .search-select-option:hover,
+body .search-select-option.highlighted { background: var(--primary-100); color: var(--primary-800); }
+body.dark .search-select-option:hover,
+body.dark .search-select-option.highlighted { background: var(--primary-800); color: #fff; }
+body .flatpickr-calendar { border-radius: var(--ui-radius); }
+body .flatpickr-day.selected,
+body .flatpickr-day.startRange,
+body .flatpickr-day.endRange { background: var(--primary-700); border-color: var(--primary-700); }
+
+// Keep focused controls visibly keyboard-operable, without relying on color alone.
+body :focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-600) 78%, var(--brass));
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  body .page-header-modern,
+  body .lms-page-header { padding: 15px 16px; }
+  body .table-responsive { border-color: var(--border-color); }
+}

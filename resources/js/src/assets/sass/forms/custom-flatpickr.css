@@ -69,7 +69,7 @@
     color: #e0e6ed; }
 
 span.flatpickr-weekday {
-  color: #888ea8; }
+  color: var(--text-muted); }
 
 .flatpickr-day {
   color: #3b3f5c;

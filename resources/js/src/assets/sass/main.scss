@@ -9,7 +9,7 @@ html {
 }
 
 body {
-    color: #888ea8;
+    color: var(--text-muted);
     height: 100%;
     font-size: 0.875rem;
     background: #f1f2f3;
@@ -63,7 +63,7 @@ strong {
 }
 
 code {
-    color: $danger;
+    color: #c0262f; // UI-15: $danger is too light for small text on white
 }
 .small,
 small {
@@ -122,7 +122,7 @@ mark {
     background-color: transparent !important;
     padding: 0px !important;
     box-shadow: none !important;
-    color: #888ea8 !important;
+    color: var(--text-muted) !important;
     margin-bottom: -24px;
     border-bottom: 1px dashed #bfc9d4;
     border-radius: 0;
@@ -290,7 +290,7 @@ span {
 .form-group label,
 label {
     font-size: 15px;
-    color: #888ea8;
+    color: var(--text-muted);
     letter-spacing: 1px;
     padding-top: 0;
     margin-bottom: 0.5rem;
@@ -576,7 +576,7 @@ select.form-control.form-custom {
         background-color: #f1f2f3;
 
         svg {
-            color: #888ea8;
+            color: var(--text-muted);
         }
     }
 
@@ -590,7 +590,7 @@ select.form-control.form-custom {
         background-color: #f1f2f3;
 
         svg {
-            color: #888ea8;
+            color: var(--text-muted);
         }
     }
 
@@ -648,7 +648,7 @@ select.form-control.form-custom {
 }
 
 .custom-checkbox .custom-control-input.is-valid ~ .custom-control-label {
-    color: #888ea8;
+    color: var(--text-muted);
 }
 
 .form-control.is-invalid,
@@ -834,7 +834,7 @@ select.form-control.form-custom {
 
             svg {
                 cursor: pointer;
-                color: #888ea8;
+                color: var(--text-muted);
                 margin-right: 6px;
                 vertical-align: middle;
                 width: 20px;
@@ -2358,7 +2358,7 @@ select.form-control.form-custom {
     &.active,
     &:active,
     &:hover {
-        color: #888ea8;
+        color: var(--text-muted);
         background-color: #f1f2f3;
     }
 }
@@ -2367,14 +2367,14 @@ select.form-control.form-custom {
     &.active,
     &:active,
     &:hover {
-        color: #888ea8;
+        color: var(--text-muted);
         background-color: #f1f2f3;
     }
 }
 
 .custom-dropdown .dropdown-item {
     font-size: 13px;
-    color: #888ea8;
+    color: var(--text-muted);
     display: block;
     font-weight: 700;
     padding: 11px 8px;
@@ -2384,7 +2384,7 @@ select.form-control.form-custom {
 .custom-dropdown-icon {
     .dropdown-item {
         font-size: 13px;
-        color: #888ea8;
+        color: var(--text-muted);
         display: block;
         font-weight: 700;
         padding: 11px 8px;
@@ -2395,7 +2395,7 @@ select.form-control.form-custom {
         width: 20px;
         height: 20px;
         margin-right: 3px;
-        color: #888ea8;
+        color: var(--text-muted);
     }
 }
 
@@ -2562,7 +2562,7 @@ textarea[readonly] {
 }
 
 .table-controls > li > a svg {
-    color: #888ea8;
+    color: var(--text-muted);
     width: 21px;
 }
 

@@ -13,7 +13,13 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'sync'),
+    // ENG-3: default changed from 'sync' to 'database' — SMS/mail jobs
+    // (SendSmsJob, AssignedTask/ReassignedTask) now actually run
+    // asynchronously via `php artisan queue:work` instead of blocking the
+    // HTTP request that dispatched them. Requires a queue worker process
+    // running in production (see ENG-6 / deployment docs) — without one,
+    // jobs sit in the `jobs` table until a worker processes them.
+    'default' => env('QUEUE_CONNECTION', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,9 +42,13 @@ return [
 
         'database' => [
             'driver' => 'database',
+            // TEN-2: null = the default connection; multi-tenant mode puts it on the control plane (TenantManager::useControlPlaneQueue)
+            'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // ENG-20: longer than the longest job (an export may run an hour), or a running job is handed out twice.
+            // Only a job whose worker died waits this long; a failing job is released at once.
+            'retry_after' => (int) env('QUEUE_RETRY_AFTER', 3800),
             'after_commit' => false,
         ],
 
@@ -66,7 +76,7 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
+            'retry_after' => (int) env('QUEUE_RETRY_AFTER', 3800),   // ENG-20: see the database connection
             'block_for' => null,
             'after_commit' => false,
         ],
@@ -83,6 +93,19 @@ return [
     | have failed. You may change them to any database / table you wish.
     |
     */
+
+    /*
+    | ENG-20: heavy work (exports, backfills, reading documents) runs on each lane's "-bulk" twin ("bulk" next to
+    | "default"), and each firm runs at most `per_firm` such jobs at once, whatever it queued (App\Queue\FirmFairShare).
+    | A job waiting for its firm's slot is put back for `retry_after` seconds and keeps trying for `retry_hours`.
+    | `slot_seconds` must exceed the longest bulk job's timeout (an export: 3600). See docs/ops/QUEUES.md.
+    */
+    'bulk' => [
+        'per_firm' => (int) env('QUEUE_BULK_PER_FIRM', 2),
+        'retry_after' => (int) env('QUEUE_BULK_RETRY_AFTER', 30),
+        'retry_hours' => (int) env('QUEUE_BULK_RETRY_HOURS', 24),
+        'slot_seconds' => 3900,
+    ],
 
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),

@@ -11,19 +11,28 @@
         <testsuite name="Feature">
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
+        <testsuite name="Isolation">
+            <directory suffix="Test.php">./tests/Isolation</directory>
+        </testsuite>
+        <testsuite name="Migration">
+            <directory suffix="Test.php">./tests/Migration</directory>
+        </testsuite>
     </testsuites>
-    <coverage processUncoveredFiles="true">
+    <source>
         <include>
             <directory suffix=".php">./app</directory>
         </include>
-    </coverage>
+    </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- docker compose starts the container in multi-tenant mode; the suite picks its mode itself (TEST_TENANCY_MODE) -->
+        <env name="TENANCY_MODE" value="single" force="true"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
         <env name="MAIL_MAILER" value="array"/>
+        <env name="PLATFORM_MFA" value="optional"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

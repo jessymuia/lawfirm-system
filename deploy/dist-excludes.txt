@@ -1,0 +1,20 @@
+# PLAT-5: paths removed from every customer-facing artifact (Docker image, release bundle).
+# One path per line, relative to the repo root; directories are removed recursively.
+# VENDOR-ONLY tools (can mint licenses): the private key never ships, but neither should the tool.
+app/Console/Commands/LicenseKeygen.php
+app/Console/Commands/LicenseIssue.php
+# Not needed at runtime
+tests
+tests-e2e
+.github
+.git
+node_modules
+docker-compose.yml
+docker
+deploy/deploy.sh
+scripts
+phpunit.xml
+phpstan.neon
+phpstan-baseline.neon
+.styleci.yml
+.eslintrc.cjs

@@ -1,6 +1,17 @@
-import store from './store';
+import { pinia } from './stores';
+import { useAppStore } from './stores/app';
 import { $themeConfig } from '@themeConfig';
 
+/**
+ * UI-12: this previously also initialized an i18n locale (dead code —
+ * it imported a '../i18n' module that didn't exist anywhere in the repo,
+ * so any code path that actually invoked toggleLocale() would have
+ * broken the production build with an unresolved-module error). No view
+ * in the app ever rendered a language switcher against it, so per the
+ * doc's "commit to i18n or remove it" decision: removed. Re-introduce a
+ * real vue-i18n setup with actual translation dictionaries if/when
+ * EN+SW support is prioritized, rather than resurrecting this scaffold.
+ */
 export default {
     init() {
         // set default styles
@@ -8,54 +19,19 @@ export default {
         if (!val) {
             val = $themeConfig.theme;
         }
-        store.commit('toggleDarkMode', val);
+        useAppStore(pinia).toggleDarkMode(val);
 
         val = localStorage.getItem('menu_style'); // vertical, collapsible-vertical, horizontal
         if (!val) {
             val = $themeConfig.navigation;
         }
-        store.commit('toggleMenuStyle', val);
+        useAppStore(pinia).toggleMenuStyle(val);
 
         val = localStorage.getItem('layout_style'); // full, boxed-layout, large-boxed-layout
         if (!val) {
             val = $themeConfig.layout;
         }
-        store.commit('toggleLayoutStyle', val);
-
-        val = localStorage.getItem('i18n_locale'); // en, da, de, el, es, fr, hu, it, ja, pl, pt, ru, sv, tr, zh
-        if (!val) {
-            val = $themeConfig.lang;
-
-            const list = store.state.countryList;
-            const item = list.find((item) => item.code === val);
-            if (item) {
-                this.toggleLanguage(item);
-            }
-        }
-    },
-
-    toggleLanguage(item) {
-        let lang = null;
-        if (item) {
-            lang = item;
-        } else {
-            let code = store.state.locale;
-            if (!code) {
-                code = localStorage.getItem('i18n_locale');
-            }
-
-            item = store.state.countryList.find((d) => d.code === code);
-            if (item) {
-                lang = item;
-            }
-        }
-
-        if (!lang) {
-            lang = store.state.countryList.find((d) => d.code === 'en');
-        }
-
-        store.commit('toggleLocale', lang.code);
-        return lang;
+        useAppStore(pinia).toggleLayoutStyle(val);
     },
 
     toggleMode(mode) {
@@ -66,7 +42,7 @@ export default {
                 mode = 'light';
             }
         }
-        store.commit('toggleDarkMode', mode || 'light');
+        useAppStore(pinia).toggleDarkMode(mode || 'light');
         return mode;
     },
 };

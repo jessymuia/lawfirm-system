@@ -6,19 +6,11 @@ use App\Constants\ModulePermissions;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class ExpenseCategoryController extends Controller
 {
-    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
-    {
-        return response()->json([
-            'success' => $success,
-            'message'=>$message,
-            'data' => $data
-        ], $statusCode);
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -26,93 +18,83 @@ class ExpenseCategoryController extends Controller
      */
     public function index()
     {
-        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_EXPENSES)) {
             abort(403);
+        }
 
-        $types = ExpenseCategory::all();
-        $types = $types->map(function ($row) {
-            return [
-                "id" => $row->id,
-                "name" => $row->name
-            ];
-        });
+        $query = ExpenseCategory::orderBy('id', 'desc');
+        $types = $this->paginatedOrFull(
+            request(),
+            $query,
+            fn ($row) => \App\Http\Resources\V1\ExpenseCategoryResource::make($row)->resolve(),
+            25,
+            ['name'],
+            ['name']
+        );
 
-        return $this->response(true,'success',$types,200);
+        return $this->response(true, 'success', $types, 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    /** ENG-16: dropdown options (id + name), capped; see Controller::optionsResponse(). */
+    public function options(\Illuminate\Http\Request $request): JsonResponse
     {
-        //
+        return $this->optionsResponse($request, ExpenseCategory::query(), fn ($r) => $r->name);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\ExpenseCategory\StoreRequest $request)
     {
-        ExpenseCategory::create([
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_EXPENSES)) {
+            abort(403);
+        }
+
+        $type = ExpenseCategory::create([
             'name' => $request->name,
-            'created_by' => auth()->user()->id
         ]);
 
-        return $this->index();
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\ExpenseCategory  $expenseCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ExpenseCategory $expenseCategory)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\ExpenseCategory  $expenseCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ExpenseCategory $expenseCategory)
-    {
-        //
+        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseCategoryResource::make($type)->resolve(), 201);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ExpenseCategory  $expenseCategory
      * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\ExpenseCategory\UpdateRequest $request, $id)
     {
-        $type = ExpenseCategory::find($id);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_EXPENSES)) {
+            abort(403);
+        }
+
+        $type = ExpenseCategory::findOrFail($id);
         $type->name = $request->name;
         $type->updated_by = auth()->user()->id;
         $type->save();
 
-        return $this->index();
+        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseCategoryResource::make($type)->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\ExpenseCategory  $expenseCategory
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(ExpenseCategory $expenseCategory)
+    public function destroy($id)
     {
-        //
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_EXPENSES)) {
+            abort(403);
+        }
+
+        $type = ExpenseCategory::findOrFail($id);
+        $type->deleted_by = auth()->user()->id;
+        $type->save();
+
+        $type->delete();
+
+        return $this->response(true, 'success', ['id' => (int) $id], 200);
     }
 }

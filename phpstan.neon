@@ -1,0 +1,21 @@
+includes:
+    # Larastan teaches PHPStan Laravel's runtime magic (Auth::user()'s
+    # concrete model, Request magic properties, Eloquent builder proxies).
+    # Without it, level 5 produces ~700 false positives on this codebase.
+    - vendor/larastan/larastan/extension.neon
+    # CARRY-6: the baseline of pre-existing findings (146 entries on
+    # 2026-08-23) is now empty: every one was fixed, none ignored. It stays
+    # included so a future exception is explicit, reviewed and visible.
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app
+
+    # Level 5 is a deliberately pragmatic starting point for a codebase
+    # that has never run static analysis before (see ENG-1) — jumping
+    # straight to a stricter level would surface hundreds of pre-existing
+    # findings unrelated to this migration's actual scope, drowning out
+    # anything CI catches going forward. Raising the level is a
+    # reasonable follow-up once the baseline is clean at 5.
+    level: 5

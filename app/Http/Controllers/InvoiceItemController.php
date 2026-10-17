@@ -2,141 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Invoices\ChangeInvoiceLines;
 use App\Constants\ModulePermissions;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceItemController extends Controller
 {
-    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
-    {
-        return response()->json([
-            'success' => $success,
-            'message'=>$message,
-            'data' => $data
-        ], $statusCode);
-    }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(\App\Http\Requests\InvoiceItem\StoreRequest $request): JsonResponse
     {
-        if(!Auth::user()->hasPermissionTo(ModulePermissions::CREATE_INVOICES))
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_INVOICES)) {
             abort(403);
-        $request->validate([
-            "invoice_id"=>"required",
-            "description"=>"required",
-            "quantity"=>"required",
-            "rate"=>"required",
-            "tax" =>"required",
-            "total_amount"=>"required"
-        ]);
+        }
 
-       InvoiceItem::create([
-            "invoice_id"=>$request->invoice_id,
-            "description"=>$request->description,
-            "quantity" => $request->quantity,
-            "rate" => $request->rate,
-            "tax" => $request->tax,
-            "total_amount" => $request->total_amount,
-            "created_by"=>auth()->user()->id
-        ]);
+        // ENG-9: drafts only; the line's total is worked out by the action (quantity x rate + tax), never taken from the request
+        app(ChangeInvoiceLines::class)->add(Invoice::findOrFail($request->invoice_id), $request->only(['description', 'quantity', 'rate', 'tax', 'tax_rate_id'])
+            + $request->only(array_values(array_filter(ChangeInvoiceLines::CODES, fn ($f) => $request->filled($f)))), Auth::user());
 
-        $items = InvoiceItem::where("invoice_id",$request->invoice_id)->orderBy("id","desc")->get();
+        $items = InvoiceItem::where('invoice_id', $request->invoice_id)->orderBy('id', 'desc')->get();
 
-        return $this->response(true,'success',$items,200);
+        return $this->response(true, 'success', $items, 200);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\InvoiceItem  $invoiceItem
-     * @return JsonResponse
      */
     public function show($id): JsonResponse
     {
-        $items = InvoiceItem::where("invoice_id", $id)->get();
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_INVOICES)) {
+            abort(403);
+        }
 
-        return $this->response(true,'success',$items, 200);
-    }
+        $items = InvoiceItem::where('invoice_id', $id)->get();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\InvoiceItem  $invoiceItem
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(InvoiceItem $invoiceItem)
-    {
-        //
+        return $this->response(true, 'success', $items, 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\InvoiceItem  $invoiceItem
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(Request $request, $id): \Illuminate\Http\Response|JsonResponse
+    public function update(\App\Http\Requests\InvoiceItem\UpdateRequest $request, $id): Response|JsonResponse
     {
-        $item = InvoiceItem::find($id);
-        $item->update([
-            "description"=>$request->description,
-            "quantity" => $request->quantity,
-            "rate" => $request->rate,
-            "tax" => $request->tax,
-            "total_amount" => $request->total_amount,
-            "updated_by"=>auth()->user()->id
-        ]);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_INVOICES)) {
+            abort(403);
+        }
 
-        $items = InvoiceItem::where("invoice_id",$request->invoice_id)->orderBy("id","desc")->get();
+        $item = app(ChangeInvoiceLines::class)->update(InvoiceItem::findOrFail($id),   // ENG-9: drafts only, judged by the line's real invoice
+            $request->only(['description', 'quantity', 'rate', 'tax', 'tax_rate_id']) + $request->only(array_values(array_filter(ChangeInvoiceLines::CODES, fn ($f) => $request->exists($f)))),
+            Auth::user());
 
-        return $this->response(true,'success',$items,200);
+        $items = InvoiceItem::where('invoice_id', $item->invoice_id)->orderBy('id', 'desc')->get();
+
+        return $this->response(true, 'success', $items, 200);
 
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\InvoiceItem  $invoiceItem
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function destroy($id): \Illuminate\Http\Response|JsonResponse
+    public function destroy($id): Response|JsonResponse
     {
-        $item = InvoiceItem::find($id);
-        $item->deleted_by = auth()->user()->id;
-        $item->save();
-        $item->delete();
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_INVOICES)) {
+            abort(403);
+        }
 
-        $items = InvoiceItem::where("invoice_id",$item->invoice_id)->orderBy("id","desc")->get();
+        $invoiceId = (int) app(ChangeInvoiceLines::class)->remove(InvoiceItem::findOrFail($id), Auth::user())->id;   // ENG-9
 
-        return $this->response(true,'success',$items,200);
+        $items = InvoiceItem::where('invoice_id', $invoiceId)->orderBy('id', 'desc')->get();
+
+        return $this->response(true, 'success', $items, 200);
     }
+
 }

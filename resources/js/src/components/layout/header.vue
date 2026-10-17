@@ -7,7 +7,9 @@
                 <div class="header-brand">
                     <button 
                         class="mobile-menu-toggle"
-                        @click="$store.commit('toggleSideBar', !$store.state.is_show_sidebar)"
+                        @click="app.toggleSideBar(!app.is_show_sidebar)"
+                        aria-label="Toggle sidebar navigation"
+                        :aria-expanded="app.is_show_sidebar ? 'true' : 'false'"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -16,10 +18,18 @@
                         </svg>
                     </button>
                     
-                    <router-link to="/" class="logo-link">
+                    <!-- The sidebar carries its own brand mark and is
+                         visible by default above 991px, so this duplicate
+                         only needs to show up where the sidebar is
+                         off-screen until toggled open (see the matching
+                         @media rule in this component's own <style>, and
+                         .modern-sidebar-wrapper's breakpoint in
+                         sidebar.vue) -- otherwise both the header and the
+                         sidebar showed the same logo and name at once. -->
+                    <router-link to="/" class="logo-link mobile-only-brand">
                         <div class="logo-wrapper">
-                            <img src="@/assets/images/logo.svg" class="logo-img" alt="logo" />
-                            <span class="logo-text">Ouma Njoga & Co.</span>
+                            <img :src="branding.logo_url || defaultLogo" class="logo-img" alt="" />
+                            <span class="logo-text">{{ branding.name }}</span>
                         </div>
                     </router-link>
                 </div>
@@ -31,10 +41,28 @@
 
                 <!-- Right Section -->
                 <div class="header-actions">
+                    <!-- Global search trigger (UI-9) -->
+                    <div class="action-item search-trigger">
+                        <button
+                            type="button"
+                            class="search-trigger-btn"
+                            @click="openGlobalSearch && openGlobalSearch()"
+                            title="Search (Ctrl/Cmd-K)"
+                            aria-label="Open global search"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <span class="search-trigger-label">Search</span>
+                            <kbd class="search-trigger-kbd">Ctrl K</kbd>
+                        </button>
+                    </div>
+
                     <!-- Theme Toggle -->
                     <div class="action-item theme-toggle">
                         <button 
-                            v-if="$store.state.dark_mode == 'light'" 
+                            v-if="app.dark_mode == 'light'" 
                             @click="toggleMode('dark')"
                             class="theme-btn"
                             title="Switch to Dark Mode"
@@ -54,7 +82,7 @@
                         </button>
                         
                         <button 
-                            v-if="$store.state.dark_mode == 'dark'" 
+                            v-if="app.dark_mode == 'dark'" 
                             @click="toggleMode('system')"
                             class="theme-btn"
                             title="Switch to System Mode"
@@ -66,7 +94,7 @@
                         </button>
                         
                         <button 
-                            v-if="$store.state.dark_mode == 'system'" 
+                            v-if="app.dark_mode == 'system'" 
                             @click="toggleMode('light')"
                             class="theme-btn"
                             title="Switch to Light Mode"
@@ -87,6 +115,7 @@
                                 id="userDropdown" 
                                 data-bs-toggle="dropdown" 
                                 aria-expanded="false"
+                                aria-label="Open account menu"
                             >
                                 <img src="@/assets/images/profile-16.jpeg" alt="User Avatar" class="user-avatar" />
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron">
@@ -97,20 +126,30 @@
                             <ul class="dropdown-menu dropdown-menu-end modern-dropdown" aria-labelledby="userDropdown">
                                 <li class="dropdown-header">
                                     <div class="user-info">
-                                        <div class="user-name">Admin User</div>
-                                        <div class="user-email">admin@oumanjoga.com</div>
+                                        <div class="user-name" data-testid="header-user-name">{{ currentUser.name || 'User' }}</div>
+                                        <div class="user-email" data-testid="header-user-email">{{ currentUser.email || '' }}</div>
                                     </div>
                                 </li>
+                                <!-- UI-16: the person's other firms (shown when they belong to more than one) -->
+                                <template v-if="firms.length > 1">
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="dropdown-header firm-switch-label">Switch firm</li>
+                                    <li v-for="firm in firms" :key="firm.slug">
+                                        <button
+                                            type="button"
+                                            class="dropdown-item"
+                                            :class="{ 'current-firm': firm.current }"
+                                            :aria-current="firm.current ? 'true' : undefined"
+                                            :disabled="firm.current || switching"
+                                            data-testid="firm-switch-item"
+                                            @click="switchTo(firm)"
+                                        >
+                                            <span>{{ firm.name }}</span>
+                                            <span v-if="firm.current" class="firm-current-tag">current</span>
+                                        </button>
+                                    </li>
+                                </template>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <router-link to="/users/profile" class="dropdown-item">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                            <circle cx="12" cy="7" r="4"></circle>
-                                        </svg>
-                                        <span>Profile</span>
-                                    </router-link>
-                                </li>
                                 <li>
                                     <router-link to="/users/account-setting" class="dropdown-item">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -122,7 +161,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <router-link to="/login" class="dropdown-item logout-item" @click="logout">
+                                    <router-link to="/login" class="dropdown-item logout-item" @click.prevent="logout">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                             <polyline points="16 17 21 12 16 7"></polyline>
@@ -141,29 +180,82 @@
         <!-- OVERLAY FOR MOBILE -->
         <div 
             class="header-overlay" 
-            :class="{ show: !$store.state.is_show_sidebar }" 
-            @click="$store.commit('toggleSideBar', !$store.state.is_show_sidebar)"
+            :class="{ show: false }"
+            @click="app.toggleSideBar(!app.is_show_sidebar)"
         ></div>
     </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { confirmAction } from '@/composables/use-confirm';
+import { branding } from '@/branding';   // UI-13
+import defaultLogo from '@/assets/images/logo.svg';
+import { useAppStore } from '@/stores/app';
+
+const app = useAppStore();   // ENG-14: layout state (Pinia)
+import { onMounted, inject, ref } from 'vue';
+import axios from '@/api';
+
+const openGlobalSearch = inject('openGlobalSearch', null);
+
+// Bug fix: this dropdown previously showed hardcoded "Admin User" /
+// "admin@oumanjoga.com" text regardless of who was actually logged in.
+const currentUser = ref({ name: '', email: '' });
+try {
+    const stored = JSON.parse(localStorage.getItem('user') || 'null');
+    if (stored) {
+        currentUser.value = { name: stored.name || '', email: stored.email || '' };
+    }
+} catch (e) {
+    // leave the defaults if localStorage has anything unexpected in it
+}
+
+// UI-16: firm switcher. Moving to another firm goes through that firm's own host with a one-minute, single-use link.
+const firms = ref([]);
+const switching = ref(false);
+const switchTo = async (firm) => {
+    if (!(await confirmAction({ title: `Switch to ${firm.name || firm.slug}?`, text: 'You will be taken to that firm and signed in there. Anything unsaved here will be lost.', confirmText: 'Switch firm' }))) return;
+    switching.value = true;
+    try {
+        const { data } = await axios.post(`/api/v1/firms/${firm.slug}/switch`);
+        window.location.href = data.data.url;
+    } catch (e) {
+        switching.value = false;
+    }
+};
 
 onMounted(() => {
     toggleMode();
+    // only once signed in: the header is mounted on the sign-in page too, where a 401 would open the session-expired dialog
+    if (currentUser.value.email) {
+        axios.get('/api/v1/firms').then(({ data }) => { firms.value = data.data || []; }).catch(() => {});
+    }
 });
 
 const toggleMode = (mode) => {
     window.$appSetting.toggleMode(mode);
 };
 
-const logout = () => {
-    localStorage.clear();
+const logout = async () => {
+    if (!(await confirmAction({ title: 'Sign out?', text: 'You will need to sign in again to continue. Anything unsaved will be lost.', confirmText: 'Sign out' }))) return;
+    // Invalidate the server-side session (see APIController::logout, SEC-4/
+    // SEC-8) before clearing the local display flags — otherwise the
+    // httpOnly session cookie stays valid and the user isn't really logged
+    // out server-side.
+    axios.post('/api/v1/logout').finally(() => {
+        localStorage.clear();
+        navigator.serviceWorker?.controller?.postMessage('signed-out');   // FUN-19: offline copies go with the session
+        window.location.assign('/login');
+    });
 };
 </script>
 
 <style lang="scss" scoped>
+// UI-16: firm switcher
+.firm-switch-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.current-firm { font-weight: 600; }
+.firm-current-tag { margin-left: auto; padding-left: 8px; font-size: 12px; opacity: 0.7; }
+
 // Modern Header Styles
 .modern-header-container {
     position: fixed;
@@ -221,6 +313,18 @@ const logout = () => {
 
     .logo-link {
         text-decoration: none;
+
+        // Hidden on desktop -- the sidebar (visible by default above
+        // 991px) already carries the brand mark there. Shown only where
+        // the sidebar is off-screen until the hamburger opens it, so
+        // exactly one brand mark is ever on screen at a time, never both.
+        &.mobile-only-brand {
+            display: none;
+
+            @media (max-width: 991px) {
+                display: block;
+            }
+        }
         
         .logo-wrapper {
             display: flex;
@@ -295,6 +399,54 @@ const logout = () => {
 .action-item {
     display: flex;
     align-items: center;
+}
+
+// Global search trigger (UI-9)
+.search-trigger {
+    .search-trigger-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--neutral-100);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+
+        &:hover {
+            background: var(--neutral-200);
+            color: var(--primary-600);
+            border-color: var(--primary-200);
+        }
+
+        svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .search-trigger-label {
+            @media (max-width: 768px) {
+                display: none;
+            }
+        }
+
+        .search-trigger-kbd {
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--text-secondary);
+
+            @media (max-width: 576px) {
+                display: none;
+            }
+        }
+    }
 }
 
 // Theme Toggle

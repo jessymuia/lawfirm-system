@@ -127,7 +127,7 @@ body.gu-unselectable .media.el-drag-ex-1 .media-body h6 {
 
 .parent.ex-1 .drag-drop .media .media-body p,
 body.gu-unselectable .media.el-drag-ex-1 .media-body p {
-    color: #888ea8;
+    color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 0;
     font-size: 12px;
@@ -191,7 +191,7 @@ body.gu-unselectable .media.el-drag-ex-2 .media-body h6 {
 
 .parent.ex-2 .drag-drop .media .media-body p,
 body.gu-unselectable .media.el-drag-ex-2 .media-body p {
-    color: #888ea8;
+    color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 0;
     font-size: 12px;
@@ -266,7 +266,7 @@ body.gu-unselectable .media.el-drag-ex-3.gu-mirror .media-body h5 span.comment-t
 
 .parent.ex-3 .drag-drop .media .media-body p.meta-time,
 body.gu-unselectable .media.el-drag-ex-3.gu-mirror .media-body p.meta-time {
-    color: #888ea8;
+    color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 0;
     font-size: 12px;
@@ -309,7 +309,7 @@ body.gu-unselectable .card.post.el-drag-ex-4.gu-mirror .media.user-meta .media-b
 
 .parent.ex-4 .card.post .media.user-meta .media-body p,
 body.gu-unselectable .card.post.el-drag-ex-4.gu-mirror .media.user-meta .media-body p {
-    color: #888ea8;
+    color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 0;
     font-size: 12px;
@@ -318,7 +318,7 @@ body.gu-unselectable .card.post.el-drag-ex-4.gu-mirror .media.user-meta .media-b
 .parent.ex-4 .card.post.text-post .card-body .post-content,
 body.gu-unselectable .card.post.text-post.el-drag-ex-4.gu-mirror .card-body .post-content {
     padding: 20px 18px;
-    color: #888ea8;
+    color: var(--text-muted);
     border-bottom: 1px solid #f1f2f3;
     margin-bottom: 15px;
 }

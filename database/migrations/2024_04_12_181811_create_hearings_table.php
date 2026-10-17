@@ -1,5 +1,6 @@
 <?php
 
+use App\AppUtils\Utils;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,9 +15,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('hearings', function (Blueprint $table) {
-            $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('case_id')->constrained("cases");
-            $table->foreignId('court_id')->constrained("courts");
+            $table = Utils::createDefaultTableColumns($table);
+            $table->foreignId('case_id')->constrained('cases');
+            $table->foreignId('court_id')->constrained('courts');
             $table->date('hearing_date');
             $table->integer('hearing_type');
             $table->text('notes');

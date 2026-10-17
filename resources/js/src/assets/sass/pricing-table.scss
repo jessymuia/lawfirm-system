@@ -278,7 +278,7 @@
     }
     .pricing-plan p {
         margin: 0;
-        color: #888ea8;
+        color: var(--text-muted);
         font-size: 14px;
         letter-spacing: 1px;
     }
@@ -294,7 +294,7 @@
     .pricing-plan-label {
         border-radius: 4px;
         font-size: 18px;
-        color: #888ea8;
+        color: var(--text-muted);
         text-align: center;
         line-height: 24px;
         padding: 15px;
@@ -325,7 +325,7 @@
         margin: 0;
         padding: 3px 0;
         line-height: 24px;
-        color: #888ea8;
+        color: var(--text-muted);
         font-size: 13px;
         letter-spacing: 1px;
     }
@@ -337,11 +337,11 @@
         box-shadow: 0 4px 12px rgba(102, 103, 107, 0.15);
     }
     .billed-yearly-radio.billed-yearly-switch span.txt-monthly {
-        color: #888ea8;
+        color: var(--text-muted);
         font-weight: 600;
     }
     .billed-yearly-radio span.txt-yearly {
-        color: #888ea8;
+        color: var(--text-muted);
         font-weight: 600;
     }
     .billed-yearly-radio span.txt-monthly {

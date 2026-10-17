@@ -179,29 +179,24 @@
             <div class="cases-section">
                 <div class="section-header">
                     <h2 class="section-title">Associated Cases</h2>
-                    <button class="btn-add-case">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Add Case
-                    </button>
                 </div>
                 
                 <div class="cases-grid">
-                    <div class="case-card" v-if="clientData.cases && clientData.cases.length > 0" v-for="case_item in clientData.cases" :key="case_item.id">
-                        <div class="case-header">
-                            <span class="case-number">Case #{{ case_item.case_number }}</span>
-                            <span class="case-status" :class="case_item.status">{{ case_item.status }}</span>
+                    <template v-if="clientData.cases && clientData.cases.length > 0">
+                        <div class="case-card cross-link" v-for="case_item in clientData.cases" :key="case_item.id" @click="goToCase(case_item.id)">
+                            <div class="case-header">
+                                <span class="case-number">Case #{{ case_item.case_number }}</span>
+                                <span class="case-status" :class="case_item.status">{{ case_item.status }}</span>
+                            </div>
+                            <h4 class="case-title">{{ case_item.title }}</h4>
+                            <p class="case-description">{{ case_item.description }}</p>
+                            <div class="case-footer">
+                                <span class="case-date">{{ formatDate(case_item.created_at) }}</span>
+                                <button type="button" class="btn-view-case" @click.stop="goToCase(case_item.id)">View Details →</button>
+                            </div>
                         </div>
-                        <h4 class="case-title">{{ case_item.title }}</h4>
-                        <p class="case-description">{{ case_item.description }}</p>
-                        <div class="case-footer">
-                            <span class="case-date">{{ formatDate(case_item.created_at) }}</span>
-                            <button class="btn-view-case">View Details →</button>
-                        </div>
-                    </div>
-                    
+                    </template>
+
                     <div class="empty-state" v-else>
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -214,6 +209,80 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Trust Ledger Section (FUN-2) -->
+            <div class="trust-section">
+                <div class="section-header">
+                    <h2 class="section-title">Trust Account</h2>
+                    <div class="trust-balance-badge" :class="{ 'zero-balance': trustBalance <= 0 }">
+                        Balance: {{ formatMoney(trustBalance) }}
+                    </div>
+                </div>
+
+                <div class="trust-grid">
+                    <!-- New transaction form -->
+                    <div class="trust-form-card">
+                        <h4>Record a Transaction</h4>
+                        <form @submit.prevent="submitTrustTransaction">
+                            <div class="form-group">
+                                <label class="form-label">Type</label>
+                                <select v-model="trustForm.type" class="form-select modern-select">
+                                    <option value="deposit">Deposit</option>
+                                    <option value="disbursement">Disbursement</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount</label>
+                                <input type="number" step="0.01" min="0.01" v-model="trustForm.amount" class="form-control modern-input" placeholder="0.00" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Related case (optional)</label>
+                                <select v-model="trustForm.case_id" class="form-select modern-select">
+                                    <option value="">None</option>
+                                    <option v-for="c in clientData.cases" :key="c.id" :value="c.id">{{ c.case_number }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <input type="text" v-model="trustForm.description" class="form-control modern-input" placeholder="e.g. Initial retainer" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Reference number (optional)</label>
+                                <input type="text" v-model="trustForm.reference_number" class="form-control modern-input" placeholder="e.g. receipt/cheque number" />
+                            </div>
+                            <button type="submit" class="btn-submit-trust" :disabled="trustSubmitting">
+                                {{ trustSubmitting ? 'Saving...' : 'Record Transaction' }}
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Transaction history -->
+                    <div class="trust-history-card">
+                        <h4>Transaction History</h4>
+                        <div v-if="trustLoading" class="trust-loading">Loading...</div>
+                        <div v-else-if="!trustTransactions.length" class="empty-state small">
+                            <p>No trust transactions yet.</p>
+                        </div>
+                        <ul v-else class="trust-list">
+                            <li v-for="t in trustTransactions" :key="t.id" :class="{ voided: t.voided }">
+                                <div class="trust-list-main">
+                                    <span class="trust-type" :class="t.type">{{ t.type === 'deposit' ? 'Deposit' : 'Disbursement' }}</span>
+                                    <span class="trust-desc">{{ t.description }}</span>
+                                    <span class="trust-date">{{ t.date }}{{ t.voided ? ' — VOIDED' : '' }}</span>
+                                </div>
+                                <div class="trust-list-side">
+                                    <span class="trust-amount" :class="t.type">
+                                        {{ t.type === 'deposit' ? '+' : '-' }}{{ formatMoney(t.amount) }}
+                                    </span>
+                                    <button v-if="!t.voided" type="button" class="btn-void" @click="voidTrustTransaction(t)" title="Void this transaction">
+                                        Void
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -221,13 +290,30 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from "../../../api";
+import axios, { fetchAllPages } from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useRecentlyViewed } from '@/composables/use-recently-viewed';
+import AppDatePicker from '@/components/ui/app-date-picker.vue';
 
 useMeta({ title: 'View Client' });
 
+const { addRecentItem } = useRecentlyViewed();
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+
 const router = useRouter();
 const route = useRoute();
+
+// UI-9: the case-details route has no id URL param — it reads
+// localStorage (see cases/list-cases.vue's view_row) — so a cross-link
+// to a case follows that same pattern rather than a plain router-link.
+const goToCase = (caseId) => {
+    if (!caseId) return;
+    localStorage.setItem('caseId', caseId);
+    router.push('/view-case');
+};
 
 const clientData = ref({
     id: '',
@@ -243,21 +329,101 @@ const clientData = ref({
     cases: []
 });
 
+// Trust ledger (FUN-2)
+const trustBalance = ref(0);
+const trustTransactions = ref([]);
+const trustLoading = ref(true);
+const trustForm = ref({ type: 'deposit', amount: '', description: '', reference_number: '', case_id: '' });
+const trustSubmitting = ref(false);
+
 onMounted(() => {
-    fetchClientData();
+    // DATA-9: the URL carries the client's public id; the ledger calls need the record loaded first.
+    fetchClientData().then(fetchTrustLedger);
 });
 
 const fetchClientData = () => {
     const clientId = route.params.id;
-    
-    axios.get(`/api/clients/${clientId}`)
+
+    return axios.get(`/api/v1/clients/${clientId}`)
         .then(response => {
             clientData.value = response.data.data;
+            addRecentItem({ type: 'client', id: clientId, title: clientData.value.name, subtitle: 'Client' });
         })
         .catch(error => {
             console.error('Error fetching client data:', error);
             showMessage('Error loading client data', 'error');
         });
+};
+
+const fetchTrustLedger = () => {
+    trustLoading.value = true;
+    if (!clientData.value.id) { trustLoading.value = false; return; }
+    fetchAllPages('/api/v1/trust-transactions', { client_id: clientData.value.id }, { pick: (body) => body.data.transactions })
+        .then(({ rows, body }) => {
+            trustBalance.value = body.balance;
+            trustTransactions.value = rows;
+        })
+        .catch(error => {
+            // A 403 here just means this user lacks trust-ledger
+            // permissions — the rest of the client page still works, so
+            // don't surface an error toast for that, only log it.
+            console.error('Error fetching trust ledger:', error);
+        })
+        .finally(() => {
+            trustLoading.value = false;
+        });
+};
+
+const submitTrustTransaction = () => {
+    if (!trustForm.value.amount || !trustForm.value.description) return;
+
+    trustSubmitting.value = true;
+    axios.post('/api/v1/trust-transactions', {
+        client_id: clientData.value.id,
+        case_id: trustForm.value.case_id || null,
+        type: trustForm.value.type,
+        amount: trustForm.value.amount,
+        description: trustForm.value.description,
+        reference_number: trustForm.value.reference_number || null,
+    })
+        .then(() => {
+            showMessage(`${trustForm.value.type === 'deposit' ? 'Deposit' : 'Disbursement'} recorded successfully.`);
+            trustForm.value = { type: 'deposit', amount: '', description: '', reference_number: '', case_id: '' };
+            fetchTrustLedger();
+        })
+        .catch(error => {
+            showMessage(error.response?.data?.message || 'Error recording transaction.', 'error');
+        })
+        .finally(() => {
+            trustSubmitting.value = false;
+        });
+};
+
+const voidTrustTransaction = (transaction) => {
+    window.Swal.fire({
+        title: 'Void this transaction?',
+        text: 'This cannot be undone. The entry stays on the record but is excluded from the balance.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--color-danger)',
+        confirmButtonText: 'Void it',
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        axios.put(`/api/v1/trust-transactions/${transaction.id}/void`)
+            .then(() => {
+                showMessage('Transaction voided.');
+                fetchTrustLedger();
+            })
+            .catch(error => {
+                showMessage(error.response?.data?.message || 'Error voiding transaction.', 'error');
+            });
+    });
+};
+
+const formatMoney = (value) => {
+    const n = Number(value) || 0;
+    return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const formatDate = (date) => {
@@ -267,46 +433,112 @@ const formatDate = (date) => {
 };
 
 const editClient = () => {
-    router.push({ name: 'list-clients', query: { edit: clientData.value.id } });
+    router.push({ name: 'clients', query: { edit: clientData.value.id } });
 };
 
 const deleteClient = () => {
-    window.Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            axios.delete(`/api/clients/${clientData.value.id}`)
-                .then(() => {
-                    showMessage('Client deleted successfully', 'success');
-                    router.push('/clients');
-                })
-                .catch(error => {
-                    console.error('Error deleting client:', error);
-                    showMessage('Error deleting client', 'error');
-                });
-        }
-    });
-};
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '12px 20px',
+    confirmDelete({
+        url: `/api/v1/clients/${clientData.value.id}`,
+        itemLabel: clientData.value.name,
+        onSuccess: () => {
+            router.push('/clients');
+        },
     });
 };
 </script>
+
+<style scoped>
+/* The client page: header bar, profile banner, a two-column grid of detail cards, cases, then the trust ledger.
+   All layout lives here (it used to rely on rules that were never written, which is why it looked broken). */
+.modern-view-client { max-width: 1180px; margin: 0 auto; padding: 4px 0 40px; font-size: 15px; color: var(--text-primary, #18181b); }
+
+.client-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-back, .btn-action-header {
+    display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; font-size: 14.5px; font-weight: 600;
+    border: 1px solid var(--border-color, #e4e4e7); background: var(--card-bg, #fff); color: var(--text-secondary, #52525b); cursor: pointer; transition: all 0.15s;
+}
+.btn-back:hover, .btn-action-header:hover { border-color: var(--primary-400); color: var(--primary-700); }
+.btn-action-header.btn-edit { background: var(--primary-600); border-color: var(--primary-600); color: #fff; }
+.btn-action-header.btn-edit:hover { background: var(--primary-700); color: #fff; }
+.btn-action-header.btn-delete { color: #b42318; border-color: rgba(231, 81, 90, 0.4); }
+.btn-action-header.btn-delete:hover { background: #e7515a; border-color: #e7515a; color: #fff; }
+
+.client-content { display: flex; flex-direction: column; gap: 22px; }
+
+/* profile banner */
+.client-profile-card {
+    border-radius: 16px; padding: 26px 28px; color: #fff;
+    background: linear-gradient(120deg, var(--primary-700), var(--primary-500));
+    box-shadow: 0 8px 24px rgba(2, 95, 144, 0.18);
+}
+.profile-header { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.profile-avatar {
+    width: 72px; height: 72px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 30px; font-weight: 700;
+    background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.45); color: #fff;
+}
+.client-name { margin: 0 0 8px; font-size: 26px; font-weight: 700; color: #fff; line-height: 1.2; }
+.client-meta { display: flex; gap: 10px 22px; flex-wrap: wrap; font-size: 14.5px; }
+.meta-item { display: inline-flex; align-items: center; gap: 7px; color: rgba(255, 255, 255, 0.92); }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.3); }
+
+/* detail cards */
+.details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.info-card, .cases-section, .trust-section {
+    background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e4e4e7); border-radius: 14px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.info-card .card-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border-light, #f4f4f5); }
+.card-icon { width: 38px; height: 38px; flex: none; border-radius: 10px; display: grid; place-items: center; background: var(--primary-50); color: var(--primary-700); }
+.card-icon.location-icon { background: #ecfdf5; color: #047857; }
+.card-icon.advocate-icon { background: #fff7ed; color: #c2410c; }
+.card-icon.info-icon { background: #f1f5f9; color: #475569; }
+.info-card .card-title { margin: 0; font-size: 17px; font-weight: 700; }
+.info-card .card-body { padding: 8px 20px 14px; }
+.info-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed var(--border-color, #e4e4e7); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { flex: none; font-size: 13.5px; color: var(--text-muted, #626779); }
+.info-value { font-weight: 600; text-align: right; word-break: break-word; }
+.info-value.email { color: var(--primary-700); }
+.info-row.full-width { flex-direction: column; align-items: flex-start; gap: 4px; }
+.info-row.full-width .info-value { text-align: left; }
+.advocate-profile { display: flex; align-items: center; gap: 14px; padding: 8px 0 4px; }
+.advocate-avatar { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 19px; background: var(--primary-100); color: var(--primary-800); }
+.advocate-name { margin: 0; font-size: 16.5px; font-weight: 700; }
+.advocate-role { font-size: 13.5px; color: var(--text-muted, #626779); }
+
+/* cases */
+.cases-section, .trust-section { padding: 20px 22px 22px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.section-title { margin: 0; font-size: 19px; font-weight: 700; }
+.cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.case-card { padding: 16px 18px; border: 1px solid var(--border-color, #e4e4e7); border-radius: 12px; background: var(--card-bg, #fff); transition: box-shadow 0.15s, border-color 0.15s; }
+.case-card.cross-link { cursor: pointer; }
+.case-card.cross-link:hover { border-color: var(--primary-300); box-shadow: 0 6px 18px rgba(2, 95, 144, 0.1); }
+.case-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.case-number { font-size: 13px; font-weight: 700; color: var(--primary-700); }
+.case-status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #e2e8f0; color: #475569; text-transform: capitalize; }
+.case-status.open, .case-status.active, .case-status.ongoing { background: #dcfce7; color: #166534; }
+.case-status.closed { background: #f1f5f9; color: #64748b; }
+.case-title { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.case-description { margin: 0 0 12px; font-size: 14px; color: var(--text-muted, #626779); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.case-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.case-date { font-size: 13px; color: var(--text-muted, #626779); }
+.btn-view-case { border: 0; background: none; color: var(--primary-700); font-weight: 700; font-size: 14px; cursor: pointer; padding: 0; }
+.empty-state { grid-column: 1 / -1; text-align: center; padding: 28px 12px; color: var(--text-muted, #626779); }
+.empty-state svg { color: var(--neutral-300); margin-bottom: 8px; }
+.empty-state h3 { margin: 0 0 4px; font-size: 17px; color: var(--text-primary, #18181b); }
+.empty-state p { margin: 0; }
+
+/* trust ledger form fields */
+.trust-section .form-group { margin-bottom: 12px; }
+.trust-section .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+.trust-section h4 { font-size: 16.5px; font-weight: 700; margin: 0 0 12px; }
+
+@media (max-width: 760px) {
+    .details-grid { grid-template-columns: 1fr; }
+    .client-profile-card { padding: 20px; }
+    .client-name { font-size: 22px; }
+    .info-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .info-value { text-align: left; }
+}
+</style>

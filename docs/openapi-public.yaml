@@ -1,0 +1,105 @@
+openapi: 3.0.3
+info:
+  title: "Law firm system: public API"
+  version: "1.0.0"
+  description: |
+    Read-only public API (PLAT-11). Authenticate with a scoped API key: `Authorization: Bearer lfk_<prefix>_<secret>`.
+    Data is limited to what the key's user may see (matter access and ethical walls apply). See docs/PUBLIC_API.md for webhooks,
+    rate limits and the deprecation policy.
+servers:
+  - url: /api/v1
+security:
+  - apiKey: []
+paths:
+  /public/clients:
+    get:
+      summary: List clients
+      description: Needs scope `clients:read`.
+      parameters: [{$ref: '#/components/parameters/page'}, {$ref: '#/components/parameters/per_page'}, {$ref: '#/components/parameters/updated_since'}]
+      responses:
+        '200': {description: A page of clients, content: {application/json: {schema: {$ref: '#/components/schemas/ClientPage'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /public/clients/{id}:
+    get:
+      summary: Get a client
+      description: Needs scope `clients:read`.
+      parameters: [{$ref: '#/components/parameters/id'}]
+      responses:
+        '200': {description: The client, content: {application/json: {schema: {type: object, properties: {data: {$ref: '#/components/schemas/Client'}}}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {description: "Not found (or not visible to the key's user)"}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /public/cases:
+    get:
+      summary: List matters
+      description: Needs scope `cases:read`.
+      parameters: [{$ref: '#/components/parameters/page'}, {$ref: '#/components/parameters/per_page'}, {$ref: '#/components/parameters/updated_since'}]
+      responses:
+        '200': {description: A page of matters, content: {application/json: {schema: {$ref: '#/components/schemas/MatterPage'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /public/cases/{id}:
+    get:
+      summary: Get a matter
+      description: Needs scope `cases:read`.
+      parameters: [{$ref: '#/components/parameters/id'}]
+      responses:
+        '200': {description: The matter, content: {application/json: {schema: {type: object, properties: {data: {$ref: '#/components/schemas/Matter'}}}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {description: "Not found (or not visible to the key's user)"}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /public/hearings:
+    get:
+      summary: List hearings
+      description: Needs scope `hearings:read`.
+      parameters: [{$ref: '#/components/parameters/page'}, {$ref: '#/components/parameters/per_page'}, {$ref: '#/components/parameters/updated_since'}]
+      responses:
+        '200': {description: A page of hearings, content: {application/json: {schema: {$ref: '#/components/schemas/HearingPage'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /public/hearings/{id}:
+    get:
+      summary: Get a hearing
+      description: Needs scope `hearings:read`.
+      parameters: [{$ref: '#/components/parameters/id'}]
+      responses:
+        '200': {description: The hearing, content: {application/json: {schema: {type: object, properties: {data: {$ref: '#/components/schemas/Hearing'}}}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {description: "Not found (or not visible to the key's user)"}
+        '429': {$ref: '#/components/responses/RateLimited'}
+components:
+  securitySchemes:
+    apiKey: {type: http, scheme: bearer, description: "lfk_<8 hex>_<32 alphanumerics>"}
+  parameters:
+    id: {name: id, in: path, required: true, description: 'The record''s public id (ULID). Integer database ids are never accepted.', schema: {$ref: '#/components/schemas/PublicId'}}
+    page: {name: page, in: query, schema: {type: integer, minimum: 1}}
+    per_page: {name: per_page, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 25}}
+    updated_since: {name: updated_since, in: query, description: "ISO-8601 timestamp; only records changed at or after it", schema: {type: string, format: date-time}}
+  responses:
+    Unauthorized: {description: "Missing, invalid, expired or revoked key (always the same answer)"}
+    Forbidden: {description: "Key lacks the scope, the key's user lacks the permission, or the plan has no API access"}
+    RateLimited: {description: "Too many requests; see Retry-After"}
+  schemas:
+    PublicId: {type: string, pattern: '^[0-9A-HJKMNP-TV-Z]{26}$', example: 01J9ZQ3V5W8XK2M4N6P8R0T2V4, description: 'ULID (DATA-9): sortable, opaque, stable across exports and imports.'}
+    PageMeta:
+      type: object
+      properties: {page: {type: integer}, per_page: {type: integer}, total: {type: integer}, last_page: {type: integer}}
+    Client:
+      type: object
+      properties: {id: {$ref: '#/components/schemas/PublicId'}, name: {type: string}, phone_number: {type: string}, extra_phone_number: {type: string, nullable: true}, address: {type: string}, created_at: {type: string, format: date-time}, updated_at: {type: string, format: date-time}}
+    Matter:
+      type: object
+      properties: {id: {$ref: '#/components/schemas/PublicId'}, case_number: {type: string}, case_type: {type: string}, client_id: {allOf: [{$ref: '#/components/schemas/PublicId'}], nullable: true}, status: {type: string, enum: [open, appeal, closed, settled]}, start_date: {type: string, format: date}, end_date: {type: string, format: date, nullable: true}, created_at: {type: string, format: date-time}, updated_at: {type: string, format: date-time}}
+    Hearing:
+      type: object
+      properties: {id: {$ref: '#/components/schemas/PublicId'}, case_id: {allOf: [{$ref: '#/components/schemas/PublicId'}], nullable: true}, hearing_date: {type: string, format: date}, hearing_type: {type: object, nullable: true, properties: {key: {type: string, nullable: true, description: 'Stable system catalog key (TEN-11); null for a firm''s own hearing type'}, name: {type: string}}}, created_at: {type: string, format: date-time}, updated_at: {type: string, format: date-time}}
+    ClientPage: {type: object, properties: {data: {type: array, items: {$ref: '#/components/schemas/Client'}}, meta: {$ref: '#/components/schemas/PageMeta'}}}
+    MatterPage: {type: object, properties: {data: {type: array, items: {$ref: '#/components/schemas/Matter'}}, meta: {$ref: '#/components/schemas/PageMeta'}}}
+    HearingPage: {type: object, properties: {data: {type: array, items: {$ref: '#/components/schemas/Hearing'}}, meta: {$ref: '#/components/schemas/PageMeta'}}}

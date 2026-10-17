@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
@@ -36,8 +35,9 @@ class ResetPassword extends Command
         // get the user with the email address
         $user = User::query()->where('email', $email)->first();
         // check if the user exists
-        if (!$user) {
+        if (! $user) {
             $this->error('User not found');
+
             return CommandAlias::FAILURE;
         }
         // prompt the user for the new password
@@ -46,6 +46,7 @@ class ResetPassword extends Command
         $user->password = bcrypt($password);
         // save the user
         $user->save();
+
         // return success
         return CommandAlias::SUCCESS;
     }

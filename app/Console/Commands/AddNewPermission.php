@@ -33,17 +33,11 @@ class AddNewPermission extends Command
         $permission = $this->ask('Enter the permission name');
         // prompt the user for the guard
         $guard = $this->ask('Enter the guard');
-        // create the permission
-        $permission = Permission::create([
+        // create the permission (create() throws if it cannot, it never returns false)
+        Permission::create([
             'name' => strtolower($permission),
             'guard_name' => strtolower($guard),
         ]);
-
-        // check if the permission was created
-        if (!$permission) {
-            $this->error('Permission not created');
-            return CommandAlias::FAILURE;
-        }
 
         return CommandAlias::SUCCESS;
     }

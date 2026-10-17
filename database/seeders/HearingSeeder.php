@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Hearing;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class HearingSeeder extends Seeder

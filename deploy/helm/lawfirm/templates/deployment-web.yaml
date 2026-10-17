@@ -1,0 +1,58 @@
+{{- if and (eq .Values.persistence.accessMode "ReadWriteOnce") (gt (int .Values.web.replicaCount) 1) }}
+{{- fail "web.replicaCount > 1 needs persistence.accessMode=ReadWriteMany (a ReadWriteOnce volume can only be mounted by one node)" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lawfirm.fullname" . }}-web
+  labels:
+    {{- include "lawfirm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: {{ .Values.web.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "lawfirm.selector" . | nindent 6 }}
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        {{- include "lawfirm.selector" . | nindent 8 }}
+        app.kubernetes.io/component: web
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: web
+          image: {{ include "lawfirm.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["web"]
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            {{- include "lawfirm.env" . | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage
+      volumes:
+        {{- include "lawfirm.storageVolume" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

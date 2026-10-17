@@ -3,10 +3,7 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class ForgetPassword extends Mailable
@@ -14,14 +11,20 @@ class ForgetPassword extends Mailable
     use Queueable, SerializesModels;
 
     public $username;
+
     public $token;
+
+    /** Base URL of the firm the link should open (multi-tenant); null = APP_URL. */
+    public $baseUrl;
+
     /**
      * Create a new message instance.
      */
-    public function __construct($username,$token)
+    public function __construct($username, $token, $baseUrl = null)
     {
-        $this->username=$username;
-        $this->token=$token;
+        $this->baseUrl = $baseUrl;
+        $this->username = $username;
+        $this->token = $token;
 
     }
 

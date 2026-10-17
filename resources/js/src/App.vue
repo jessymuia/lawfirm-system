@@ -1,6 +1,8 @@
 <template>
-    <div :class="[$store.state.layout_style, $store.state.menu_style]">
+    <div :class="[app.layout_style, app.menu_style]">
         <component v-bind:is="layout"></component>
+        <SessionExpiredModal />
+        <PwaInstall />
     </div>
 </template>
 <script setup>
@@ -9,14 +11,16 @@
     import '@/assets/sass/app.scss';
 
     import { useMeta } from '@/composables/use-meta';
-    import { useStore } from 'vuex';
+    import { useAppStore } from '@/stores/app';
+    import SessionExpiredModal from './components/session-expired-modal.vue';
+    import PwaInstall from './components/pwa-install.vue';
 
     useMeta({ title: 'Sales Admin' });
 
-    const store = useStore();
+    const app = useAppStore();
 
     const layout = computed(() => {
-        return store.getters.layout;
+        return app.layout;
     });
 </script>
 <script>

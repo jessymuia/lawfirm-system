@@ -25,6 +25,7 @@
                     </svg>
                     <h2 class="card-title">Invoice Information</h2>
                 </div>
+                <InvoiceStatus v-if="invoice.workflow_status" :payment-status="invoice.payment_status" :status="invoice.workflow_status" :due-date="invoice.invoice_due_date" />
             </div>
             
             <div class="card-body">
@@ -78,44 +79,51 @@
 
             <div class="card-body">
                 <div class="table-container">
-                    <v-client-table :data="itemsI" :columns="columnsI" :options="table_optionI">
-                        <template #description="props">
-                            <div class="description-cell">{{ props.row.description }}</div>
-                        </template>
-                        <template #quantity="props">
-                            <div class="quantity-cell">{{ props.row.quantity }}</div>
-                        </template>
-                        <template #rate="props">
-                            <div class="amount-cell">KES {{ props.row.rate }}</div>
-                        </template>
-                        <template #tax="props">
-                            <div class="tax-cell">KES {{ props.row.tax }}</div>
-                        </template>
-                        <template #total_amount="props">
-                            <div class="total-cell">KES {{ props.row.total_amount }}</div>
-                        </template>
-                        <template #actions="props">
-                            <div class="actions text-center">
-                                <a href="javascript:;" class="cancel me-1" @click="update_rowI(props.row)">
-                                    <button type="button" class="btn-action-table btn-edit" data-bs-toggle="modal" data-bs-target="#clientI_modal">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2"/>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
-                                        </svg>
-                                        Edit
-                                    </button>
-                                </a>
-                                <a href="javascript:" class="cancel" @click="submit_form6(props.row)">
-                                    <button type="button" class="btn-action-table btn-delete">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/>
-                                        </svg>
-                                        Delete
-                                    </button>
-                                </a>
-                            </div>
-                        </template>
-                    </v-client-table>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Tax</th>
+                                <th>Total</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in itemsI" :key="row.id">
+                                <td data-label="Description"><div class="description-cell">{{ row.description }}</div></td>
+                                <td data-label="Qty"><div class="quantity-cell">{{ row.quantity }}</div></td>
+                                <td data-label="Rate"><div class="amount-cell">{{ currency }} {{ row.rate }}</div></td>
+                                <td data-label="Tax"><div class="tax-cell">{{ currency }} {{ row.tax }}</div></td>
+                                <td data-label="Total"><div class="total-cell">{{ currency }} {{ row.total_amount }}</div></td>
+                                <td class="actions-col" data-label="Actions">
+                                    <div class="actions text-center">
+                                        <a href="javascript:;" class="cancel me-1" @click="update_rowI(row)">
+                                            <button type="button" class="btn-action-table btn-edit" data-bs-toggle="modal" data-bs-target="#clientI_modal">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2"/>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
+                                                </svg>
+                                                Edit
+                                            </button>
+                                        </a>
+                                        <a href="javascript:" class="cancel" @click="delete_rowI(row)">
+                                            <button type="button" class="btn-action-table btn-delete">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/>
+                                                </svg>
+                                                Delete
+                                            </button>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-if="itemsI.length === 0">
+                                <td colspan="6" class="no-items-row">No items on this invoice yet — add the first one above.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -132,74 +140,88 @@
         </div>
 
         <!-- Add/Edit Item Modal -->
-        <div class="modal fade" id="clientI_modal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content modern-modal">
-                    <div class="modal-header">
-                        <h4 class="modal-title">{{ modal.title }}</h4>
-                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+        <CrudModal ref="crudModalRef" modal-id="clientI_modal" :title="modal.title" :submit-label="modal.button" size="lg" :form-snapshot="() => ({ ...client })" @submit="submit_form4">
+            <div class="form-group">
+                <label class="form-label">Description *</label>
+                <textarea v-model="client.description" rows="3" class="modern-input"
+                          :class="[is_submit_form4 ? (client.description ? 'is-valid' : 'is-invalid') : '']"
+                          placeholder="Enter item description or service details"></textarea>
+                <div class="invalid-feedback">Please fill the description</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label class="form-label">Quantity *</label>
+                    <input type="number" step="0.001" v-model="client.quantity" class="modern-input"
+                           :class="[is_submit_form4 ? (client.quantity ? 'is-valid' : 'is-invalid') : '']"
+                           placeholder="0.00" @input="computeTotal" />
+                    <div class="invalid-feedback">Please fill the quantity</div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label class="form-label">Rate ({{ currency }}) *</label>
+                    <input type="number" step="0.001" v-model="client.rate" class="modern-input"
+                           :class="[is_submit_form4 ? (client.rate ? 'is-valid' : 'is-invalid') : '']"
+                           placeholder="0.00" @input="computeTotal" />
+                    <div class="invalid-feedback">Please fill the rate</div>
+                </div>
+            </div>
+
+            <!-- FUN-13: UTBMS codes for e-billed (LEDES) clients. A line with an expense code is an expense; otherwise a fee. -->
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="form-label" for="item-task">UTBMS task</label>
+                    <select id="item-task" v-model="client.utbms_task_code" class="modern-input">
+                        <option value="">—</option>
+                        <option v-for="t in utbmsTasks" :key="t.code" :value="t.code">{{ t.code }} {{ t.name }}</option>
+                    </select>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label class="form-label" for="item-activity">UTBMS activity</label>
+                    <select id="item-activity" v-model="client.utbms_activity_code" class="modern-input">
+                        <option value="">—</option>
+                        <option v-for="a in utbmsActivities" :key="a.code" :value="a.code">{{ a.code }} {{ a.name }}</option>
+                    </select>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label class="form-label" for="item-expense">UTBMS expense</label>
+                    <select id="item-expense" v-model="client.utbms_expense_code" class="modern-input">
+                        <option value="">—</option>
+                        <option v-for="e in utbmsExpenses" :key="e.code" :value="e.code">{{ e.code }} {{ e.name }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="calculated-section">
+                <div class="calculated-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Calculated Values</span>
+                </div>
+                <div class="row">
+                    <!-- DATA-14: the tax comes from one of the firm's tax rates (Settings → Currencies and tax) -->
+                    <div class="col-md-3 form-group">
+                        <label class="form-label" for="item-tax-rate">Tax rate</label>
+                        <select id="item-tax-rate" v-model="client.tax_rate_id" class="modern-input" @change="computeTotal">
+                            <option :value="null">No tax</option>
+                            <option v-for="t in taxRates" :key="t.id" :value="t.id">{{ t.name }} ({{ t.rate }}%)</option>
+                        </select>
                     </div>
-                    <div class="modal-body">
-                        <form class="modern-form" novalidate @submit.stop.prevent="submit_form4">
-                            <div class="form-group">
-                                <label class="form-label">Description *</label>
-                                <textarea v-model="client.description" rows="3" class="modern-input"
-                                          :class="[is_submit_form4 ? (client.description ? 'is-valid' : 'is-invalid') : '']"
-                                          placeholder="Enter item description or service details"></textarea>
-                                <div class="invalid-feedback">Please fill the description</div>
-                            </div>
+                    <div class="col-md-3 form-group">
+                        <label class="form-label" for="item-tax">Tax</label>
+                        <input id="item-tax" type="number" step="0.001" v-model="client.tax" class="modern-input calculated"
+                               placeholder="0.00" readonly />
+                    </div>
 
-                            <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <label class="form-label">Quantity *</label>
-                                    <input type="number" step="0.001" v-model="client.quantity" class="modern-input"
-                                           :class="[is_submit_form4 ? (client.quantity ? 'is-valid' : 'is-invalid') : '']"
-                                           placeholder="0.00" @input="computeTotal" />
-                                    <div class="invalid-feedback">Please fill the quantity</div>
-                                </div>
-
-                                <div class="col-md-6 form-group">
-                                    <label class="form-label">Rate (KES) *</label>
-                                    <input type="number" step="0.001" v-model="client.rate" class="modern-input"
-                                           :class="[is_submit_form4 ? (client.rate ? 'is-valid' : 'is-invalid') : '']"
-                                           placeholder="0.00" @input="computeTotal" />
-                                    <div class="invalid-feedback">Please fill the rate</div>
-                                </div>
-                            </div>
-
-                            <div class="calculated-section">
-                                <div class="calculated-header">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                    <span>Calculated Values</span>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label class="form-label">Tax (16%)</label>
-                                        <input type="number" step="0.001" v-model="client.tax" class="modern-input calculated"
-                                               placeholder="0.00" readonly />
-                                    </div>
-
-                                    <div class="col-md-6 form-group">
-                                        <label class="form-label">Total Amount</label>
-                                        <input type="number" step="0.001" v-model="client.total_amount" class="modern-input calculated"
-                                               placeholder="0.00" readonly />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button class="btn-submit" type="submit">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                {{ modal.button }}
-                            </button>
-                        </form>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label" for="item-total">Total Amount</label>
+                        <input id="item-total" type="number" step="0.001" v-model="client.total_amount" class="modern-input calculated"
+                               placeholder="0.00" readonly />
                     </div>
                 </div>
             </div>
-        </div>
+        </CrudModal>
     </div>
 </template>
 
@@ -208,62 +230,57 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from "../../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import CrudModal from '@/components/ui/crud-modal.vue';
+import InvoiceStatus from '@/components/ui/invoice-status.vue';
+import { useUtbms } from '@/composables/use-utbms';
 useMeta({ title: 'Invoice Items' });
 
-const columnsI = ref(['description', 'quantity', 'rate', 'tax', 'total_amount', 'actions']);
-const itemsI = ref([]);
-const table_optionI = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['description', 'quantity', 'rate', 'tax', 'total_amount'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
 
-const modal = ref({title: "", button: ""});
+const itemsI = ref([]);
+
+const modal = ref({title: "Add Item", button: "Add"});
 const invoice = ref({});
 const is_submit_form4 = ref(false);
 const router = useRouter();
 
-const client = ref({id: "",invoice_id:"",description : "", quantity:0,rate:0, tax:0, total_amount:0});
+const { tasks: utbmsTasks, activities: utbmsActivities, expenses: utbmsExpenses } = useUtbms();
+const client = ref({id: "",invoice_id:"",description : "", quantity:0,rate:0, tax:0, tax_rate_id: null, total_amount:0, utbms_task_code: "", utbms_activity_code: "", utbms_expense_code: ""});
+// DATA-14: the firm's tax rates, and the currency this invoice is in
+const taxRates = ref([]);
+const defaultTaxRate = () => (taxRates.value.find(t => t.is_default) || {}).id ?? null;
+const currency = computed(() => invoice.value.currency || 'KES');
+const crudModalRef = ref(null);
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
     client.value.invoice_id = localStorage.getItem('invoiceId');
     if (client.value.invoice_id && client.value.description && client.value.quantity && client.value.rate) {
         if(client.value.id > 0) {
-            axios.put(`/api/invoiceItems/${client.value.id}`, client.value)
+            axios.put(`/api/v1/invoiceItems/${client.value.id}`, client.value)
                 .then(response => {
                     itemsI.value = response.data.data;
                     showMessage('Item updated successfully.');
-                    document.getElementById('closebtn').click();
+                    crudModalRef.value?.clearDirtyGuard();
+                    document.getElementById('clientI_modal-closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error updating item. Please try again.');
+                    showMessage('Error updating item. Please try again.', 'error');
                     console.error(error);
                 });
         } else {
-            axios.post('/api/invoiceItems', client.value)
+            axios.post('/api/v1/invoiceItems', client.value)
                 .then(response => {
                     itemsI.value = response.data.data;
                     showMessage('Item added successfully.');
-                    document.getElementById('closebtn').click();
+                    crudModalRef.value?.clearDirtyGuard();
+                    document.getElementById('clientI_modal-closebtn').click();
                 })
                 .catch(error => {
-                    showMessage('Error adding item. Please try again.');
+                    showMessage('Error adding item. Please try again.', 'error');
                     console.error(error);
                 });
         }
@@ -272,41 +289,23 @@ const submit_form4 = () => {
         client.value.description = "";
         client.value.quantity = 0;
         client.value.tax = 0;
+        client.value.tax_rate_id = defaultTaxRate();
         client.value.rate = 0;
         client.value.total_amount = 0;
+        client.value.utbms_task_code = "";
+        client.value.utbms_activity_code = "";
+        client.value.utbms_expense_code = "";
         modal.value.title = "Add Item";
         modal.value.button = "Add";
         is_submit_form4.value = false;
     }
 };
 
-const submit_form6 = (item) => {
-    if (confirm('Are you sure you want to delete this item?')) {
-        if (item) {
-            axios.delete(`/api/invoiceItems/${item.id}`)
-                .then(response => {
-                    itemsI.value = response.data.data;
-                    showMessage('Invoice item deleted successfully.');
-                })
-                .catch(error => {
-                    showMessage('Error deleting the invoice item. Please try again.');
-                    console.error(error);
-                });
-        }
-    }
-};
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
+const delete_rowI = (item) => {
+    confirmDelete({
+        url: `/api/v1/invoiceItems/${item.id}`,
+        itemLabel: item.description,
+        onSuccess: () => { fetchData(); },
     });
 };
 
@@ -319,43 +318,58 @@ const update_rowI = (item) => {
     client.value.description = item.description;
     client.value.quantity = item.quantity;
     client.value.tax = item.tax;
+    client.value.tax_rate_id = item.tax_rate_id ?? null;
     client.value.rate = item.rate;
     client.value.total_amount = item.total_amount;
+    client.value.utbms_task_code = item.utbms_task_code || "";
+    client.value.utbms_activity_code = item.utbms_activity_code || "";
+    client.value.utbms_expense_code = item.utbms_expense_code || "";
 
     modal.value.title = "Update Item";
     modal.value.button = "Update";
 };
 
 const fetchData = () => {
-    modal.value.title = "Add Item";
-    modal.value.button = "Add";
-
     let invoiceId = localStorage.getItem('invoiceId');
-    axios.get(`/api/invoiceItems/${invoiceId}`)
+    axios.get(`/api/v1/invoiceItems/${invoiceId}`)
         .then(response => {
             itemsI.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching items:', error);
+            showMessage('Could not load invoice items. Please try refreshing the page.', 'error');
         });
 
-    axios.get(`/api/invoices/${invoiceId}`)
+    axios.get(`/api/v1/invoices/${invoiceId}`)
         .then(response => {
             invoice.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching invoice:', error);
+            showMessage('Could not load the invoice. Please try refreshing the page.', 'error');
         });
 };
 
 onMounted(() => {
     fetchData();
+    axios.get('/api/v1/finance/settings').then(({ data }) => {
+        taxRates.value = data.data.tax_rates;
+        if (!client.value.id) client.value.tax_rate_id = defaultTaxRate();
+    }).catch(() => {});
 });
 
 const computeTotal = () => {
-    let totals = client.value.quantity * client.value.rate;
-    client.value.tax = (0.16 * totals);
-    client.value.total_amount = totals;
+    // Bug fix: this previously set total_amount to quantity*rate only,
+    // excluding tax — and since the backend used to trust this value
+    // verbatim (see InvoiceItemController), every invoice's grand total
+    // silently excluded VAT. The backend now always recomputes this
+    // authoritatively regardless of what's sent, but the displayed
+    // (readonly) preview should still show the real total the item will
+    // actually be billed at, not a pre-tax figure.
+    let subtotal = client.value.quantity * client.value.rate;
+    const rate = taxRates.value.find(t => t.id === client.value.tax_rate_id);
+    client.value.tax = rate ? Math.round(subtotal * rate.rate) / 100 : 0;   // DATA-14: the server works it out the same way
+    client.value.total_amount = subtotal + client.value.tax;
 };
 </script>
 
@@ -404,12 +418,12 @@ const computeTotal = () => {
     width: 48px;
     height: 48px;
     padding: 10px;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border-radius: 12px;
     stroke-width: 2;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
 }
 
 .card-title {
@@ -448,12 +462,12 @@ const computeTotal = () => {
 }
 
 .btn-add {
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
 }
 
 .btn-add:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
 }
 
 .btn-preview {
@@ -498,7 +512,7 @@ const computeTotal = () => {
     padding: 14px 18px;
     background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     border-radius: 10px;
-    border-left: 4px solid #6366f1;
+    border-left: 4px solid var(--primary-600);
     min-height: 52px;
     display: flex;
     align-items: center;
@@ -517,6 +531,98 @@ const computeTotal = () => {
     overflow-x: auto;
 }
 
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+    }
+
+    th {
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+    }
+
+    tbody tr:hover {
+        background: rgba(2, 132, 199, 0.03);
+    }
+}
+
+.no-items-row {
+    text-align: center;
+    color: #6b7280;
+    padding: 32px 16px !important;
+    font-style: italic;
+}
+
+.actions-col {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* UI-9: stacked-card layout on small screens, consistent with the
+   shared DataTable component's own mobile behaviour. */
+@media (max-width: 768px) {
+    .items-table {
+        thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        tbody, tr, td {
+            display: block;
+            width: 100%;
+        }
+
+        tr {
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            padding: 4px 0;
+        }
+
+        td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+
+            &::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 11px;
+                text-transform: uppercase;
+                color: #6b7280;
+                text-align: left;
+                flex-shrink: 0;
+            }
+        }
+
+        .actions-col {
+            justify-content: flex-end;
+
+            &::before {
+                display: none;
+            }
+        }
+    }
+}
+
 .description-cell {
     color: #374151;
     font-size: 14px;
@@ -530,7 +636,7 @@ const computeTotal = () => {
 }
 
 .amount-cell {
-    color: #6366f1;
+    color: var(--primary-600);
     font-weight: 700;
     font-size: 15px;
 }
@@ -542,7 +648,7 @@ const computeTotal = () => {
 }
 
 .total-cell {
-    color: #059669;
+    color: var(--primary-700);
     font-weight: 700;
     font-size: 16px;
 }
@@ -569,7 +675,7 @@ const computeTotal = () => {
 }
 
 .btn-edit {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
     color: white;
 }
 
@@ -600,7 +706,7 @@ const computeTotal = () => {
     align-items: center;
     gap: 12px;
     padding: 16px 36px;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 10px;
@@ -608,12 +714,12 @@ const computeTotal = () => {
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
 }
 
 .btn-view-full:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+    box-shadow: 0 8px 24px rgba(2, 132, 199, 0.45);
 }
 
 .btn-view-full svg {
@@ -624,7 +730,7 @@ const computeTotal = () => {
 
 /* Modal Styles */
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 24px 28px;
@@ -686,8 +792,8 @@ textarea.modern-input {
 
 .modern-input:focus {
     outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--primary-600);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
 }
 
 .modern-input.is-invalid {
@@ -695,7 +801,7 @@ textarea.modern-input {
 }
 
 .modern-input.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -731,7 +837,7 @@ textarea.modern-input {
     width: 24px;
     height: 24px;
     stroke-width: 2;
-    color: #6366f1;
+    color: var(--primary-600);
 }
 
 .calculated-header span {
@@ -756,7 +862,7 @@ textarea.modern-input {
     justify-content: center;
     gap: 10px;
     padding: 16px 36px;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 10px;
@@ -764,13 +870,13 @@ textarea.modern-input {
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
     align-self: flex-start;
 }
 
 .btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.45);
+    box-shadow: 0 6px 24px rgba(2, 132, 199, 0.45);
 }
 
 .btn-submit svg {

@@ -1,0 +1,139 @@
+# Local testing stack — one command brings up the app with MySQL 8, a
+# queue worker, the scheduler, and a MailHog mail-catcher:
+#
+#   docker compose up --build
+#
+# First run: installs Composer/npm deps into the bind-mounted checkout,
+# builds the frontend, migrates, and seeds demo data (known logins are
+# printed by the app container; see docker/entrypoint.sh).
+#
+#   App:      http://localhost:8089   (sign in as a Firm or as the Operator; see docs/DEMO_LOGINS.md)
+#   MailHog:  http://localhost:8025   (all outbound mail lands here)
+#   MySQL:    127.0.0.1:33060  root/secret  db=lawfirm
+#
+# Run the backend gates inside the stack (tests use in-memory sqlite):
+#   docker compose exec app php artisan test
+#   docker compose exec app vendor/bin/phpstan analyse --memory-limit=1G
+#   docker compose exec app vendor/bin/pint --test
+#
+# Rebuild the frontend after JS/Vue changes:
+#   docker compose run --rm assets npm run build
+#
+# This file is for local testing only — it is not a production deployment
+# (php artisan serve, root DB credentials, debug on).
+
+# Host port the app is reachable on. Sanctum's cookie auth only trusts
+# origins listed in SANCTUM_STATEFUL_DOMAINS, so the three URL-ish values
+# below must all agree with this port — hence the shared variable.
+x-app-env: &app-env
+  APP_ENV: local
+  APP_DEBUG: "false"
+  APP_NAME: "Law Management System"
+  APP_SHORT_NAME: Law
+  # Law Management System (Law): several firms plus the platform operator, all on this one address. The sign-in page
+  # offers "Firm" and "Operator"; `php artisan law:demo-setup` (run on first start) creates the super admin and one sample firm
+  # (docs/DEMO_LOGINS.md); more via `php artisan law:demo-load`, removed with `law:demo-remove`. The old single-firm demo (used by the browser tests): TENANCY_MODE=single docker compose up
+  TENANCY_MODE: ${TENANCY_MODE:-multi}
+  TENANCY_BASE_DOMAIN: localhost
+  # Self-service trial signup (PLAT-13) answers on this host: http://join.localhost:8089/signup (the sign-in page links to it)
+  TENANCY_SIGNUP_HOST: join.localhost
+  PLATFORM_CONSOLE_ON_APP_HOST: "true"
+  PLATFORM_MFA: optional
+  APP_URL: http://localhost:${APP_PORT:-8089}
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  DB_DATABASE: lawfirm
+  DB_USERNAME: root
+  DB_PASSWORD: secret
+  QUEUE_CONNECTION: database
+  MAIL_MAILER: smtp
+  MAIL_HOST: mailhog
+  MAIL_PORT: "1025"
+  SANCTUM_STATEFUL_DOMAINS: localhost,localhost:${APP_PORT:-8089},127.0.0.1,127.0.0.1:${APP_PORT:-8089}
+  CORS_ALLOWED_ORIGINS: http://localhost:${APP_PORT:-8089}
+  # Containers run as the host UID (see `user:` below) which has no passwd
+  # entry in the image — give Composer/artisan a writable home.
+  HOME: /tmp
+  COMPOSER_HOME: /tmp/composer
+
+x-app-base: &app-base
+  build: docker
+  user: "${UID:-1000}:${GID:-1000}"
+  volumes:
+    - .:/var/www/html
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: lawfirm
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      # Host port 33060 to avoid clashing with any locally installed MySQL.
+      - "127.0.0.1:33060:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # One-shot: installs JS deps and builds the Mix bundle (public/js and
+  # public/css are not committed). Skips work already done; force a
+  # rebuild with:  docker compose run --rm assets npm run build
+  assets:
+    image: node:22-alpine
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    environment:
+      HOME: /tmp
+    volumes:
+      - .:/app
+    command: sh -c '[ -d node_modules ] || npm ci; [ -f public/build/manifest.json ] || npm run build'
+
+  app:
+    <<: *app-base
+    ports:
+      - "${APP_PORT:-8089}:8000"
+    environment:
+      <<: *app-env
+      APP_SETUP: "1" # this container owns first-run setup (see entrypoint)
+    depends_on:
+      mysql:
+        condition: service_healthy
+      assets:
+        condition: service_completed_successfully
+
+  # ENG-3: QUEUE_CONNECTION=database — mail/SMS jobs need a running worker. ENG-20: it serves interactive
+  # work first, then bulk (exports, backfills, document reading).
+  queue:
+    <<: *app-base
+    command: php artisan queue:work --queue=default,bulk --tries=3 --sleep=3 --timeout=3700
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  # FUN-3/ENG-6: hearing reminders and nightly backups are schedule-driven.
+  scheduler:
+    <<: *app-base
+    command: php artisan schedule:work
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "127.0.0.1:8025:8025"
+
+volumes:
+  mysql-data:

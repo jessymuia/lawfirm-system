@@ -20,7 +20,7 @@
                 <h2 class="page-title">Court Types</h2>
                 <p class="page-subtitle">Manage different types of courts</p>
             </div>
-            <button type="button" class="btn-add-type" data-bs-toggle="modal" data-bs-target="#client_modal">
+            <button type="button" class="btn-add-type" @click="resetForm" data-bs-toggle="modal" data-bs-target="#client_modal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -32,204 +32,186 @@
         <div class="types-table-card">
             <div class="table-header">
                 <h3 class="table-title">All Court Types</h3>
-                <div class="table-stats">
-                    <span class="stat-badge">{{ items.length }} Total</span>
-                </div>
             </div>
             
             <div class="table-wrapper">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #name="props">
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/courttypes"
+                    :columns="[{ key: 'name', label: 'Name' }]"
+                    :sortable-columns="['name']"
+                    :searchable-columns="['name']"
+                    empty-title="No court types yet"
+                    empty-description="Add your first court type to get started."
+                    empty-action-label="Add Court Type"
+                    @empty-action="openAddModal"
+                >
+                    <template #cell-name="{ row }">
                         <div class="type-name-cell">
                             <div class="type-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                                 </svg>
                             </div>
-                            <span class="type-name-text">{{ props.row.name }}</span>
+                            <span class="type-name-text">{{ row.name }}</span>
+                            <CatalogBadge :row="row" />
                         </div>
                     </template>
                     
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="action-buttons">
-                            <button type="button" class="btn-action btn-edit" @click="update_row(props.row)" data-bs-toggle="modal" data-bs-target="#client_modal" title="Edit Type">
+                            <button type="button" class="btn-action btn-edit" @click="update_row(row)" data-bs-toggle="modal" data-bs-target="#client_modal" title="Edit Type" aria-label="Edit type">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
                             </button>
+                            <button v-if="!row.is_system" type="button" class="btn-action btn-delete" @click="delete_row(row)" title="Delete Type" aria-label="Delete type">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                </svg>
+                            </button>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
-        <div class="modal fade" id="client_modal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content modern-modal">
-                    <div class="modal-header">
-                        <div class="modal-title-wrapper">
-                            <div class="modal-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="modal-title">{{ modal.title }}</h4>
-                                <p class="modal-subtitle">{{ modal.title === 'Add Court Type' ? 'Enter type name below' : 'Update type name' }}</p>
-                            </div>
-                        </div>
-                        <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close-modern">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
+        <CrudModal ref="crudModalRef" modal-id="client_modal" :submit-label="modal.button" :form-snapshot="() => ({ ...client })" @submit="submit_form4">
+            <template #header>
+                <div class="modal-title-wrapper">
+                    <div class="modal-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
                     </div>
-                    
-                    <div class="modal-body">
-                        <form class="modern-form" @submit.stop.prevent="submit_form4">
-                            <div class="form-group">
-                                <label class="form-label">Type Name <span class="required">*</span></label>
-                                <input type="text" v-model="client.name" class="form-control modern-input"
-                                    :class="[is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '']"
-                                    placeholder="e.g., High Court, Magistrates Court"/>
-                                <div class="invalid-feedback">Type name is required</div>
-                            </div>
-
-                            <div class="modal-footer-actions">
-                                <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                                <button class="btn-submit" type="submit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                    {{ modal.button }}
-                                </button>
-                            </div>
-                        </form>
+                    <div>
+                        <h4 class="modal-title">{{ modal.title }}</h4>
+                        <p class="modal-subtitle">{{ modal.title === 'Add Court Type' ? 'Enter type name below' : (client.is_system ? 'Set a local name' : 'Update type name') }}</p>
                     </div>
                 </div>
+            </template>
+
+            <div v-if="client.is_system" class="form-group">
+                <label class="form-label">Local name</label>
+                <input type="text" v-model="client.alias" class="form-control modern-input" :class="{ 'is-invalid': hasError('alias') }" :placeholder="client.official_name" @input="clearErrors('alias')"/>
+                <div class="invalid-feedback">{{ fieldError('alias') }}</div>
+                <small class="form-text text-muted">Official name: <strong>{{ client.official_name }}</strong>. It is maintained by the platform and cannot be renamed or deleted; set the name your firm uses instead. Leave empty to use the official name.</small>
             </div>
-        </div>
+            <div v-else class="form-group">
+                <label class="form-label">Type Name <span class="required">*</span></label>
+                <input type="text" v-model="client.name" class="form-control modern-input"
+                    :class="[hasError('name') ? 'is-invalid' : (is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '')]"
+                    placeholder="e.g., High Court, Magistrates Court" @input="clearErrors('name')"/>
+                <div class="invalid-feedback">{{ hasError('name') ? fieldError('name') : 'Type name is required' }}</div>
+            </div>
+        </CrudModal>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useFormErrors } from '@/composables/use-form-errors';
+import CrudModal from '@/components/ui/crud-modal.vue';
+import DataTable from '@/components/ui/data-table.vue';
+import CatalogBadge from '@/components/ui/catalog-badge.vue';
 
 useMeta({ title: 'Court Types' });
 
 const router = useRouter();
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
 
-const columns = ref(['name', 'actions']);
-const items = ref([]);
+const tableRef = ref(null);
+const crudModalRef = ref(null);
 const modal = ref({title: "Add Court Type", button: "Add"});
 const is_submit_form4 = ref(false);
 
 const client = ref({
     id: "",
-    name: ""
+    name: "",
+    is_system: false,
+    alias: "",
+    official_name: ""
 });
 
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover modern-table',
-    columnsClasses: { actions: 'actions-column' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search types...',
-        limit: 'Show:',
-    },
-    sortable: ['name'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
-
-onMounted(() => {
-    fetchData();
-});
+// TEN-11: a system row only accepts a local name (alias); a firm row is renamed as before.
+const payload = () => client.value.is_system ? { alias: client.value.alias } : { name: client.value.name };
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.name) {
         if(client.value.id > 0) {
-            axios.put(`/api/courttypes/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/courttypes/${client.value.id}`, payload())
+                .then(() => {
                     showMessage('Court type updated successfully.');
-                    document.getElementById('closebtn').click();
+                    crudModalRef.value?.clearDirtyGuard();
+                    document.getElementById('client_modal-closebtn').click();
                     resetForm();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating type. Please try again.', 'error');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating type. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/courttypes', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/courttypes', payload())
+                .then(() => {
                     showMessage('Court type added successfully.');
-                    document.getElementById('closebtn').click();
+                    crudModalRef.value?.clearDirtyGuard();
+                    document.getElementById('client_modal-closebtn').click();
                     resetForm();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding type. Please try again.', 'error');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding type. Please try again.'), 'error');
                 });
         }
     }
 };
 
-const fetchData = () => {
-    axios.get('/api/courttypes')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching court types:', error);
-        });
+const openAddModal = () => {
+    resetForm();
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
 };
 
 const update_row = (item) => {
-    client.value.id = item.id;
-    client.value.name = item.name;
+    clearErrors();
+    client.value = {id: item.id, name: item.official_name ?? item.name, is_system: !!item.is_system, alias: item.alias ?? "", official_name: item.official_name ?? item.name};
     modal.value.title = "Update Court Type";
     modal.value.button = "Update";
+};
+
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/courttypes/${item.id}`,
+        itemLabel: item.name,
+        onSuccess: () => { tableRef.value?.refresh(); },
+    });
 };
 
 const resetForm = () => {
     client.value = {
         id: "",
-        name: ""
+        name: "",
+        is_system: false,
+        alias: "",
+        official_name: ""
     };
     modal.value.title = "Add Court Type";
     modal.value.button = "Add";
     is_submit_form4.value = false;
-};
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '12px 20px',
-    });
+    clearErrors();
 };
 </script>
 
@@ -271,7 +253,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;
@@ -311,7 +293,7 @@ const showMessage = (msg = '', type = 'success') => {
 .table-header .stat-badge {
     padding: 6px 12px;
     background: #cffafe;
-    color: #06b6d4;
+    color: var(--primary-600);
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
@@ -328,7 +310,7 @@ const showMessage = (msg = '', type = 'success') => {
     height: 32px;
     border-radius: 8px;
     background: #cffafe;
-    color: #06b6d4;
+    color: var(--primary-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -368,18 +350,15 @@ const showMessage = (msg = '', type = 'success') => {
     transform: translateY(-2px);
 }
 
-.modern-modal {
-    border: none;
-    border-radius: 16px;
+.btn-action.btn-delete {
+    background: #fee2e2;
+    color: #e7515a;
 }
 
-.modern-modal .modal-header {
-    padding: 24px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+.btn-action.btn-delete:hover {
+    background: #e7515a;
+    color: white;
+    transform: translateY(-2px);
 }
 
 .modal-title-wrapper {
@@ -393,7 +372,7 @@ const showMessage = (msg = '', type = 'success') => {
     height: 48px;
     border-radius: 12px;
     background: #cffafe;
-    color: #06b6d4;
+    color: var(--primary-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -410,28 +389,6 @@ const showMessage = (msg = '', type = 'success') => {
     font-size: 13px;
     color: #6b7280;
     margin: 4px 0 0 0;
-}
-
-.btn-close-modern {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f3f4f6;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-close-modern:hover {
-    background: #fee2e2;
-    color: #ef4444;
-}
-
-.modern-modal .modal-body {
-    padding: 24px;
 }
 
 .form-group {
@@ -464,7 +421,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .modern-input:focus {
     outline: none;
-    border-color: #06b6d4;
+    border-color: var(--primary-600);
     box-shadow: 0 0 0 3px #cffafe;
 }
 
@@ -473,7 +430,7 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .modern-input.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -485,49 +442,6 @@ const showMessage = (msg = '', type = 'success') => {
 
 .is-invalid ~ .invalid-feedback {
     display: block;
-}
-
-.modal-footer-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 28px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.btn-cancel {
-    padding: 10px 20px;
-    background: #f3f4f6;
-    color: #6b7280;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-cancel:hover {
-    background: #e5e7eb;
-}
-
-.btn-submit {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 24px;
-    background: linear-gradient(135deg, #06b6d4, #0891b2);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-submit:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
 }
 
 @media (max-width: 768px) {

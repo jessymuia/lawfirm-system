@@ -1,0 +1,117 @@
+# PLAT-5: Helm values. The database is EXTERNAL (managed MySQL 8 / MariaDB 10.6+); this chart does not run one.
+
+nameOverride: ""
+
+image:
+  repository: ghcr.io/your-org/lawfirm
+  tag: ""                 # empty = the chart's appVersion
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+app:
+  name: "Law Management System"
+  url: https://lawfirm.example.com      # public URL users type in (https)
+  statefulDomains: lawfirm.example.com  # SANCTUM_STATEFUL_DOMAINS
+  trustedProxies: "*"                   # the ingress controller is the proxy; restrict to its CIDR if you can
+  logLevel: info
+  # firm | restricted (docs/MATTER_ACCESS.md)
+  matterAccess: firm
+  license:
+    required: false
+    publicKeys: ""
+
+# Secrets: either let the chart create one from `secrets.*`, or point at an existing Secret you manage
+# (recommended: sealed-secrets / external-secrets). The existing Secret needs these keys:
+#   APP_KEY, DB_PASSWORD, and optionally INSTALL_ADMIN_PASSWORD, MAIL_PASSWORD, REDIS_PASSWORD, MEILISEARCH_KEY
+existingSecret: ""
+secrets:
+  appKey: ""            # docker run --rm <image> artisan key:generate --show
+  dbPassword: ""
+  installAdminPassword: ""
+  mailPassword: ""
+  redisPassword: ""     # ENG-20, when Redis needs one
+  meilisearchKey: ""    # ENG-19, when search.engine is meilisearch
+
+# ENG-19: global search. "database" needs nothing; "meilisearch" ranks results with one set of indexes per firm
+# (external service; key in secrets.meilisearchKey). After enabling it run: artisan search:reindex
+search:
+  engine: database
+  meilisearchHost: ""
+
+# ENG-20: Redis (external, like the database) for cache, sessions, the queue and the per-firm bulk slots. Empty host =
+# database queue, file cache and file sessions, which need the shared volume (and keep web at one replica on RWO).
+redis:
+  host: ""
+  port: 6379
+
+database:
+  host: ""              # required
+  port: 3306
+  name: lawfirm
+  username: lawfirm
+
+installAdmin:
+  email: admin@example.com
+  name: Administrator
+
+mail:
+  mailer: smtp
+  host: smtp.example.com
+  port: 587
+  username: ""
+  encryption: tls
+  fromAddress: no-reply@example.com
+
+# Uploaded documents live on this volume (web, queue and scheduler must all see it).
+persistence:
+  enabled: true
+  existingClaim: ""
+  size: 20Gi
+  storageClassName: ""
+  # ReadWriteOnce works on any cluster but pins web+queue+scheduler to one node (the chart adds the affinity)
+  # and limits web to 1 replica. Use ReadWriteMany (NFS/CephFS/EFS) to scale web beyond 1.
+  accessMode: ReadWriteOnce
+
+web:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 250m, memory: 256Mi }
+    limits: { memory: 768Mi }
+queue:
+  # ENG-20: workers scale out freely (every worker takes jobs safely from the same queue).
+  replicaCount: 1
+  # Lanes served, first listed first: interactive work (SMS, mail, sync) before bulk (exports, backfills, documents).
+  lanes: "default,bulk"
+  resources:
+    requests: { cpu: 100m, memory: 192Mi }
+    limits: { memory: 512Mi }
+# ENG-20: optional workers for heavy work only. Enable it and set queue.lanes to "default", so bulk work neither waits
+# behind nor holds up interactive work; each firm still runs at most QUEUE_BULK_PER_FIRM bulk jobs at once.
+bulkQueue:
+  enabled: false
+  replicaCount: 1
+  lanes: "bulk"
+  resources:
+    requests: { cpu: 250m, memory: 256Mi }
+    limits: { memory: 1Gi }
+scheduler:
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: lawfirm.example.com
+  tls:
+    enabled: true
+    secretName: ""      # existing TLS secret; leave empty if cert-manager creates it via annotations
+
+podSecurityContext: {}
+nodeSelector: {}
+tolerations: []

@@ -3,9 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\ExpenseCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+/**
+ * A new firm's starter expense categories. These are the firm's own rows (TEN-11:
+ * tenant overlay, not system catalog): firms rename and delete them freely, and
+ * upgrades never touch them.
+ */
 class ExpenseCategorySeeder extends Seeder
 {
     /**
@@ -17,17 +21,17 @@ class ExpenseCategorySeeder extends Seeder
     {
         //
         $expenseCategories = [
-            "Operational Expenses",
-            "Personnel Expenses",
-            "Marketing Expenses",
-            "Travel & Entertainment Expenses",
-            "Technology and Software Expenses",
-            "Litigation Expenses",
+            'Operational Expenses',
+            'Personnel Expenses',
+            'Marketing Expenses',
+            'Travel & Entertainment Expenses',
+            'Technology and Software Expenses',
+            'Litigation Expenses',
         ];
 
         foreach ($expenseCategories as $category) {
-            ExpenseCategory::create([
-                'name' => $category
+            ExpenseCategory::firstOrCreate([
+                'name' => $category,
             ]);
         }
     }

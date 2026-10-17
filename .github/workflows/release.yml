@@ -1,0 +1,59 @@
+# Pushing a tag v<semver> verifies the release, then publishes the image, the Helm chart and the bare-metal bundle.
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan release:check
+      - name: Tag matches VERSION
+        run: test "v$(tr -d '[:space:]' < VERSION)" = "${GITHUB_REF_NAME}"
+      - run: php artisan test
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:latest
+      - uses: azure/setup-helm@v4
+      - run: helm package deploy/helm/lawfirm --destination dist
+      - run: scripts/build-release-bundle.sh dist
+      - name: Release notes
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          if [ -f "docs/upgrade/$v.md" ]; then cp "docs/upgrade/$v.md" dist/notes.md; else echo "See CHANGELOG.md" > dist/notes.md; fi
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tgz
+            dist/*.tar.gz
+            dist/*.sha256
+          body_path: dist/notes.md

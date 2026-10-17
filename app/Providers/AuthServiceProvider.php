@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -23,7 +22,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->registerPolicies();
+        // Laravel 10+ upgrade: registerPolicies() is now invoked
+        // automatically by the framework, so the manual call here was
+        // removed (harmless if left, but redundant — see
+        // docs/ops/STACK_UPGRADE_GUIDE.md).
 
         //
     }

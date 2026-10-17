@@ -46,7 +46,7 @@
         cursor: pointer;
 
         > input:checked ~ span.new-control-indicator {
-            background: #888ea8;
+            background: var(--text-muted);
 
             &:after {
                 display: block;
@@ -54,7 +54,7 @@
         }
 
         span.new-control-indicator:after {
-            border: solid #888ea8;
+            border: solid var(--text-muted);
             top: 50%;
             left: 50%;
             margin-left: -2px;
@@ -70,7 +70,7 @@
 
         &.checkbox-primary > input:checked ~ span.new-control-indicator {
             background: transparent;
-            border: 2px solid #888ea8;
+            border: 2px solid var(--text-muted);
         }
     }
 
@@ -172,7 +172,7 @@
             a.nav-link {
                 position: relative;
                 font-weight: 700;
-                color: #888ea8;
+                color: var(--text-muted);
                 border-radius: 0;
                 padding: 20px 0px 20px 15px;
                 -webkit-transition: all 0.35s ease;
@@ -212,7 +212,7 @@
                 }
 
                 svg {
-                    color: #888ea8;
+                    color: var(--text-muted);
                     margin-right: 6px;
                     vertical-align: middle;
                     width: 21px;
@@ -332,7 +332,7 @@
             p.todo-text {
                 font-size: 14px;
                 margin-bottom: 0;
-                color: #888ea8;
+                color: var(--text-muted);
                 font-weight: 600;
                 -webkit-transition: all 0.35s ease;
                 transition: all 0.35s ease;
@@ -477,7 +477,7 @@
             .dropdown-toggle svg {
                 width: 21px;
                 height: 21px;
-                color: #888ea8;
+                color: var(--text-muted);
             }
 
             .show .dropdown-toggle svg {

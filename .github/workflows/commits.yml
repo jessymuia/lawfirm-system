@@ -1,0 +1,24 @@
+# Every commit and pull request title must be a conventional commit (see CONTRIBUTING.md).
+name: commits
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  conventional:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Commit subjects
+        run: git log --no-merges --format=%s origin/${{ github.base_ref }}..HEAD | php artisan release:draft --strict
+      - name: Pull request title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$TITLE" | php artisan release:draft --strict

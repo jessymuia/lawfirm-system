@@ -391,7 +391,7 @@
                 &.menu-categories {
                     li {
                         &.menu {
-                            color: #888ea8;
+                            color: var(--text-muted);
                             > a.active {
                                 background: transparent;
                                 box-shadow: none;
@@ -404,7 +404,7 @@
                             }
                             > .dropdown-toggle {
                                 padding: 9px 20px;
-                                color: #888ea8;
+                                color: var(--text-muted);
                                 svg {
                                     color: #515365;
                                 }

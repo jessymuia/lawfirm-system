@@ -20,7 +20,7 @@
                 <h2 class="page-title">Client Management</h2>
                 <p class="page-subtitle">Manage and organize your client information</p>
             </div>
-            <button type="button" class="btn-add-client" data-bs-toggle="modal" data-bs-target="#client_modal">
+            <button type="button" class="btn-add-client" @click="resetForm" data-bs-toggle="modal" data-bs-target="#client_modal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -32,72 +32,100 @@
         <div class="clients-table-card">
             <div class="table-header">
                 <h3 class="table-title">All Clients</h3>
-                <div class="table-stats">
-                    <span class="stat-badge">{{ items.length }} Total</span>
-                </div>
             </div>
             
             <div class="table-wrapper">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #name="props">
-                        <div class="client-name-cell">
+                <DataTable
+:viewable="false"
+                    ref="tableRef"
+                    fetch-url="/api/v1/clients"
+                    table-id="clients-list"
+                    :selectable="true"
+                    :columns="[
+                        { key: 'name', label: 'Name' },
+                        { key: 'phone_number', label: 'Phone' },
+                        { key: 'extra_phone_number', label: 'Alt. Phone' },
+                        { key: 'address', label: 'Address' },
+                        { key: 'advocate', label: 'Advocate' },
+                    ]"
+                    :sortable-columns="['name', 'phone_number', 'address']"
+                    :searchable-columns="['name', 'phone_number', 'address']"
+                    empty-title="No clients yet"
+                    empty-description="Add your first client to get started."
+                    empty-action-label="Add New Client"
+                    @empty-action="openAddModal"
+                >
+                    <template #bulk-actions="{ selectedIds, clearSelection }">
+                        <button type="button" class="btn-toolbar" @click="bulkDeleteClients(selectedIds, clearSelection)">Delete Selected</button>
+                    </template>
+                    <template #cell-name="{ row }">
+                        <router-link :to="{ name: 'client-details', params: { id: row.public_id || row.id } }" class="client-name-cell cross-link">
                             <div class="client-avatar">
-                                {{ props.row.name ? props.row.name.charAt(0).toUpperCase() : 'C' }}
+                                {{ row.name ? row.name.charAt(0).toUpperCase() : 'C' }}
                             </div>
-                            <span class="client-name-text">{{ props.row.name }}</span>
-                        </div>
+                            <span class="client-name-text">{{ row.name }}</span>
+                        </router-link>
                     </template>
                     
-                    <template #phone_number="props">
+                    <template #cell-phone_number="{ row }">
                         <div class="contact-cell">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
-                            <span>{{ props.row.phone_number }}</span>
+                            <span>{{ row.phone_number }}</span>
                         </div>
                     </template>
                     
-                    <template #extra_phone_number="props">
-                        <div class="contact-cell secondary" v-if="props.row.extra_phone_number">
+                    <template #cell-extra_phone_number="{ row }">
+                        <div class="contact-cell secondary" v-if="row.extra_phone_number">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
-                            <span>{{ props.row.extra_phone_number }}</span>
+                            <span>{{ row.extra_phone_number }}</span>
                         </div>
                         <span v-else class="no-data">—</span>
                     </template>
                     
-                    <template #address="props">
+                    <template #cell-address="{ row }">
                         <div class="address-cell">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                 <circle cx="12" cy="10" r="3"></circle>
                             </svg>
-                            <span>{{ props.row.address }}</span>
+                            <span>{{ row.address }}</span>
                         </div>
                     </template>
                     
-                    <template #advocate="props">
-                        <span class="advocate-badge">{{ props.row.advocate }}</span>
+                    <template #cell-advocate="{ row }">
+                        <span class="advocate-badge">{{ row.advocate }}</span>
                     </template>
                     
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="action-buttons">
-                            <button type="button" class="btn-action btn-view" @click="view_row(props.row)" title="View Details">
+                            <button type="button" class="btn-action btn-view" @click="view_row(row)" title="View Details" aria-label="View client details">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
                             </button>
-                            <button type="button" class="btn-action btn-edit" @click="update_row(props.row)" data-bs-toggle="modal" data-bs-target="#client_modal" title="Edit Client">
+                            <button type="button" class="btn-action btn-edit" @click="update_row(row)" data-bs-toggle="modal" data-bs-target="#client_modal" title="Edit Client" aria-label="Edit client">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
                             </button>
+                            <button type="button" class="btn-action btn-delete" @click="delete_row(row)" title="Delete Client" aria-label="Delete Client">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                    <path d="M10 11v6"></path>
+                                    <path d="M14 11v6"></path>
+                                    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -138,11 +166,12 @@
                                             type="text"
                                             v-model="client.name"
                                             class="form-control modern-input"
-                                            :class="[is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '']"
+                                            :class="[hasError('name') ? 'is-invalid' : (is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '')]"
                                             id="clientName"
                                             placeholder="Enter full name"
+                                            @input="clearErrors('name')"
                                         />
-                                        <div class="invalid-feedback">Please enter client name</div>
+                                        <div class="invalid-feedback">{{ hasError('name') ? fieldError('name') : 'Please enter client name' }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -158,11 +187,13 @@
                                             type="tel"
                                             v-model="client.phone_number"
                                             class="form-control modern-input"
-                                            :class="[is_submit_form4 ? (client.phone_number ? 'is-valid' : 'is-invalid') : '']"
+                                            :class="[hasError('phone_number') ? 'is-invalid' : (is_submit_form4 ? (client.phone_number ? 'is-valid' : 'is-invalid') : '')]"
                                             id="phoneNumber"
                                             placeholder="+254 700 000 000"
+                                            @input="clearErrors('phone_number'); checkPhone(client.phone_number, client.id)"
                                         />
-                                        <div class="invalid-feedback">Please enter phone number</div>
+                                        <div class="invalid-feedback">{{ hasError('phone_number') ? fieldError('phone_number') : 'Please enter phone number' }}</div>
+                                        <div v-if="phoneHint" class="duplicate-hint">{{ phoneHint }}</div>
                                     </div>
                                     
                                     <div class="form-group">
@@ -175,6 +206,18 @@
                                             class="form-control modern-input"
                                             id="extraPhone"
                                             placeholder="+254 700 000 000 (Optional)"
+                                        />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ebillingClientId" class="form-label">E-billing client ID</label>
+                                        <input
+                                            id="ebillingClientId"
+                                            v-model="client.ebilling_client_id"
+                                            type="text"
+                                            maxlength="64"
+                                            class="form-control modern-input"
+                                            placeholder="Only for clients billed through LEDES (Optional)"
                                         />
                                     </div>
                                 </div>
@@ -191,11 +234,12 @@
                                             type="text"
                                             v-model="client.address"
                                             class="form-control modern-input"
-                                            :class="[is_submit_form4 ? (client.address ? 'is-valid' : 'is-invalid') : '']"
+                                            :class="[hasError('address') ? 'is-invalid' : (is_submit_form4 ? (client.address ? 'is-valid' : 'is-invalid') : '')]"
                                             id="address"
                                             placeholder="Enter complete address"
+                                            @input="clearErrors('address')"
                                         />
-                                        <div class="invalid-feedback">Please enter address</div>
+                                        <div class="invalid-feedback">{{ hasError('address') ? fieldError('address') : 'Please enter address' }}</div>
                                     </div>
                                     
                                     <div class="form-group">
@@ -205,15 +249,16 @@
                                         <select 
                                             v-model="client.advocate" 
                                             class="form-select modern-select" 
-                                            :class="[is_submit_form4 ? (client.advocate ? 'is-valid' : 'is-invalid') : '']"
+                                            :class="[hasError('advocate') ? 'is-invalid' : (is_submit_form4 ? (client.advocate ? 'is-valid' : 'is-invalid') : '')]"
                                             id="advocate"
+                                            @change="clearErrors('advocate')"
                                         >
                                             <option value="">Select an advocate</option>
                                             <option v-for="data in advocates" :key="data.id" :value="data.id">
                                                 {{ data.name }}
                                             </option>
                                         </select>
-                                        <div class="invalid-feedback">Please select an advocate</div>
+                                        <div class="invalid-feedback">{{ hasError('advocate') ? fieldError('advocate') : 'Please select an advocate' }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -238,17 +283,56 @@
 </template>
 
 <script setup>
+import { confirmAction } from '@/composables/use-confirm';
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { conflictGate, CANCELLED } from '@/composables/use-conflict-gate';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useFormErrors } from '@/composables/use-form-errors';
+import { useDuplicateHint } from '@/composables/use-duplicate-hint';
+import { useModalDirtyGuard } from '@/composables/use-modal-dirty-guard';
+import DataTable from '@/components/ui/data-table.vue';
+
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { errors, hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
+const { hint: phoneHint, check: checkPhone, clearHint: clearPhoneHint } = useDuplicateHint('/api/v1/clients-check-phone', 'phone_number');
 
 useMeta({ title: 'Clients' });
 
 const router = useRouter();
 
-const columns = ref(['name', 'phone_number', 'extra_phone_number', 'address', 'advocate', 'actions']);
-const items = ref([]);
+const tableRef = ref(null);
+
+// UI-20: bulk actions — see cases/list-cases.vue for the pattern this
+// mirrors (DataTable owns selection state, module owns what the
+// actions actually do).
+const bulkDeleteClients = (selectedIds, clearSelection) => {
+    if (!selectedIds.length) return;
+
+    confirmAction({
+        title: `Delete ${selectedIds.length} client${selectedIds.length > 1 ? 's' : ''}?`,
+        text: 'This will delete every selected client. This can be undone by an administrator.',
+        confirmText: 'Yes, delete all',
+        danger: true,
+    }).then((ok) => {
+        if (!ok) return;
+
+        axios.post('/api/v1/clients/bulk-delete', { ids: selectedIds })
+            .then(() => {
+                showMessage(`Deleted ${selectedIds.length} client${selectedIds.length > 1 ? 's' : ''}.`);
+                clearSelection();
+                tableRef.value?.refresh();
+            })
+            .catch((error) => {
+                const message = error.response?.data?.message || 'Error deleting selected clients. Please try again.';
+                showMessage(message, 'error');
+            });
+    });
+};
 const advocates = ref([]);
 const modal = ref({ title: "Add Client", button: "Add Client" });
 const is_submit_form4 = ref(false);
@@ -258,98 +342,110 @@ const client = ref({
     phone_number: "",
     extra_phone_number: "",
     address: "",
-    advocate: ""
+    advocate: "",
+    ebilling_client_id: "",
 });
 
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover modern-table',
-    columnsClasses: { actions: 'actions-column' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search clients...',
-        limit: 'Show:',
-    },
-    sortable: ['name', 'phone_number', 'address', 'advocate'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+// UI-15: closing this modal with unsaved edits (X, backdrop, Esc, route
+// change) now asks for confirmation instead of silently discarding.
+// Bug fix (found via a real E2E run): a successful save previously
+// closed the modal via closebtn.click() BEFORE resetForm() ran, so the
+// dirty-guard's hide.bs.modal check compared the just-submitted (still
+// populated) fields against the empty open-time snapshot, saw a
+// difference, and blocked the auto-close with an unanswered confirm
+// dialog — the modal appeared to hang open forever. clear() explicitly
+// tells the guard this state is no longer "unsaved edits" right when a
+// save succeeds, independent of whatever order the reset/close calls
+// happen to run in.
+const { clear: clearDirtyGuard } = useModalDirtyGuard('client_modal', () => ({ ...client.value }));
 
+// PLAT-13: the onboarding checklist's "add a client" step lands here with ?new=1.
+const route = useRoute();
 onMounted(() => {
-    fetchData();
-});
-
-const fetchData = () => {
-    axios.get('/api/clients')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching clients:', error);
-        });
-
-    axios.get('/api/advocates')
+    if (route.query.new === '1') openAddModal();
+    axios.get('/api/v1/advocates')
         .then(response => {
             advocates.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching advocates:', error);
+            showMessage('Could not load advocates. Please try refreshing the page.', 'error');
         });
-};
+});
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     
     if (client.value.name && client.value.phone_number && client.value.address && client.value.advocate) {
         if (client.value.id > 0) {
-            axios.put(`/api/clients/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/clients/${client.value.id}`, client.value)
+                .then(() => {
                     showMessage('Client updated successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
                     resetForm();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating client. Please try again.', 'error');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating client. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/clients', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            // FUN-9: check for conflicts before taking the client on
+            conflictGate('client', [{ name: client.value.name, role: 'client' }], { phone: client.value.phone_number })
+                .then(({ proceed, checkId }) => (proceed
+                    ? axios.post('/api/v1/clients', { ...client.value, conflict_check_id: checkId })
+                    : Promise.reject(CANCELLED)))
+                .then(() => {
                     showMessage('Client added successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
                     resetForm();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding client. Please try again.', 'error');
-                    console.error(error);
+                    if (error.cancelled) return;
+                    showMessage(setErrorsFromResponse(error, 'Error adding client. Please try again.'), 'error');
                 });
         }
     }
 };
 
+const openAddModal = () => {
+    resetForm();
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
+
 const update_row = (item) => {
+    clearErrors();
+    clearPhoneHint();
     client.value.id = item.id;
     client.value.name = item.name;
     client.value.phone_number = item.phone_number;
     client.value.extra_phone_number = item.extra_phone_number;
     client.value.advocate = item.advocate_id;
     client.value.address = item.address;
+    client.value.ebilling_client_id = item.ebilling_client_id || "";
     
     modal.value.title = "Update Client";
     modal.value.button = "Update Client";
 };
 
 const view_row = (item) => {
-    router.push({ name: 'view-client', params: { id: item.id } });
+    router.push({ name: 'client-details', params: { id: item.public_id || item.id } });
+};
+
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/clients/${item.id}`,
+        itemLabel: item.name,
+        onSuccess: () => { tableRef.value?.refresh(); },
+        restoreUrl: `/api/v1/clients/${item.id}/restore`,
+        onRestore: () => { tableRef.value?.refresh(); },
+    });
 };
 
 const resetForm = () => {
@@ -359,26 +455,14 @@ const resetForm = () => {
         phone_number: "",
         extra_phone_number: "",
         address: "",
-        advocate: ""
+        advocate: "",
+        ebilling_client_id: "",
     };
     modal.value.title = "Add Client";
     modal.value.button = "Add Client";
     is_submit_form4.value = false;
-};
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '12px 20px',
-    });
+    clearErrors();
+    clearPhoneHint();
 };
 </script>
 
@@ -420,7 +504,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
@@ -432,7 +516,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-add-client:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
 }
 
 .clients-table-card {
@@ -460,7 +544,7 @@ const showMessage = (msg = '', type = 'success') => {
 .table-header .stat-badge {
     padding: 6px 12px;
     background: #eef2ff;
-    color: #4f46e5;
+    color: var(--primary-600);
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
@@ -476,7 +560,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     display: flex;
     align-items: center;
@@ -510,14 +594,14 @@ const showMessage = (msg = '', type = 'success') => {
     display: inline-block;
     padding: 6px 12px;
     background: #d1fae5;
-    color: #10b981;
+    color: #047857;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
 }
 
 .no-data {
-    color: #9ca3af;
+    color: #6b7280;
     font-style: italic;
 }
 
@@ -540,12 +624,12 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .btn-action.btn-view {
-    background: #e0f2fe;
-    color: #0ea5e9;
+    background: var(--primary-100);
+    color: var(--primary-500);
 }
 
 .btn-action.btn-view:hover {
-    background: #0ea5e9;
+    background: var(--primary-500);
     color: white;
     transform: translateY(-2px);
 }
@@ -557,6 +641,17 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-action.btn-edit:hover {
     background: #f59e0b;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-action.btn-delete {
+    background: #fee2e2;
+    color: #e7515a;
+}
+
+.btn-action.btn-delete:hover {
+    background: #e7515a;
     color: white;
     transform: translateY(-2px);
 }
@@ -586,7 +681,7 @@ const showMessage = (msg = '', type = 'success') => {
     height: 48px;
     border-radius: 12px;
     background: #eef2ff;
-    color: #4f46e5;
+    color: var(--primary-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -677,7 +772,7 @@ const showMessage = (msg = '', type = 'success') => {
 .modern-input:focus,
 .modern-select:focus {
     outline: none;
-    border-color: #4f46e5;
+    border-color: var(--primary-600);
     box-shadow: 0 0 0 3px #eef2ff;
 }
 
@@ -688,7 +783,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .modern-input.is-valid,
 .modern-select.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -700,6 +795,26 @@ const showMessage = (msg = '', type = 'success') => {
 
 .is-invalid ~ .invalid-feedback {
     display: block;
+}
+
+.duplicate-hint {
+    font-size: 12px;
+    color: #b45309;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cross-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--primary-600);
+        text-decoration: underline;
+    }
 }
 
 .modal-footer-actions {
@@ -714,7 +829,7 @@ const showMessage = (msg = '', type = 'success') => {
 .btn-cancel {
     padding: 10px 20px;
     background: #f3f4f6;
-    color: #6b7280;
+    color: #4b5563;
     border: none;
     border-radius: 8px;
     font-weight: 500;
@@ -731,7 +846,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
@@ -742,7 +857,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-submit:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 @media (max-width: 768px) {

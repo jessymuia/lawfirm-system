@@ -2,229 +2,278 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Invoices\DraftInvoice;
+use App\Actions\Invoices\ReviseDraftInvoice;
+use App\Actions\Invoices\SubmitInvoice;
+use App\Actions\Invoices\VoidInvoice;
 use App\Constants\ModulePermissions;
-use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Carbon\Carbon;
-use GuzzleHttp\Promise\Create;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
-    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
-    {
-        return response()->json([
-            'success' => $success,
-            'message'=>$message,
-            'data' => $data
-        ], $statusCode);
-    }
     /**
      * Display a listing of the resource.
-     *
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_INVOICES)) {
             abort(403);
-        if(auth()->user()->hasRole('admin')){
-            $invoices = Invoice::withTrashed()->orWhere("status",1)->orwhere("created_by", auth()->user()->id)->get();
-        } else {
-            $invoices = Invoice::where("created_by", auth()->user()->id)->get();
         }
 
-        $invoices = $invoices->map(function ($row) {
-            $status = "archived";
-            $delete = false;
+        $query = Invoice::with(['case', 'client'])->orderBy('id', 'desc');
 
-            switch ($row->status) {
-                case 1:
-                    $status = "active";
-                    $delete = true;
-                    break;
-                case 3:
-                    $status = "draft";
-                    $delete = true;
-                    break;
-                case 4:
-                    $status = "deleted(admin)";
-                    break;
-                case 5:
-                    $status = "deleted(user)";
-                    break;
+        // UI-10/UI-35: lets a case's own Financials tab list just that
+        // case's invoices, same fixed-column trust boundary as the
+        // filters above — applied before the admin/non-admin visibility
+        // scoping below so it narrows within whatever a user can
+        // already see, never expands it.
+        if (request()->filled('case_id')) {
+            $query->where('case_id', request()->input('case_id'));
+        }
 
-            }
+        if (auth()->user()->hasRole('admin')) {
+            $query->withTrashed()
+                ->where(function ($q) {
+                    $q->where('workflow_status', 'submitted')
+                        ->orWhere('created_by', auth()->user()->id);
+                });
+        } else {
+            $query->where('created_by', auth()->user()->id);
+        }
 
-           return [
-               "id" => $row->id,
-               "case_id" => $row->case_id,
-               "case" => $row->case->case_number,
-               "invoice_date" => Carbon::parse($row->invoice_date)->format('d/m/Y'),
-               "invoice_due_date" => Carbon::parse($row->invoice_due_date)->format('d/m/Y'),
-               "client_id" => $row->client_id,
-               "client" => Client::find($row->client_id)->name,
-               "status" => $status,
-               "delete" => $delete,
-           ];
-        });
+        // UI-28: real, kept-in-sync column (see Invoice::refreshPaymentStatus)
+        // — a fixed column name, not client-controlled, same trust boundary
+        // as CasesController's lifecycle_status filter. Accepts a
+        // comma-separated list (e.g. "unpaid,partially_paid") so a single
+        // KPI link can match a multi-status condition exactly.
+        if (request()->filled('payment_status')) {
+            $statuses = array_filter(explode(',', request()->input('payment_status')));
+            $query->whereIn('payment_status', $statuses);
+        }
 
-        return $this->response(true,'success', $invoices, 200);
-    }
+        // UI-28: combined with payment_status above, this is what lets the
+        // dashboard's Outstanding Invoices KPI deep-link to an EXACT match
+        // regardless of admin status. Without it, an admin's visibility
+        // rule below (submitted OR created_by = me) is broader than the
+        // dashboard's own query (submitted only) — an admin's own
+        // non-submitted drafts could otherwise leak into the linked list
+        // but not the KPI total they clicked through from.
+        if (request()->filled('workflow_status')) {
+            $query->where('workflow_status', request()->input('workflow_status'));
+        }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
+        $invoices = $this->paginatedOrFull(
+            request(),
+            $query,
+            fn ($row) => \App\Http\Resources\V1\InvoiceResource::make($row)->resolve(),
+            25,
+            ['invoice_date', 'invoice_due_date'],
+            ['invoice_number']
+        );
 
+        return $this->response(true, 'success', $invoices, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function store(Request $request): \Illuminate\Http\Response|JsonResponse
+    public function store(\App\Http\Requests\Invoice\StoreRequest $request): Response|JsonResponse
     {
-        Invoice::create([
-            "case_id" => $request->case_id,
-            "invoice_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
-            "invoice_due_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_due_date)->format('Y-m-d'),
-            "client_id" => $request->client_id,
-            "status" => 3,
-            "created_by" => auth()->user()->id
-        ]);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_INVOICES)) {
+            abort(403);
+        }
 
-        return $this->index();
+        $invoice = app(DraftInvoice::class)->handle($this->invoiceData($request), Auth::user());   // ENG-9
+
+        return $this->response(true, 'success', \App\Http\Resources\V1\InvoiceResource::make($invoice->load(['case', 'client']))->resolve(), 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Invoice  $invoice
-     * @return JsonResponse
      */
     public function show($id): JsonResponse
     {
-        $invoice = Invoice::find($id);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_INVOICES)) {
+            abort(403);
+        }
+
+        $invoice = Invoice::findOrFail($id);
+
+        if (! auth()->user()->hasRole('admin') && $invoice->created_by !== auth()->user()->id) {
+            abort(403);
+        }
+
         $invoice = [
-            "id" => $invoice->id,
-            "case" => $invoice->case->case_number,
-            "client" => $invoice->client->name,
-            "invoice_date" => Carbon::parse($invoice->invoice_date)->format('d/m/Y'),
-            "invoice_due_date" => Carbon::parse($invoice->invoice_due_date)->format('d/m/Y'),
+            'id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'case' => $invoice->case()->withTrashed()->first()->case_number ?? 'Unknown case',
+            'client' => $invoice->client()->withTrashed()->first()->name ?? 'Unknown client',
+            'invoice_date' => Carbon::parse($invoice->invoice_date)->format('d/m/Y'),
+            'invoice_due_date' => Carbon::parse($invoice->invoice_due_date)->format('d/m/Y'),
+            'currency' => $invoice->currency,
+            'subtotal' => $invoice->subtotal,
+            'tax_total' => $invoice->tax_total,
+            'total_amount' => $invoice->total_amount,
+            'amount_paid' => $invoice->amount_paid,
+            'workflow_status' => $invoice->workflow_status,
+            'payment_status' => $invoice->payment_status,
         ];
 
-        return $this->response(true,'success', $invoice, 200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Invoice  $invoice
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Invoice $invoice)
-    {
-        //
+        return $this->response(true, 'success', $invoice, 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Invoice  $invoice
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(Request $request, $id): \Illuminate\Http\Response|JsonResponse
+    public function update(\App\Http\Requests\Invoice\UpdateRequest $request, $id): Response|JsonResponse
     {
-        $invoice = Invoice::find($id);
-        $invoice->update([
-            "case_id" => $request->case_id,
-            "invoice_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
-            "invoice_due_date" => Carbon::createFromFormat('d/m/Y', $request->invoice_due_date)->format('Y-m-d'),
-            "client_id" => $request->client_id,
-            "updated_by" => auth()->user()->id
-        ]);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_INVOICES)) {
+            abort(403);
+        }
 
-        return $this->index();
+        $invoice = Invoice::findOrFail($id);
+
+        if (! auth()->user()->hasRole('admin') && $invoice->created_by !== auth()->user()->id) {
+            abort(403);
+        }
+
+        app(ReviseDraftInvoice::class)->handle($invoice, $this->invoiceData($request), Auth::user());   // ENG-9: drafts only
+
+        return $this->response(true, 'success', \App\Http\Resources\V1\InvoiceResource::make($invoice->fresh(['case', 'client']))->resolve(), 200);
     }
 
-    public function sendToAdmin($id): \Illuminate\Http\Response|JsonResponse
+    /** @return array{case_id: mixed, client_id: mixed, invoice_date: string, invoice_due_date: string} the request in the action's terms (dates Y-m-d) */
+    private function invoiceData(\Illuminate\Http\Request $request): array
     {
-        $invoice = Invoice::find($id);
-        $invoice->update([
-            "status" => 1,
-            "updated_by" => auth()->user()->id
-        ]);
+        return [
+            'case_id' => $request->case_id,
+            'client_id' => $request->client_id,
+            'invoice_date' => Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
+            'invoice_due_date' => Carbon::createFromFormat('d/m/Y', $request->invoice_due_date)->format('Y-m-d'),
+        ] + array_filter(['currency' => $request->input('currency')]);   // DATA-14
+    }
 
-        return $this->index();
+    public function sendToAdmin($id): Response|JsonResponse
+    {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_INVOICES)) {
+            abort(403);
+        }
+
+        $invoice = Invoice::findOrFail($id);
+
+        if (! auth()->user()->hasRole('admin') && $invoice->created_by !== auth()->user()->id) {
+            abort(403);
+        }
+
+        app(SubmitInvoice::class)->handle($invoice, Auth::user());   // ENG-9
+
+        return $this->response(true, 'success', \App\Http\Resources\V1\InvoiceResource::make($invoice->fresh(['case', 'client']))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Invoice  $invoice
-     * @return JsonResponse
+     * Admins may void any invoice. A creator may delete their own invoice
+     * only while it is still a draft (not yet submitted) — once submitted,
+     * only an admin can void it, preserving an audit trail for anything
+     * that has left draft state.
+     *
      */
     public function destroy($id): JsonResponse
     {
-        $invoice = Invoice::find($id);
-        if(auth()->user()->hasPermissionTo(ModulePermissions::DELETE_INVOICES)) {
-            //maybe send to creator that the invoice has been rejected by admin
+        // the route's InvoicePolicy::delete check (authz:policy) already decided; this keeps the action safe on its own
+        $invoice = Invoice::findOrFail($id);
+        \Illuminate\Support\Facades\Gate::authorize('delete', $invoice);
+        app(VoidInvoice::class)->handle($invoice, Auth::user());   // ENG-9
 
-            $invoice->deleted_by = auth()->user()->id;
-            $invoice->status = 4; //Deleted By admin
-            $invoice->save();
-            $invoice->delete();
-        } else if($invoice->created_by === auth()->user()->id && $invoice->status === 4) {
+        return $this->response(true, 'success', ['id' => (int) $id], 200);
+    }
 
-            $invoice->deleted_by = auth()->user()->id;
-            $invoice->status = 5; //Deleted By creator
-            $invoice->save();
-            $invoice->delete();
-        } else {
-            return $this->response(false,"error", null, 404);
+    /**
+     * UI-20: bulk delete — mirrors destroy()'s own per-invoice
+     * admin-or-own-draft rule rather than a single blanket permission
+     * check, since that's the real authorization logic for deleting an
+     * invoice at all. Rows the caller isn't allowed to delete are
+     * silently skipped (not an error) and reported back as `skipped` so
+     * the frontend can tell the person some selected rows weren't
+     * removed, rather than the whole batch failing over one invoice
+     * they didn't have rights to.
+     */
+    public function destroyMany(\App\Http\Requests\Invoice\DestroyManyRequest $request): JsonResponse
+    {
+
+        $invoices = Invoice::whereIn('id', $request->input('ids'))->get();
+
+        $deleted = [];
+        $skipped = [];
+
+        foreach ($invoices as $invoice) {
+            if (\Illuminate\Support\Facades\Gate::denies('delete', $invoice)) {   // InvoicePolicy: any invoice with delete-invoice, else own drafts
+                $skipped[] = $invoice->id;
+
+                continue;
+            }
+
+            app(VoidInvoice::class)->handle($invoice, Auth::user());   // ENG-9
+            $deleted[] = $invoice->id;
         }
 
-        return $this->index();
+        return $this->response(true, 'success', ['deleted' => $deleted, 'skipped' => $skipped], 200);
     }
 
     public function preview($id): JsonResponse
     {
-        $items = InvoiceItem::where("invoice_id",$id)->get();
-        $invoice = Invoice::find($id);
-        $total = InvoiceItem::where("invoice_id", $id)
-            ->selectRaw("SUM(tax) as total_tax, SUM(total_amount) as totals")
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_INVOICES)) {
+            abort(403);
+        }
+
+        $invoice = Invoice::findOrFail($id);
+
+        if (! auth()->user()->hasRole('admin') && $invoice->created_by !== auth()->user()->id) {
+            abort(403);
+        }
+
+        $items = InvoiceItem::where('invoice_id', $id)->get();
+        $total = InvoiceItem::where('invoice_id', $id)
+            ->selectRaw('SUM(tax) as total_tax, SUM(total_amount) as totals')
             ->first();
 
-
-        $items = $items->map(function($row) {
+        $items = $items->map(function ($row) {
             return [
-                "item" => $row->description,
-                "quantity" => $row->quantity,
-                "price" => $row->rate,
-                "amount" => $row->total_amount
+                'item' => $row->description,
+                'quantity' => $row->quantity,
+                'price' => $row->rate,
+                'amount' => $row->total_amount,
             ];
         });
 
         $invoice = [
-            "number"=> sprintf("%04d", $invoice->id),
-            "date" => $invoice->invoice_date,
-            "due_date"=>$invoice->invoice_due_date,
-            "client" => $invoice->client->name,
-            "client_address" => $invoice->client->address,
-            "postShow" => $invoice->status === 3
+            'number' => $invoice->invoice_number,
+            'date' => $invoice->invoice_date,
+            'due_date' => $invoice->invoice_due_date,
+            'client' => $invoice->client()->withTrashed()->first()->name ?? 'Unknown client',
+            'client_address' => $invoice->client()->withTrashed()->first()->address ?? '',
+            'currency' => $invoice->currency,
+            'subtotal' => $invoice->subtotal,
+            'tax_total' => $invoice->tax_total,
+            'total_amount' => $invoice->total_amount,
+            'amount_paid' => $invoice->amount_paid,
+            'workflow_status' => $invoice->workflow_status,
+            'payment_status' => $invoice->payment_status,
+            'postShow' => $invoice->workflow_status === 'draft',
         ];
 
-        return $this->response(true,'success',[$items,$invoice,$total],200);
+        return $this->response(true, 'success', [$items, $invoice, $total], 200);
     }
 }

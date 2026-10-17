@@ -1,0 +1,103 @@
+# PLAT-5: production-style self-hosted stack. Not the dev stack (that is ../../docker-compose.yml).
+#
+#   cp .env.example .env      # then fill it in (see docs/INSTALL_SELFHOST.md)
+#   docker compose up -d
+#
+# Start order: db -> migrate (one-shot: app:install) -> web, queue, scheduler.
+# TLS is terminated in front of this stack (your reverse proxy / load balancer); set TRUSTED_PROXIES and APP_URL=https://…
+
+x-app: &app
+  image: ${LAWFIRM_IMAGE:-ghcr.io/your-org/lawfirm}:${LAWFIRM_VERSION:?set LAWFIRM_VERSION in .env (e.g. 1.0.0)}
+  # Explicit list on purpose (no env_file): the DB root password must never reach the app containers.
+  environment:
+    APP_ENV: production
+    APP_DEBUG: "false"
+    DB_CONNECTION: mysql
+    DB_HOST: db
+    DB_PORT: "3306"
+    DB_DATABASE: ${DB_DATABASE:-lawfirm}
+    DB_USERNAME: ${DB_USERNAME:-lawfirm}
+    DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    APP_KEY: ${APP_KEY:?set APP_KEY in .env (docker run --rm IMAGE artisan key:generate --show)}
+    QUEUE_CONNECTION: database
+    TENANCY_MODE: single
+    APP_NAME: ${APP_NAME:-Law Management System}
+    APP_URL: ${APP_URL:?set APP_URL in .env}
+    SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-}
+    CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+    TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+    INSTALL_ADMIN_EMAIL: ${INSTALL_ADMIN_EMAIL:-}
+    INSTALL_ADMIN_NAME: ${INSTALL_ADMIN_NAME:-Administrator}
+    INSTALL_ADMIN_PASSWORD: ${INSTALL_ADMIN_PASSWORD:-}
+    LICENSE_REQUIRED: ${LICENSE_REQUIRED:-false}
+    MATTER_ACCESS: ${MATTER_ACCESS:-firm}
+    LICENSE_PUBLIC_KEYS: ${LICENSE_PUBLIC_KEYS:-}
+    MAIL_MAILER: ${MAIL_MAILER:-smtp}
+    MAIL_HOST: ${MAIL_HOST:-}
+    MAIL_PORT: ${MAIL_PORT:-587}
+    MAIL_USERNAME: ${MAIL_USERNAME:-}
+    MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
+    MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-no-reply@example.com}
+    MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Law Management System}
+    LOG_CHANNEL: ${LOG_CHANNEL:-stderr_json}
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+  volumes:
+    - app-storage:/var/www/html/storage
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-lawfirm}
+      MYSQL_USER: ${DB_USERNAME:-lawfirm}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # One-shot: migrates the schema, syncs permissions/roles, creates the first admin if there is none.
+  # Safe to re-run; it runs again on every `docker compose up` and after every upgrade.
+  migrate:
+    <<: *app
+    command: ["migrate"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    command: ["web"]
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  queue:
+    <<: *app
+    command: ["queue"]
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  scheduler:
+    <<: *app
+    command: ["scheduler"]
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:
+  app-storage:

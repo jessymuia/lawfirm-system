@@ -1,0 +1,61 @@
+{{- if .Values.bulkQueue.enabled }}
+# ENG-20: workers for heavy work only (exports, backfills, reading documents).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lawfirm.fullname" . }}-queue-bulk
+  labels:
+    {{- include "lawfirm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: queue-bulk
+spec:
+  replicas: {{ .Values.bulkQueue.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "lawfirm.selector" . | nindent 6 }}
+      app.kubernetes.io/component: queue-bulk
+  template:
+    metadata:
+      labels:
+        {{- include "lawfirm.selector" . | nindent 8 }}
+        app.kubernetes.io/component: queue-bulk
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.persistence.enabled (eq .Values.persistence.accessMode "ReadWriteOnce") }}
+      # A ReadWriteOnce volume attaches to one node: keep this pod beside the web pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  {{- include "lawfirm.selector" . | nindent 18 }}
+                  app.kubernetes.io/component: web
+      {{- end }}
+      containers:
+        - name: queue
+          image: {{ include "lawfirm.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["queue"]
+          env:
+            {{- include "lawfirm.env" . | nindent 12 }}
+            - name: QUEUE_WORKER_QUEUES
+              value: {{ .Values.bulkQueue.lanes | default "bulk" | quote }}
+          resources:
+            {{- toYaml .Values.bulkQueue.resources | nindent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage
+      volumes:
+        {{- include "lawfirm.storageVolume" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,35 @@
+/*
+ * UI-36: global print rules — hides the app's chrome (header, sidebar,
+ * footer, breadcrumbs, the global-search palette) on any printed page,
+ * not just invoices. Individual pages (invoice preview, case summary)
+ * add their own @media print rules on top of this for their specific
+ * document layout; this file is the one place that guarantees the
+ * surrounding app shell never ends up on a printed page.
+ */
+@media print {
+    body {
+        background: #fff !important;
+    }
+
+    header,
+    .modern-header,
+    .modern-sidebar-wrapper,
+    .sidebar-overlay,
+    .modern-footer,
+    .app-breadcrumbs,
+    .global-search {
+        display: none !important;
+    }
+
+    .main-container,
+    .main-content,
+    .content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+}

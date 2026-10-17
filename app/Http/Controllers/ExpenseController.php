@@ -3,149 +3,163 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
-use App\Models\Cases;
 use App\Models\Expense;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class ExpenseController extends Controller
 {
-    private function response(bool $success, string $message,$data , int $statusCode):JsonResponse
-    {
-        return response()->json([
-            'success' => $success,
-            'message'=>$message,
-            'data' => $data
-        ], $statusCode);
-    }
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index(): \Illuminate\Http\Response|JsonResponse
+    public function index(): Response|JsonResponse
     {
-//        if(!Auth::user()->hasPermissionTo(ModulePermissions::LIST_INVOICES))
-//            abort(403);
-        $expenses = Expense::all();
-        $expenses = $expenses->map(function ($row) {
-           return [
-               "id" => $row->id,
-               "case_id" => $row->case_id,
-               "expense_date" => Carbon::parse($row->date)->format('d/m/Y'),
-               "amount" => $row->amount,
-               "category" => $row->category,
-               "category_name" => $row->categoryName ? $row->categoryName->name : "",
-               "description" => $row->description,
-               "vendor" => $row->vendor,
-               "payment_method" => $row->payment_method,
-               "invoice_number" => $row->invoice_number,
-               "user_id" => $row->user_id,
-               "user" => User::find($row->user_id)->name,
-               'case' => Cases::find($row->case_id)->case_number
-           ];
-        });
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_EXPENSES)) {
+            abort(403);
+        }
 
-        return $this->response(true,'success',$expenses,200);
-    }
+        $query = Expense::with(['categoryName', 'user', 'case'])->orderBy('id', 'desc');
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        // Bug fix: the case detail page's "Case Expenses" card called this
+        // endpoint with no filter at all, so it displayed every expense
+        // in the entire firm on every case's page, not just that case's
+        // own expenses — directly contradicting the card's own heading.
+        // This filter is opt-in (only applied when case_id is actually
+        // passed), so the plain expenses list page's existing behaviour
+        // is unchanged.
+        if (request()->filled('case_id')) {
+            $query->where('case_id', request()->input('case_id'));
+        }
+
+        // Note: 'expense_date' in the response is a Carbon-formatted alias
+        // of the real `date` column (see ExpenseResource) — it can't be
+        // used as a sort column here since Eloquent would try to
+        // ORDER BY a column that doesn't exist. Sortable columns below
+        // are limited to keys that are a 1:1 match with a real column.
+        $expenses = $this->paginatedOrFull(
+            request(),
+            $query,
+            fn ($row) => \App\Http\Resources\V1\ExpenseResource::make($row)->resolve(),
+            25,
+            ['amount', 'description', 'vendor', 'payment_method', 'invoice_number'],
+            ['description', 'vendor', 'invoice_number']
+        );
+
+        return $this->response(true, 'success', $expenses, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function store(Request $request): \Illuminate\Http\Response|JsonResponse
+    public function store(\App\Http\Requests\Expense\StoreRequest $request): Response|JsonResponse
     {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_EXPENSES)) {
+            abort(403);
+        }
 
-        Expense::create([
-            "case_id" => $request->case_id,
-            "date" => Carbon::createFromFormat('d/m/Y', $request->expense_date)->format('Y-m-d'),
-            "amount" => $request->amount,
-            "category" => $request->category,
-            "description" => $request->description,
-            "vendor" => $request->vendor,
-            "payment_method" => $request->payment_method,
-            "invoice_number" => $request->invoice_number,
-            "user_id" => $request->user_id,
-            "created_by" => auth()->user()->id
+        $expense = Expense::create([
+            'case_id' => $request->case_id,
+            'date' => Carbon::createFromFormat('d/m/Y', $request->expense_date)->format('Y-m-d'),
+            'amount' => $request->amount,
+            'category' => $request->category,
+            'description' => $request->description,
+            'vendor' => $request->vendor,
+            'payment_method' => $request->payment_method,
+            'invoice_number' => $request->invoice_number,
+            'user_id' => $request->user_id,
+            'utbms_expense_code' => $request->input('utbms_expense_code'),   // FUN-13
         ]);
 
-        return $this->index();
+        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseResource::make($expense->load(['categoryName', 'user', 'case']))->resolve(), 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Expense  $expense
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function show($id): \Illuminate\Http\Response|JsonResponse
+    public function show($id): Response|JsonResponse
     {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_EXPENSES)) {
+            abort(403);
+        }
+
         $expenses = Expense::where('case_id', $id)->firstOrFail();
 
-        return $this->response(true,'success',$expenses,200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Expense  $expense
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Expense $expense)
-    {
-        //
+        return $this->response(true, 'success', $expenses, 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Expense  $expense
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(Request $request, $id): \Illuminate\Http\Response|JsonResponse
+    public function update(\App\Http\Requests\Expense\UpdateRequest $request, $id): Response|JsonResponse
     {
-        $expense = Expense::find($id);
-        $expense ->update([
-            "case_id" => $request->case_id,
-            "date" => Carbon::createFromFormat('d/m/Y', $request->expense_date)->format('Y-m-d'),
-            "amount" => $request->amount,
-            "category" => $request->category,
-            "description" => $request->description,
-            "vendor" => $request->vendor,
-            "payment_method" => $request->payment_method,
-            "invoice_number" => $request->invoice_number,
-            "user_id" => $request->user_id,
-            "updated_by" => auth()->user()->id
-        ]);
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_EXPENSES)) {
+            abort(403);
+        }
 
-        return $this->index();
+        $expense = Expense::findOrFail($id);
+        $expense->update([
+            'case_id' => $request->case_id,
+            'date' => Carbon::createFromFormat('d/m/Y', $request->expense_date)->format('Y-m-d'),
+            'amount' => $request->amount,
+            'category' => $request->category,
+            'description' => $request->description,
+            'vendor' => $request->vendor,
+            'payment_method' => $request->payment_method,
+            'invoice_number' => $request->invoice_number,
+            'user_id' => $request->user_id,
+            'updated_by' => auth()->user()->id,
+        ] + ($request->exists('utbms_expense_code') ? $request->only('utbms_expense_code') : []));   // FUN-13: only when sent
+
+        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseResource::make($expense->fresh(['categoryName', 'user', 'case']))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Expense  $expense
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Expense $expense)
+    public function destroy($id)
     {
-        //
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_EXPENSES)) {
+            abort(403);
+        }
+
+        $expense = Expense::findOrFail($id);
+        $expense->deleted_by = auth()->user()->id;
+        $expense->save();
+
+        $expense->delete();
+
+        return $this->response(true, 'success', ['id' => (int) $id], 200);
+    }
+
+    /**
+     * UI-20: bulk delete — see CasesController::destroyMany for the
+     * general pattern this mirrors.
+     */
+    public function destroyMany(\App\Http\Requests\Expense\DestroyManyRequest $request)
+    {
+        if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_EXPENSES)) {
+            abort(403);
+        }
+
+        $expenses = Expense::whereIn('id', $request->input('ids'))->get();
+        foreach ($expenses as $expense) {
+            $expense->deleted_by = auth()->user()->id;
+            $expense->save();
+            $expense->delete();
+        }
+
+        return $this->response(true, 'success', ['deleted' => $expenses->pluck('id')], 200);
     }
 }

@@ -20,7 +20,7 @@
                 <h2 class="page-title">Courts Management</h2>
                 <p class="page-subtitle">Manage court information and types</p>
             </div>
-            <button type="button" class="btn-add-court" data-bs-toggle="modal" data-bs-target="#client_modal">
+            <button type="button" class="btn-add-court" @click="resetForm" data-bs-toggle="modal" data-bs-target="#client_modal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -32,14 +32,21 @@
         <div class="courts-table-card">
             <div class="table-header">
                 <h3 class="table-title">All Courts</h3>
-                <div class="table-stats">
-                    <span class="stat-badge">{{ items.length }} Total</span>
-                </div>
             </div>
             
             <div class="table-wrapper">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #name="props">
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/courts"
+                    :columns="[{ key: 'name', label: 'Name' }, { key: 'court_type', label: 'Type' }]"
+                    :sortable-columns="['name']"
+                    :searchable-columns="['name']"
+                    empty-title="No courts yet"
+                    empty-description="Add your first court to get started."
+                    empty-action-label="Add New Court"
+                    @empty-action="openAddModal"
+                >
+                    <template #cell-name="{ row }">
                         <div class="court-name-cell">
                             <div class="court-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -47,25 +54,34 @@
                                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                 </svg>
                             </div>
-                            <span class="court-name-text">{{ props.row.name }}</span>
+                            <span class="court-name-text">{{ row.name }}</span>
+                            <CatalogBadge :row="row" />
                         </div>
                     </template>
-                    
-                    <template #court_type="props">
-                        <span class="type-badge">{{ props.row.court_type }}</span>
+
+                    <template #cell-court_type="{ row }">
+                        <span class="type-badge">{{ row.court_type }}</span>
                     </template>
-                    
-                    <template #actions="props">
+
+                    <template #actions="{ row }">
                         <div class="action-buttons">
-                            <button type="button" class="btn-action btn-edit" @click="update_row(props.row)" data-bs-toggle="modal" data-bs-target="#client_modal" title="Edit Court">
+                            <button type="button" class="btn-action btn-edit" @click="update_row(row)" data-bs-toggle="modal" data-bs-target="#client_modal" title="Edit Court" aria-label="Edit court">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
                             </button>
+                            <button v-if="!row.is_system" type="button" class="btn-action btn-delete" @click="delete_row(row)" title="Delete Court" aria-label="Delete court">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                    <path d="M10 11v6"></path>
+                                    <path d="M14 11v6"></path>
+                                </svg>
+                            </button>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -82,7 +98,7 @@
                             </div>
                             <div>
                                 <h4 class="modal-title">{{ modal.title }}</h4>
-                                <p class="modal-subtitle">{{ modal.title === 'Add Court' ? 'Enter court information below' : 'Update court details' }}</p>
+                                <p class="modal-subtitle">{{ modal.title === 'Add Court' ? 'Enter court information below' : (client.is_system ? 'Set a local name' : 'Update court details') }}</p>
                             </div>
                         </div>
                         <button id="closebtn" type="button" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" class="btn-close-modern">
@@ -97,23 +113,30 @@
                         <form class="modern-form" @submit.stop.prevent="submit_form4">
                             <div class="form-section">
                                 <h5 class="section-title">Court Information</h5>
-                                <div class="form-grid">
+                                <div v-if="client.is_system" class="form-group">
+                                    <label class="form-label">Local name</label>
+                                    <input type="text" v-model="client.alias" class="form-control modern-input" :class="{ 'is-invalid': hasError('alias') }" :placeholder="client.official_name" @input="clearErrors('alias')"/>
+                                    <div class="invalid-feedback">{{ fieldError('alias') }}</div>
+                                    <small class="form-text text-muted">Official name: <strong>{{ client.official_name }}</strong>. It is maintained by the platform and cannot be renamed or deleted; set the name your firm uses instead. Leave empty to use the official name.</small>
+                                </div>
+                                <div v-else class="form-grid">
                                     <div class="form-group">
                                         <label class="form-label">Court Name <span class="required">*</span></label>
                                         <input type="text" v-model="client.name" class="form-control modern-input"
-                                            :class="[is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '']"
-                                            placeholder="Enter court name"/>
-                                        <div class="invalid-feedback">Court name is required</div>
+                                            :class="[hasError('name') ? 'is-invalid' : (is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '')]"
+                                            placeholder="Enter court name" @input="clearErrors('name')"/>
+                                        <div class="invalid-feedback">{{ hasError('name') ? fieldError('name') : 'Court name is required' }}</div>
                                     </div>
                                     
                                     <div class="form-group">
                                         <label class="form-label">Court Type <span class="required">*</span></label>
                                         <select v-model="client.type" class="form-select modern-select"
-                                            :class="[is_submit_form4 ? (client.type ? 'is-valid' : 'is-invalid') : '']">
+                                            :class="[hasError('type') ? 'is-invalid' : (is_submit_form4 ? (client.type ? 'is-valid' : 'is-invalid') : '')]"
+                                            @change="clearErrors('type')">
                                             <option value="">Select Court Type</option>
                                             <option v-for="data in types" :key="data.id" :value="data.id">{{ data.name }}</option>
                                         </select>
-                                        <div class="invalid-feedback">Please select a court type</div>
+                                        <div class="invalid-feedback">{{ hasError('type') ? fieldError('type') : 'Please select a court type' }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -136,17 +159,24 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+import CatalogBadge from '@/components/ui/catalog-badge.vue';
 
 useMeta({ title: 'Courts' });
 
 const router = useRouter();
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
 
-const columns = ref(['name', 'court_type', 'actions']);
-const items = ref([]);
+const tableRef = ref(null);
 const types = ref([]);
 const modal = ref({title: "Add Court", button: "Add"});
 const is_submit_form4 = ref(false);
@@ -154,116 +184,93 @@ const is_submit_form4 = ref(false);
 const client = ref({
     id: "",
     name: "",
-    type: ""
+    type: "",
+    is_system: false,
+    alias: "",
+    official_name: ""
 });
 
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover modern-table',
-    columnsClasses: { actions: 'actions-column' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search courts...',
-        limit: 'Show:',
-    },
-    sortable: ['name', 'court_type'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+// TEN-11: a system court only accepts a local name (alias); a firm's court is edited as before.
+const payload = () => client.value.is_system ? { alias: client.value.alias } : { name: client.value.name, type: client.value.type };
 
 onMounted(() => {
-    fetchData();
-});
-
-const submit_form4 = () => {
-    is_submit_form4.value = true;
-    if (client.value.name && client.value.type) {
-        if(client.value.id > 0) {
-            axios.put(`/api/courts/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
-                    showMessage('Court updated successfully.');
-                    document.getElementById('closebtn').click();
-                    resetForm();
-                })
-                .catch(error => {
-                    showMessage('Error updating court. Please try again.', 'error');
-                    console.error(error);
-                });
-        } else {
-            axios.post('/api/courts', client.value)
-                .then(response => {
-                    items.value = response.data.data;
-                    showMessage('Court added successfully.');
-                    document.getElementById('closebtn').click();
-                    resetForm();
-                })
-                .catch(error => {
-                    showMessage('Error adding court. Please try again.', 'error');
-                    console.error(error);
-                });
-        }
-    }
-};
-
-const fetchData = () => {
-    axios.get('/api/courts')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching courts:', error);
-        });
-
-    axios.get('/api/courttypes')
+    axios.get('/api/v1/courttypes/options')
         .then(response => {
             types.value = response.data.data;
         })
         .catch(error => {
             console.error('Error fetching court types:', error);
+            showMessage('Could not load court types. Please try refreshing the page.', 'error');
         });
+});
+
+const submit_form4 = () => {
+    is_submit_form4.value = true;
+    clearErrors();
+    if (client.value.name && client.value.type) {
+        if(client.value.id > 0) {
+            axios.put(`/api/v1/courts/${client.value.id}`, payload())
+                .then(() => {
+                    showMessage('Court updated successfully.');
+                    document.getElementById('closebtn').click();
+                    resetForm();
+                    tableRef.value?.refresh();
+                })
+                .catch(error => {
+                    showMessage(setErrorsFromResponse(error, 'Error updating court. Please try again.'), 'error');
+                });
+        } else {
+            axios.post('/api/v1/courts', payload())
+                .then(() => {
+                    showMessage('Court added successfully.');
+                    document.getElementById('closebtn').click();
+                    resetForm();
+                    tableRef.value?.refresh(1);
+                })
+                .catch(error => {
+                    showMessage(setErrorsFromResponse(error, 'Error adding court. Please try again.'), 'error');
+                });
+        }
+    }
+};
+
+const openAddModal = () => {
+    resetForm();
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
 };
 
 const update_row = (item) => {
-    client.value.id = item.id;
-    client.value.name = item.name;
-    client.value.type = item.type;
+    clearErrors();
+    client.value = {id: item.id, name: item.official_name ?? item.name, type: item.type, is_system: !!item.is_system, alias: item.alias ?? "", official_name: item.official_name ?? item.name};
 
     modal.value.title = "Update Court";
     modal.value.button = "Update";
+};
+
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/courts/${item.id}`,
+        itemLabel: item.name,
+        onSuccess: () => { tableRef.value?.refresh(); },
+    });
 };
 
 const resetForm = () => {
     client.value = {
         id: "",
         name: "",
-        type: ""
+        type: "",
+        is_system: false,
+        alias: "",
+        official_name: ""
     };
     modal.value.title = "Add Court";
     modal.value.button = "Add";
     is_submit_form4.value = false;
-};
-
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '12px 20px',
-    });
+    clearErrors();
 };
 </script>
 
@@ -305,7 +312,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
@@ -317,7 +324,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-add-court:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
 }
 
 .courts-table-card {
@@ -345,7 +352,7 @@ const showMessage = (msg = '', type = 'success') => {
 .table-header .stat-badge {
     padding: 6px 12px;
     background: #ede9fe;
-    color: #8b5cf6;
+    color: var(--primary-600);
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
@@ -362,7 +369,7 @@ const showMessage = (msg = '', type = 'success') => {
     height: 32px;
     border-radius: 8px;
     background: #ede9fe;
-    color: #8b5cf6;
+    color: var(--primary-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,7 +384,7 @@ const showMessage = (msg = '', type = 'success') => {
     display: inline-block;
     padding: 6px 12px;
     background: #dbeafe;
-    color: #3b82f6;
+    color: #1d4ed8;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
@@ -412,6 +419,17 @@ const showMessage = (msg = '', type = 'success') => {
     transform: translateY(-2px);
 }
 
+.btn-action.btn-delete {
+    background: #fee2e2;
+    color: #e7515a;
+}
+
+.btn-action.btn-delete:hover {
+    background: #e7515a;
+    color: white;
+    transform: translateY(-2px);
+}
+
 .modern-modal {
     border: none;
     border-radius: 16px;
@@ -437,7 +455,7 @@ const showMessage = (msg = '', type = 'success') => {
     height: 48px;
     border-radius: 12px;
     background: #ede9fe;
-    color: #8b5cf6;
+    color: var(--primary-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -524,7 +542,7 @@ const showMessage = (msg = '', type = 'success') => {
 .modern-input:focus,
 .modern-select:focus {
     outline: none;
-    border-color: #8b5cf6;
+    border-color: var(--primary-600);
     box-shadow: 0 0 0 3px #ede9fe;
 }
 
@@ -535,7 +553,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .modern-input.is-valid,
 .modern-select.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -561,7 +579,7 @@ const showMessage = (msg = '', type = 'success') => {
 .btn-cancel {
     padding: 10px 20px;
     background: #f3f4f6;
-    color: #6b7280;
+    color: #4b5563;
     border: none;
     border-radius: 8px;
     font-weight: 500;
@@ -578,7 +596,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
@@ -589,7 +607,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-submit:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 @media (max-width: 768px) {

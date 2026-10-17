@@ -24,7 +24,7 @@
                     </svg>
                     <h4>Tasks Management</h4>
                 </div>
-                <button type="button" class="btn-add-task" data-bs-toggle="modal" data-bs-target="#client_modal">
+                <button type="button" class="btn-add-task" @click="openAddModal" data-bs-toggle="modal" data-bs-target="#client_modal">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
                     </svg>
@@ -35,50 +35,72 @@
 
         <div class="table-container">
             <div class="table-card">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #title="props">
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/tasks"
+                    table-id="tasks-list"
+                    :selectable="true"
+                    :columns="[
+                        { key: 'title', label: 'Title' },
+                        { key: 'description', label: 'Description' },
+                        { key: 'advocate', label: 'Assigned To' },
+                        { key: 'due_date', label: 'Due Date' },
+                        { key: 'priority', label: 'Priority' },
+                        { key: 'status', label: 'Status' },
+                    ]"
+                    :sortable-columns="['title', 'due_date', 'priority']"
+                    :searchable-columns="['title', 'description']"
+                    empty-title="No tasks yet"
+                    empty-description="Add your first task to get started."
+                    empty-action-label="Add New Task"
+                    @empty-action="openAddModal"
+                >
+                    <template #bulk-actions="{ selectedIds, clearSelection }">
+                        <button type="button" class="btn-toolbar" @click="bulkDeleteTasks(selectedIds, clearSelection)">Delete Selected</button>
+                    </template>
+                    <template #cell-title="{ row }">
                         <div class="task-title">
                             <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke-width="2"/>
                                 <rect x="9" y="3" width="6" height="4" rx="1" stroke-width="2"/>
                             </svg>
-                            {{ props.row.title }}
+                            {{ row.title }}
                         </div>
                     </template>
-                    <template #description="props">
-                        <div class="description-text">{{ props.row.description }}</div>
+                    <template #cell-description="{ row }">
+                        <div class="description-text">{{ row.description }}</div>
                     </template>
-                    <template #advocate="props">
+                    <template #cell-advocate="{ row }">
                         <div class="advocate-cell">
                             <svg class="advocate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2"/>
                                 <circle cx="12" cy="7" r="4" stroke-width="2"/>
                             </svg>
-                            {{ props.row.advocate }}
+                            {{ row.advocate }}
                         </div>
                     </template>
-                    <template #due_date="props">
+                    <template #cell-due_date="{ row }">
                         <div class="date-cell">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                                 <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/>
                             </svg>
-                            {{ props.row.due_date }}
+                            {{ row.due_date }}
                         </div>
                     </template>
-                    <template #priority="props">
-                        <span :class="['priority-badge', `priority-${props.row.priority?.toLowerCase()}`]">
-                            {{ props.row.priority }}
+                    <template #cell-priority="{ row }">
+                        <span :class="['priority-badge', `priority-${row.priority?.toLowerCase()}`]">
+                            {{ row.priority }}
                         </span>
                     </template>
-                    <template #status="props">
-                        <span :class="['status-badge', `status-${props.row.status?.toLowerCase()?.replace('_', '-')}`]">
-                            {{ props.row.status?.replace('_', ' ') }}
+                    <template #cell-status="{ row }">
+                        <span :class="['status-badge', `status-${row.status?.toLowerCase()?.replace('_', '-')}`]">
+                            {{ row.status?.replace('_', ' ') }}
                         </span>
                     </template>
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="actions text-center">
-                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                            <a href="javascript:;" class="cancel me-1" @click="update_row(row)">
                                 <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#client_modal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -87,9 +109,18 @@
                                     Edit
                                 </button>
                             </a>
+                            <a href="javascript:;" class="cancel" @click="delete_row(row)">
+                                <button type="button" class="btn-delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </a>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -129,18 +160,20 @@
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label class="form-label">Assigned To *</label>
-                                        <select v-model="client.assigned_to" class="modern-select" :class="[is_submit_form4 ? (client.assigned_to ? 'is-valid' : 'is-invalid') : '']">
-                                            <option value="">Select User</option>
-                                            <option v-for="data in users" :key="data.id" :value="data.id">{{ data.name }}</option>
-                                        </select>
-                                        <div class="invalid-feedback">Please select the user</div>
+                                        <SearchSelect
+                                            fetch-url="/api/v1/advocates"
+                                            v-model="client.assigned_to"
+                                            :initial-label="client.advocate_name"
+                                            placeholder="Search users..."
+                                            :invalid="is_submit_form4 && !client.assigned_to"
+                                        />
+                                        <div class="invalid-feedback" :style="is_submit_form4 && !client.assigned_to ? 'display:block' : ''">Please select the user</div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
-                                        <label class="form-label">Due Date * (dd/mm/yyyy)</label>
-                                        <input v-model="client.due_date" type="text" class="modern-input"
-                                               :class="[is_submit_form4 ? (client.due_date ? 'is-valid' : 'is-invalid') : '']"
-                                               v-maska="'##/##/####'" placeholder="__/__/____" />
+                                        <label class="form-label">Due Date *</label>
+                                        <AppDatePicker v-model="client.due_date"
+                                               :invalid="is_submit_form4 && !client.due_date" />
                                         <div class="invalid-feedback">Please provide a valid date</div>
                                     </div>
 
@@ -181,69 +214,88 @@
 </template>
 
 <script setup>
+import { confirmAction } from '@/composables/use-confirm';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import AppDatePicker from '@/components/ui/app-date-picker.vue';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+import SearchSelect from '@/components/ui/search-select.vue';
+import { useModalDirtyGuard } from '@/composables/use-modal-dirty-guard';
+
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { setErrorsFromResponse, clearErrors } = useFormErrors();
 useMeta({ title: 'Tasks' });
 
-const columns = ref(['title','description','advocate','due_date','priority','status', 'actions']);
-const items = ref([]);
-const users = ref([]);
-const modal = ref({title: "", button: ""});
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['title','description','advocate','due_date','priority','status'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const tableRef = ref(null);
 
-onMounted(() => {
-    fetchData();
-});
+const bulkDeleteTasks = (selectedIds, clearSelection) => {
+    if (!selectedIds.length) return;
+
+    confirmAction({
+        title: `Delete ${selectedIds.length} task${selectedIds.length > 1 ? 's' : ''}?`,
+        text: 'This will delete every selected task. This can be undone by an administrator.',
+        confirmText: 'Yes, delete all',
+        danger: true,
+    }).then((ok) => {
+        if (!ok) return;
+
+        axios.post('/api/v1/tasks/bulk-delete', { ids: selectedIds })
+            .then(() => {
+                showMessage(`Deleted ${selectedIds.length} task${selectedIds.length > 1 ? 's' : ''}.`);
+                clearSelection();
+                tableRef.value?.refresh();
+            })
+            .catch((error) => {
+                const message = error.response?.data?.message || 'Error deleting selected tasks. Please try again.';
+                showMessage(message, 'error');
+            });
+    });
+};
+const modal = ref({title: "Add Task", button: "Add"});
+
+onMounted(() => {});
 
 const router = useRouter();
 const is_submit_form4 = ref(false);
-const client = ref({id: "",description:"",title : "", assigned_to: "", due_date:"",priority:"",status:""});
+const client = ref({id: "",description:"",title : "", assigned_to: "", advocate_name: "", due_date:"",priority:"",status:""});
+
+// UI-15: closing this modal with unsaved edits now asks for confirmation.
+// Bug fix (found via a real E2E run): clearDirtyGuard() must be called
+// on a successful save, before the modal auto-closes — see
+// list-clients.vue's identical fix for the full explanation.
+const { clear: clearDirtyGuard } = useModalDirtyGuard('client_modal', () => ({ ...client.value }));
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.priority && client.value.status && client.value.title && client.value.description) {
         if(client.value.id > 0) {
-            axios.put(`/api/tasks/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/tasks/${client.value.id}`, client.value)
+                .then(() => {
                     showMessage('Task updated successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating task. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating task. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/tasks', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/tasks', client.value)
+                .then(() => {
                     showMessage('Task added successfully.');
+                    clearDirtyGuard();
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding task. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding task. Please try again.'), 'error');
                 });
         }
 
@@ -251,6 +303,7 @@ const submit_form4 = () => {
         client.value.description = "";
         client.value.title = "";
         client.value.assigned_to = "";
+        client.value.advocate_name = "";
         client.value.due_date = "";
         client.value.priority = "";
         client.value.status = "";
@@ -260,25 +313,14 @@ const submit_form4 = () => {
     }
 };
 
-const fetchData = () => {
+const openAddModal = () => {
+    client.value = {id: "",description:"",title : "", assigned_to: "", advocate_name: "", due_date:"",priority:"",status:""};
     modal.value.title = "Add Task";
     modal.value.button = "Add";
-    
-    axios.get('/api/tasks')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching tasks:', error);
-        });
-
-    axios.get('/api/advocates')
-        .then(response => {
-            users.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching advocates:', error);
-        });
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
 };
 
 const update_row = (item) => {
@@ -286,6 +328,7 @@ const update_row = (item) => {
     client.value.description = item.description;
     client.value.title = item.title;
     client.value.assigned_to = item.assigned_to;
+    client.value.advocate_name = item.advocate;
     client.value.due_date = item.due_date;
     client.value.priority = item.priority;
     client.value.status = item.status;
@@ -293,17 +336,13 @@ const update_row = (item) => {
     modal.value.button = "Update";
 };
 
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/tasks/${item.id}`,
+        itemLabel: item.title,
+        onSuccess: () => { tableRef.value?.refresh(); },
+        restoreUrl: `/api/v1/tasks/${item.id}/restore`,
+        onRestore: () => { tableRef.value?.refresh(); },
     });
 };
 </script>
@@ -340,7 +379,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 48px;
     height: 48px;
     padding: 12px;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border-radius: 12px;
     flex-shrink: 0;
@@ -358,19 +397,19 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 .btn-add-task:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
 }
 
 .btn-add-task svg {
@@ -402,7 +441,7 @@ const showMessage = (msg = '', type = 'success') => {
 .task-icon {
     width: 18px;
     height: 18px;
-    color: #8b5cf6;
+    color: var(--primary-600);
     flex-shrink: 0;
     stroke-width: 2;
 }
@@ -427,7 +466,7 @@ const showMessage = (msg = '', type = 'success') => {
 .advocate-icon {
     width: 18px;
     height: 18px;
-    color: #8b5cf6;
+    color: var(--primary-600);
     flex-shrink: 0;
     stroke-width: 2;
 }
@@ -443,7 +482,7 @@ const showMessage = (msg = '', type = 'success') => {
 .date-cell svg {
     width: 16px;
     height: 16px;
-    color: #8b5cf6;
+    color: var(--primary-600);
     stroke-width: 2;
 }
 
@@ -505,7 +544,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 6px;
@@ -517,7 +556,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .btn-edit:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 .btn-edit svg {
@@ -526,8 +565,34 @@ const showMessage = (msg = '', type = 'success') => {
     stroke-width: 2;
 }
 
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #e7515a, #c53040);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 81, 90, 0.3);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 20px 24px;
@@ -606,8 +671,8 @@ textarea.modern-input {
 .modern-input:focus,
 .modern-select:focus {
     outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    border-color: var(--primary-600);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
 }
 
 .modern-input.is-invalid,
@@ -617,7 +682,7 @@ textarea.modern-input {
 
 .modern-input.is-valid,
 .modern-select.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -637,7 +702,7 @@ textarea.modern-input {
     justify-content: center;
     gap: 8px;
     padding: 14px 32px;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
     color: white;
     border: none;
     border-radius: 8px;
@@ -645,13 +710,13 @@ textarea.modern-input {
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
     align-self: flex-start;
 }
 
 .btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
 }
 
 @media (max-width: 768px) {

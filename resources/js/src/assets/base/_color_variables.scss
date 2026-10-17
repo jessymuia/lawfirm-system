@@ -7,21 +7,21 @@
 $white: #fff;
 $black: #000;
 
-$primary: #4361ee;
+$primary: #0e6b50;
 $info: #2196f3;
-$success: #1abc9c;
+$success: #1f8a5b;
 $warning: #e2a03f;
 $danger: #e7515a;
-$secondary: #805dca;
-$dark: #3b3f5c;
+$secondary: #4b5d55;
+$dark: #16211d;
 
 
-$l-primary: #eaf1ff;
+$l-primary: #e2edea;
 $l-info: #e7f7ff;
 $l-success: #ddf5f0;
 $l-warning: #fff9ed;
 $l-danger: #fff5f5;
-$l-secondary: #f3effc;
+$l-secondary: #eef2ef;
 $l-dark: #e3e4eb;
 
 // 	=================
@@ -35,7 +35,8 @@ $m-color_3: #e0e6ed;
 $m-color_4: #bfc9d4;
 $m-color_5: #d3d3d3;
 
-$m-color_6: #888ea8;
+$m-color_6: var(--text-muted);
+$m-color_6-hex: #626779; // for get_color() in an inline SVG, which cannot take a variable
 $m-color_7: #506690;
 
 $m-color_8: #555555;

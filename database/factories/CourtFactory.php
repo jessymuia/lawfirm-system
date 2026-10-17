@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Court;
 use App\Models\CourtType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Court>
+ * @extends Factory<Court>
  */
 class CourtFactory extends Factory
 {
@@ -20,7 +21,10 @@ class CourtFactory extends Factory
         return [
             //
             'name' => $this->faker->name(),
-            'type' => CourtType::query()->get('id')->random(1)->first(),
+            // Self-sufficient: creates its own CourtType if none is
+            // supplied, instead of erroring against an empty table in a
+            // fresh test database (Collection::random() throws on empty).
+            'type' => CourtType::factory(),
         ];
     }
 }

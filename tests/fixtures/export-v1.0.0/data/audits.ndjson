@@ -1,0 +1,1 @@
+{"id":1,"user_type":"App\\Models\\User","user_id":1,"event":"created","auditable_type":"App\\Models\\Cases","auditable_id":1,"old_values":"[]","new_values":"{\"x\":1}","url":null,"ip_address":null,"user_agent":null,"tags":null,"created_at":"2026-10-01 07:09:28","updated_at":"2026-10-01 07:09:28"}

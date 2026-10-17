@@ -1,0 +1,16 @@
+{
+    // ENG-15: TypeScript on the API boundary (docs/TYPESCRIPT.md). `npm run type-check` (vue-tsc) is a CI gate.
+    // .ts files and <script lang="ts"> components are checked strictly; plain .js / .vue stay as they are until migrated.
+    "extends": "@vue/tsconfig/tsconfig.dom.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": { "@/*": ["resources/js/src/*"] },
+        "allowJs": true,
+        "checkJs": false,
+        "strict": true,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "types": ["vite/client"]
+    },
+    "include": ["resources/js/src/**/*.ts", "resources/js/src/**/*.d.ts", "resources/js/src/**/*.vue"]
+}

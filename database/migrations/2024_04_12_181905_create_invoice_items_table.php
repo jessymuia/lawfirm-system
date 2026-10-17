@@ -1,5 +1,6 @@
 <?php
 
+use App\AppUtils\Utils;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,8 +15,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_items', function (Blueprint $table) {
-            $table = \App\AppUtils\Utils::createDefaultTableColumns($table);
-            $table->foreignId('invoice_id')->constrained("invoices");
+            $table = Utils::createDefaultTableColumns($table);
+            $table->foreignId('invoice_id')->constrained('invoices');
             $table->string('description');
             $table->double('quantity');
             $table->double('rate');

@@ -27,7 +27,8 @@ class TestSMS extends Command
      */
     public function handle()
     {
-        sendCustomSMS("0717941258","Testing");
+        sendCustomSMS('0717941258', 'Testing');
+
         return Command::SUCCESS;
     }
 }

@@ -63,6 +63,46 @@ return [
             ]) : [],
         ],
 
+        // TEN-2: control-plane database (tenant registry, domains). Kept
+        // deliberately thin; nothing that joins to a case belongs here.
+        'control' => [
+            'driver' => 'mysql',
+            'host' => env('CONTROL_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('CONTROL_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('CONTROL_DB_DATABASE', 'control_plane'),
+            'username' => env('CONTROL_DB_USERNAME', env('DB_USERNAME', 'forge')),
+            'password' => env('CONTROL_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        // §3.3/§6: read-only connection to the pre-migration ("source")
+        // database, used only by tests/Migration/MigrationVerificationTest.php
+        // during the actual migration event — never used by the running
+        // application itself. Configure via DB_SOURCE_* env vars only
+        // when actually running the migration verification suite; leaving
+        // these unset is safe for every other environment (the connection
+        // is never opened unless a Migration-suite test actually queries it).
+        'source' => [
+            'driver' => 'mysql',
+            'host' => env('DB_SOURCE_HOST', '127.0.0.1'),
+            'port' => env('DB_SOURCE_PORT', '3306'),
+            'database' => env('DB_SOURCE_DATABASE', ''),
+            'username' => env('DB_SOURCE_USERNAME', ''),
+            'password' => env('DB_SOURCE_PASSWORD', ''),
+            'unix_socket' => env('DB_SOURCE_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
@@ -107,6 +147,17 @@ return [
     */
 
     'migrations' => 'migrations',
+
+    // ENG-23: the read replica for reports and the dashboard (docs/ops/READ_REPLICA.md). Host and, when they differ from
+    // the primary's, port and credentials; the database name is the primary's. Multi-firm cells set their own
+    // (`cells update <cell> --replica-host=`). A replica further behind than max_lag seconds is skipped.
+    'replica' => [
+        'host' => env('DB_REPLICA_HOST'),
+        'port' => env('DB_REPLICA_PORT'),
+        'username' => env('DB_REPLICA_USERNAME'),
+        'password' => env('DB_REPLICA_PASSWORD'),
+        'max_lag' => (int) env('DB_REPLICA_MAX_LAG', 300),
+    ],
 
     /*
     |--------------------------------------------------------------------------

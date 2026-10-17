@@ -102,7 +102,7 @@
         cursor: pointer;
 
         > input:checked ~ span.new-control-indicator {
-            background: #888ea8;
+            background: var(--text-muted);
 
             &:after {
                 display: block;
@@ -278,7 +278,7 @@
                     width: 19px;
                     height: 19px;
                     margin-bottom: 7px;
-                    color: #888ea8;
+                    color: var(--text-muted);
                 }
 
                 span.nav-names {
@@ -334,7 +334,7 @@
                 border-radius: 5px;
                 font-size: 12px;
                 font-weight: 700;
-                color: #888ea8;
+                color: var(--text-muted);
                 border-bottom: none !important;
 
                 &.g-dot-primary.active:before {
@@ -516,7 +516,7 @@
                         vertical-align: middle;
                         font-size: 15px;
                         margin-right: 7px;
-                        color: #888ea8;
+                        color: var(--text-muted);
                     }
                 }
             }
@@ -527,7 +527,7 @@
 
             svg {
                 cursor: pointer;
-                color: #888ea8;
+                color: var(--text-muted);
                 margin: 0 6px;
                 vertical-align: middle;
                 width: 20px;
@@ -890,7 +890,7 @@
                 }
 
                 svg {
-                    color: #888ea8;
+                    color: var(--text-muted);
                     font-weight: 600;
 
                     &.restore {
@@ -900,7 +900,7 @@
                             content: '';
                             height: 28px;
                             width: 2px;
-                            background: #888ea8;
+                            background: var(--text-muted);
                             position: absolute;
                             border-radius: 50px;
                             left: 9px;

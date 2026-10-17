@@ -1,0 +1,12 @@
+# DATA-13: migrations that predate the lint and are grandfathered.
+# Never add to this list; fix or add an explicit `migration-lint: allow` with a reason.
+2025_03_08_050848_update-hearing-length-of-notes-and-outcome.php
+2025_03_08_095457_update-priority-type-of-tasks.php
+2026_08_19_090000_add_fk_constraint_to_courts_type.php
+2026_08_19_090100_add_fk_constraint_to_hearings_hearing_type.php
+2026_08_19_090200_convert_money_columns_to_decimal.php
+2026_08_19_090300_add_unique_constraints_case_number_and_client_phone.php
+2026_08_19_090400_refactor_invoice_status_and_add_totals.php
+2026_08_19_140000_add_versioning_to_documents.php
+2026_08_23_120000_make_hearings_notes_and_outcome_nullable.php
+2026_08_27_084625_make_document_group_id_nullable.php

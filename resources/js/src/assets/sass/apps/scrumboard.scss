@@ -154,7 +154,7 @@
         padding: 28px 1rem;
 
         p {
-            color: #888ea8;
+            color: var(--text-muted);
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 0;
@@ -289,7 +289,7 @@
             &.feather-edit-2 {
                 width: 18px;
                 height: 18px;
-                color: #888ea8;
+                color: var(--text-muted);
                 vertical-align: middle;
                 fill: rgba(0, 23, 55, 0.08);
                 cursor: pointer;
@@ -364,7 +364,7 @@
                     &.tb-section-2 svg {
                         width: 18px;
                         cursor: pointer;
-                        color: #888ea8;
+                        color: var(--text-muted);
                         margin-right: 6px;
                         vertical-align: middle;
                         width: 18px;
@@ -374,7 +374,7 @@
                         &.feather-edit-2 {
                             width: 18px;
                             height: 18px;
-                            color: #888ea8;
+                            color: var(--text-muted);
                             vertical-align: middle;
                             fill: rgba(0, 23, 55, 0.08);
                             cursor: pointer;

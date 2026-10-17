@@ -36,6 +36,6 @@
 }
 .color-box .cl-info span {
     font-size: 14px;
-    color: #888ea8;
+    color: var(--text-muted);
     font-weight: 600;
 }

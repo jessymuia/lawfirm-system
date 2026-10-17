@@ -1,67 +1,22 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
-function sendSMS(\App\Models\User $user, $message): void
+function sendSMS(User $user, $message): void
 {
-    $curl = curl_init();
-
-    $apikey = "a7cc0baf1c2d20cbb9fd390e9cf702a1";
-    $partnerID = 9575;
-    $mobile = sanitizePhone($user->phone_number);
-    $shortcode = "O_NJOGA ADV";
-    $pass_type = "plain";
-
-    $postData = json_encode([
-        'apikey' => $apikey,
-        'partnerID' => $partnerID,
-        'mobile' => $mobile,
-        'message' => $message,
-        'shortcode' => $shortcode,
-        'pass_type' => $pass_type,
-    ]);
-
-    curl_setopt_array($curl, [
-        CURLOPT_URL => 'https://sms.textsms.co.ke/api/services/sendsms/',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => $postData,
-        CURLOPT_HTTPHEADER => array(
-            'Content-Type: application/json',
-            'Cookie: PHPSESSID=t37bf6ls0p7154sv8q84e8vm86'
-        ),
-    ]);
-
-    $response = curl_exec($curl);
-    Log::info($response);
+    sendCustomSMS($user->phone_number, $message);
 }
+
 function sendCustomSMS($phone_number, $message): void
 {
     try {
         $curl = curl_init();
 
-        $apikey = "a7cc0baf1c2d20cbb9fd390e9cf702a1";
-        $partnerID = 9575;
-        $mobile = sanitizePhone($phone_number);
-        $shortcode = "O_NJOGA ADV";
-        $pass_type = "plain";
-
-        $postData = json_encode([
-            'apikey' => $apikey,
-            'partnerID' => $partnerID,
-            'mobile' => $mobile,
-            'message' => $message,
-            'shortcode' => $shortcode,
-            'pass_type' => $pass_type,
-        ]);
+        $postData = json_encode(textsmsPayload($phone_number, $message));
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => 'https://sms.textsms.co.ke/api/services/sendsms/',
+            CURLOPT_URL => config('services.textsms.url'),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -70,29 +25,50 @@ function sendCustomSMS($phone_number, $message): void
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $postData,
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'Cookie: PHPSESSID=t37bf6ls0p7154sv8q84e8vm86'
-            ),
+            ],
         ]);
 
         $response = curl_exec($curl);
-        Log::info($response);
-    }catch (\Exception $e){
+        $error = curl_error($curl);
+        curl_close($curl);
+
+        if ($error) {
+            Log::error('TextSMS request failed: '.$error);
+
+            return;
+        }
+
+        // Response may contain delivery metadata but never credentials; safe to log.
+        Log::info('TextSMS response received', ['response' => $response]);
+    } catch (Exception $e) {
         Log::error($e->getMessage()
-            .$e->getFile(). " ". $e->getLine()
-            .$e->getTraceAsString()
+            .' '.$e->getFile().' '.$e->getLine()
+            .' '.$e->getTraceAsString()
         );
     }
 }
 
+/** SEC-15: the firm's own TextSMS credentials win over the deployment's. */
+function textsmsPayload($phone_number, $message): array
+{
+    $c = app(\App\Secrets\IntegrationCredentials::class)->all('textsms');
+
+    return [
+        'apikey' => $c['api_key'],
+        'partnerID' => $c['partner_id'],
+        'mobile' => sanitizePhone($phone_number),
+        'message' => $message,
+        'shortcode' => $c['shortcode'],
+        'pass_type' => 'plain',
+    ];
+}
+
 function sanitizePhone($phoneNumber): string
 {
-    $phone = preg_replace("/[^0-9]/","",$phoneNumber);
-    $lastNine = substr($phone,-9);
+    $phone = preg_replace('/[^0-9]/', '', $phoneNumber);
+    $lastNine = substr($phone, -9);
 
-    $result = "254".$lastNine;
-    Log::info($result);
-
-    return $result;
+    return '254'.$lastNine;
 }

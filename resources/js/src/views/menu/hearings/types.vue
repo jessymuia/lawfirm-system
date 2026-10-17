@@ -26,7 +26,7 @@
                     </svg>
                     <h4>Hearing Types</h4>
                 </div>
-                <button type="button" class="btn-add-type" data-bs-toggle="modal" data-bs-target="#client_modal">
+                <button type="button" class="btn-add-type" @click="openAddModal" data-bs-toggle="modal" data-bs-target="#client_modal">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
                     </svg>
@@ -37,18 +37,29 @@
 
         <div class="table-container">
             <div class="table-card">
-                <v-client-table :data="items" :columns="columns" :options="table_option">
-                    <template #name="props">
+                <DataTable
+                    ref="tableRef"
+                    fetch-url="/api/v1/hearingtypes"
+                    :columns="[{ key: 'name', label: 'Name' }]"
+                    :sortable-columns="['name']"
+                    :searchable-columns="['name']"
+                    empty-title="No hearing types yet"
+                    empty-description="Add your first hearing type to get started."
+                    empty-action-label="Add Type"
+                    @empty-action="openAddModal"
+                >
+                    <template #cell-name="{ row }">
                         <div class="type-name">
                             <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            {{ props.row.name }}
+                            {{ row.name }}
+                            <CatalogBadge :row="row" />
                         </div>
                     </template>
-                    <template #actions="props">
+                    <template #actions="{ row }">
                         <div class="actions text-center">
-                            <a href="javascript:;" class="cancel me-1" @click="update_row(props.row)">
+                            <a href="javascript:;" class="cancel me-1" @click="update_row(row)">
                                 <button type="button" class="btn-edit" data-bs-toggle="modal" data-bs-target="#client_modal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -57,9 +68,18 @@
                                     Edit
                                 </button>
                             </a>
+                            <a v-if="!row.is_system" href="javascript:;" class="cancel" @click="delete_row(row)">
+                                <button type="button" class="btn-delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </a>
                         </div>
                     </template>
-                </v-client-table>
+                </DataTable>
             </div>
         </div>
 
@@ -73,16 +93,23 @@
                     </div>
                     <div class="modal-body">
                         <form class="modern-form" novalidate @submit.stop.prevent="submit_form4">
-                            <div class="form-group">
+                            <div v-if="client.is_system" class="form-group">
+                                <label class="form-label">Local name</label>
+                                <input type="text" v-model="client.alias" class="modern-input" :class="{ 'is-invalid': hasError('alias') }" :placeholder="client.official_name" @input="clearErrors('alias')"/>
+                                <div class="invalid-feedback">{{ fieldError('alias') }}</div>
+                                <small class="form-text text-muted">Official name: <strong>{{ client.official_name }}</strong>. It is maintained by the platform and cannot be renamed or deleted; set the name your firm uses instead. Leave empty to use the official name.</small>
+                            </div>
+                            <div v-else class="form-group">
                                 <label class="form-label">Hearing Type Name *</label>
                                 <input
                                     type="text"
                                     v-model="client.name"
                                     class="modern-input"
-                                    :class="[is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '']"
+                                    :class="[hasError('name') ? 'is-invalid' : (is_submit_form4 ? (client.name ? 'is-valid' : 'is-invalid') : '')]"
                                     placeholder="e.g., Pre-Trial, Motion, Trial, Sentencing"
+                                    @input="clearErrors('name')"
                                 />
-                                <div class="invalid-feedback">Please fill the hearing type name</div>
+                                <div class="invalid-feedback">{{ hasError('name') ? fieldError('name') : 'Please fill the hearing type name' }}</div>
                             </div>
 
                             <button class="btn-submit" type="submit">{{ modal.button }}</button>
@@ -95,110 +122,89 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from "../../../api";
 import { useMeta } from '@/composables/use-meta';
+import { useToast } from '@/composables/use-toast';
+import { useConfirmDelete } from '@/composables/use-confirm-delete';
+import { useFormErrors } from '@/composables/use-form-errors';
+import DataTable from '@/components/ui/data-table.vue';
+import CatalogBadge from '@/components/ui/catalog-badge.vue';
+
 useMeta({ title: 'Hearing Types' });
 
-const columns = ref(['name', 'actions']);
-const items = ref([]);
-const modal = ref({title: "", button: ""});
-const table_option = ref({
-    perPage: 10,
-    perPageValues: [5, 10, 20, 50],
-    skin: 'table table-hover',
-    columnsClasses: { actions: 'actions text-center' },
-    pagination: { nav: 'scroll', chunk: 5 },
-    texts: {
-        count: 'Showing {from} to {to} of {count}',
-        filter: '',
-        filterPlaceholder: 'Search...',
-        limit: 'Results:',
-    },
-    sortable: ['name'],
-    sortIcon: {
-        base: 'sort-icon-none',
-        up: 'sort-icon-asc',
-        down: 'sort-icon-desc',
-    },
-    resizableColumns: false,
-});
+const { showMessage } = useToast();
+const { confirmDelete } = useConfirmDelete();
+const { hasError, fieldError, clearErrors, setErrorsFromResponse } = useFormErrors();
 
-onMounted(() => {
-    fetchData();
-});
+const tableRef = ref(null);
+const modal = ref({title: "Add Hearing Type", button: "Add"});
 
 const router = useRouter();
 const is_submit_form4 = ref(false);
-const client = ref({id: "", name: ""});
+const client = ref({id: "", name: "", is_system: false, alias: "", official_name: ""});
+
+// TEN-11: a system row only accepts a local name (alias); a firm row is renamed as before.
+const payload = () => client.value.is_system ? { alias: client.value.alias } : { name: client.value.name };
 
 const submit_form4 = () => {
     is_submit_form4.value = true;
+    clearErrors();
     if (client.value.name) {
         if(client.value.id > 0) {
-            axios.put(`/api/hearingtypes/${client.value.id}`, client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.put(`/api/v1/hearingtypes/${client.value.id}`, payload())
+                .then(() => {
                     showMessage('Hearing type updated successfully.');
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh();
                 })
                 .catch(error => {
-                    showMessage('Error updating hearing type. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error updating hearing type. Please try again.'), 'error');
                 });
         } else {
-            axios.post('/api/hearingtypes', client.value)
-                .then(response => {
-                    items.value = response.data.data;
+            axios.post('/api/v1/hearingtypes', payload())
+                .then(() => {
                     showMessage('Hearing type added successfully.');
                     document.getElementById('closebtn').click();
+                    tableRef.value?.refresh(1);
                 })
                 .catch(error => {
-                    showMessage('Error adding hearing type. Please try again.');
-                    console.error(error);
+                    showMessage(setErrorsFromResponse(error, 'Error adding hearing type. Please try again.'), 'error');
                 });
         }
 
-        client.value.id = "";
-        client.value.name = "";
+        client.value = {id: "", name: "", is_system: false, alias: "", official_name: ""};
         modal.value.title = "Add Hearing Type";
         modal.value.button = "Add";
         is_submit_form4.value = false;
     }
 };
 
-const fetchData = () => {
-    modal.value.title = "Add Hearing Type";
-    modal.value.button = "Add";
-    
-    axios.get('/api/hearingtypes')
-        .then(response => {
-            items.value = response.data.data;
-        })
-        .catch(error => {
-            console.error('Error fetching hearing types:', error);
-        });
-};
-
 const update_row = (item) => {
-    client.value.id = item.id;
-    client.value.name = item.name;
+    clearErrors();
+    client.value = {id: item.id, name: item.official_name ?? item.name, is_system: !!item.is_system, alias: item.alias ?? "", official_name: item.official_name ?? item.name};
     modal.value.title = "Update Hearing Type";
     modal.value.button = "Update";
 };
 
-const showMessage = (msg = '', type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: 'top',
-        showConfirmButton: false,
-        timer: 3000,
-    });
-    toast.fire({
-        icon: type,
-        title: msg,
-        padding: '10px 20px',
+const openAddModal = () => {
+    clearErrors();
+    client.value = {id: "", name: "", is_system: false, alias: "", official_name: ""};
+    is_submit_form4.value = false;
+    modal.value.title = "Add Hearing Type";
+    modal.value.button = "Add";
+    const modalEl = document.getElementById('client_modal');
+    if (modalEl && window.bootstrap) {
+        new window.bootstrap.Modal(modalEl).show();
+    }
+};
+
+const delete_row = (item) => {
+    confirmDelete({
+        url: `/api/v1/hearingtypes/${item.id}`,
+        itemLabel: item.name,
+        onSuccess: () => { tableRef.value?.refresh(); },
     });
 };
 </script>
@@ -235,7 +241,7 @@ const showMessage = (msg = '', type = 'success') => {
     width: 48px;
     height: 48px;
     padding: 12px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px;
     flex-shrink: 0;
@@ -253,7 +259,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;
@@ -296,7 +302,7 @@ const showMessage = (msg = '', type = 'success') => {
 .type-icon {
     width: 20px;
     height: 20px;
-    color: #14b8a6;
+    color: var(--primary-600);
     flex-shrink: 0;
     stroke-width: 2;
 }
@@ -306,7 +312,7 @@ const showMessage = (msg = '', type = 'success') => {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 6px;
@@ -327,8 +333,34 @@ const showMessage = (msg = '', type = 'success') => {
     stroke-width: 2;
 }
 
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #e7515a, #c53040);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 81, 90, 0.3);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
 .modern-modal .modal-header {
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 20px 24px;
@@ -384,7 +416,7 @@ const showMessage = (msg = '', type = 'success') => {
 
 .modern-input:focus {
     outline: none;
-    border-color: #14b8a6;
+    border-color: var(--primary-600);
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
@@ -393,7 +425,7 @@ const showMessage = (msg = '', type = 'success') => {
 }
 
 .modern-input.is-valid {
-    border-color: #10b981;
+    border-color: var(--primary-600);
 }
 
 .invalid-feedback {
@@ -413,7 +445,7 @@ const showMessage = (msg = '', type = 'success') => {
     justify-content: center;
     gap: 8px;
     padding: 14px 32px;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
     color: white;
     border: none;
     border-radius: 8px;

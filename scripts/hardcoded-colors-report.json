@@ -1,0 +1,3742 @@
+[
+  {
+    "file": "views/menu/cases/list-cases.vue",
+    "hits": [
+      {
+        "line": 567,
+        "color": "#f9fafb",
+        "text": "background: #f9fafb;"
+      },
+      {
+        "line": 577,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 585,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 591,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 607,
+        "color": "#047857",
+        "text": "color: #047857;"
+      },
+      {
+        "line": 608,
+        "color": "#047857",
+        "text": "border: 1.5px solid #047857;"
+      },
+      {
+        "line": 646,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 657,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 663,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 669,
+        "color": "#d1fae5",
+        "text": "background: #d1fae5;"
+      },
+      {
+        "line": 686,
+        "color": "#eef2ff",
+        "text": "background: #eef2ff;"
+      },
+      {
+        "line": 687,
+        "color": "#4f46e5",
+        "text": "color: #4f46e5;"
+      },
+      {
+        "line": 695,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 699,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 706,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 707,
+        "color": "#92400e",
+        "text": "color: #92400e;"
+      },
+      {
+        "line": 714,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 729,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 763,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 764,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 768,
+        "color": "#f59e0b",
+        "text": "background: #f59e0b;"
+      },
+      {
+        "line": 774,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 775,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 779,
+        "color": "#e7515a",
+        "text": "background: #e7515a;"
+      },
+      {
+        "line": 791,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 792,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 808,
+        "color": "#d1fae5",
+        "text": "background: #d1fae5;"
+      },
+      {
+        "line": 818,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 824,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 835,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 842,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 843,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 857,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 860,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 876,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 881,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 889,
+        "color": "#e5e7eb",
+        "text": "border: 1.5px solid #e5e7eb;"
+      },
+      {
+        "line": 892,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 893,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 901,
+        "color": "#d1fae5",
+        "text": "box-shadow: 0 0 0 3px #d1fae5;"
+      },
+      {
+        "line": 906,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 917,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 927,
+        "color": "#b45309",
+        "text": "color: #b45309;"
+      },
+      {
+        "line": 954,
+        "color": "#e5e7eb",
+        "text": "border-top: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 959,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 960,
+        "color": "#4b5563",
+        "text": "color: #4b5563;"
+      },
+      {
+        "line": 969,
+        "color": "#e5e7eb",
+        "text": "background: #e5e7eb;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/clients/list-clients.vue",
+    "hits": [
+      {
+        "line": 474,
+        "color": "#f9fafb",
+        "text": "background: #f9fafb;"
+      },
+      {
+        "line": 484,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 492,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 498,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 523,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 534,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 540,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 546,
+        "color": "#eef2ff",
+        "text": "background: #eef2ff;"
+      },
+      {
+        "line": 574,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 581,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 589,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 596,
+        "color": "#d1fae5",
+        "text": "background: #d1fae5;"
+      },
+      {
+        "line": 597,
+        "color": "#047857",
+        "text": "color: #047857;"
+      },
+      {
+        "line": 604,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 638,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 639,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 643,
+        "color": "#f59e0b",
+        "text": "background: #f59e0b;"
+      },
+      {
+        "line": 649,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 650,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 654,
+        "color": "#e7515a",
+        "text": "background: #e7515a;"
+      },
+      {
+        "line": 666,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 667,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 683,
+        "color": "#eef2ff",
+        "text": "background: #eef2ff;"
+      },
+      {
+        "line": 693,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 699,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 710,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 717,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 718,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 732,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 735,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 751,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 756,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 764,
+        "color": "#e5e7eb",
+        "text": "border: 1.5px solid #e5e7eb;"
+      },
+      {
+        "line": 767,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 768,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 776,
+        "color": "#eef2ff",
+        "text": "box-shadow: 0 0 0 3px #eef2ff;"
+      },
+      {
+        "line": 781,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 792,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 802,
+        "color": "#b45309",
+        "text": "color: #b45309;"
+      },
+      {
+        "line": 826,
+        "color": "#e5e7eb",
+        "text": "border-top: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 831,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 832,
+        "color": "#4b5563",
+        "text": "color: #4b5563;"
+      },
+      {
+        "line": 841,
+        "color": "#e5e7eb",
+        "text": "background: #e5e7eb;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/court/index.vue",
+    "hits": [
+      {
+        "line": 282,
+        "color": "#f9fafb",
+        "text": "background: #f9fafb;"
+      },
+      {
+        "line": 292,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 300,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 306,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 331,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 342,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 348,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 354,
+        "color": "#ede9fe",
+        "text": "background: #ede9fe;"
+      },
+      {
+        "line": 371,
+        "color": "#ede9fe",
+        "text": "background: #ede9fe;"
+      },
+      {
+        "line": 380,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 386,
+        "color": "#dbeafe",
+        "text": "background: #dbeafe;"
+      },
+      {
+        "line": 387,
+        "color": "#1d4ed8",
+        "text": "color: #1d4ed8;"
+      },
+      {
+        "line": 412,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 413,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 417,
+        "color": "#f59e0b",
+        "text": "background: #f59e0b;"
+      },
+      {
+        "line": 423,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 424,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 428,
+        "color": "#e7515a",
+        "text": "background: #e7515a;"
+      },
+      {
+        "line": 440,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 441,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 457,
+        "color": "#ede9fe",
+        "text": "background: #ede9fe;"
+      },
+      {
+        "line": 467,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 473,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 484,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 491,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 492,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 506,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 509,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 521,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 526,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 534,
+        "color": "#e5e7eb",
+        "text": "border: 1.5px solid #e5e7eb;"
+      },
+      {
+        "line": 537,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 538,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 546,
+        "color": "#ede9fe",
+        "text": "box-shadow: 0 0 0 3px #ede9fe;"
+      },
+      {
+        "line": 551,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 562,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 576,
+        "color": "#e5e7eb",
+        "text": "border-top: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 581,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 582,
+        "color": "#4b5563",
+        "text": "color: #4b5563;"
+      },
+      {
+        "line": 591,
+        "color": "#e5e7eb",
+        "text": "background: #e5e7eb;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/clients/view-client.vue",
+    "hits": [
+      {
+        "line": 453,
+        "color": "#18181b",
+        "text": ".modern-view-client { max-width: 1180px; margin: 0 auto; padding: 4px 0 40px; font-size: 15px; color"
+      },
+      {
+        "line": 459,
+        "color": "#e4e4e7",
+        "text": "border: 1px solid var(--border-color, #e4e4e7); background: var(--card-bg, #fff); color: var(--text-"
+      },
+      {
+        "line": 459,
+        "color": "#fff",
+        "text": "border: 1px solid var(--border-color, #e4e4e7); background: var(--card-bg, #fff); color: var(--text-"
+      },
+      {
+        "line": 459,
+        "color": "#52525b",
+        "text": "border: 1px solid var(--border-color, #e4e4e7); background: var(--card-bg, #fff); color: var(--text-"
+      },
+      {
+        "line": 462,
+        "color": "#fff",
+        "text": ".btn-action-header.btn-edit { background: var(--primary-600); border-color: var(--primary-600); colo"
+      },
+      {
+        "line": 463,
+        "color": "#fff",
+        "text": ".btn-action-header.btn-edit:hover { background: var(--primary-700); color: #fff; }"
+      },
+      {
+        "line": 464,
+        "color": "#b42318",
+        "text": ".btn-action-header.btn-delete { color: #b42318; border-color: rgba(231, 81, 90, 0.4); }"
+      },
+      {
+        "line": 465,
+        "color": "#e7515a",
+        "text": ".btn-action-header.btn-delete:hover { background: #e7515a; border-color: #e7515a; color: #fff; }"
+      },
+      {
+        "line": 465,
+        "color": "#e7515a",
+        "text": ".btn-action-header.btn-delete:hover { background: #e7515a; border-color: #e7515a; color: #fff; }"
+      },
+      {
+        "line": 465,
+        "color": "#fff",
+        "text": ".btn-action-header.btn-delete:hover { background: #e7515a; border-color: #e7515a; color: #fff; }"
+      },
+      {
+        "line": 471,
+        "color": "#fff",
+        "text": "border-radius: 16px; padding: 26px 28px; color: #fff;"
+      },
+      {
+        "line": 478,
+        "color": "#fff",
+        "text": "background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.45); color: #fff;"
+      },
+      {
+        "line": 480,
+        "color": "#fff",
+        "text": ".client-name { margin: 0 0 8px; font-size: 26px; font-weight: 700; color: #fff; line-height: 1.2; }"
+      },
+      {
+        "line": 483,
+        "color": "#4ade80",
+        "text": ".status-dot { width: 9px; height: 9px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 3p"
+      },
+      {
+        "line": 488,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e4e4e7); border-radius: 14p"
+      },
+      {
+        "line": 488,
+        "color": "#e4e4e7",
+        "text": "background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e4e4e7); border-radius: 14p"
+      },
+      {
+        "line": 490,
+        "color": "#f4f4f5",
+        "text": ".info-card .card-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-"
+      },
+      {
+        "line": 492,
+        "color": "#ecfdf5",
+        "text": ".card-icon.location-icon { background: #ecfdf5; color: #047857; }"
+      },
+      {
+        "line": 492,
+        "color": "#047857",
+        "text": ".card-icon.location-icon { background: #ecfdf5; color: #047857; }"
+      },
+      {
+        "line": 493,
+        "color": "#fff7ed",
+        "text": ".card-icon.advocate-icon { background: #fff7ed; color: #c2410c; }"
+      },
+      {
+        "line": 493,
+        "color": "#c2410c",
+        "text": ".card-icon.advocate-icon { background: #fff7ed; color: #c2410c; }"
+      },
+      {
+        "line": 494,
+        "color": "#f1f5f9",
+        "text": ".card-icon.info-icon { background: #f1f5f9; color: #475569; }"
+      },
+      {
+        "line": 494,
+        "color": "#475569",
+        "text": ".card-icon.info-icon { background: #f1f5f9; color: #475569; }"
+      },
+      {
+        "line": 497,
+        "color": "#e4e4e7",
+        "text": ".info-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding"
+      },
+      {
+        "line": 499,
+        "color": "#626779",
+        "text": ".info-label { flex: none; font-size: 13.5px; color: var(--text-muted, #626779); }"
+      },
+      {
+        "line": 507,
+        "color": "#626779",
+        "text": ".advocate-role { font-size: 13.5px; color: var(--text-muted, #626779); }"
+      },
+      {
+        "line": 514,
+        "color": "#e4e4e7",
+        "text": ".case-card { padding: 16px 18px; border: 1px solid var(--border-color, #e4e4e7); border-radius: 12px"
+      },
+      {
+        "line": 514,
+        "color": "#fff",
+        "text": ".case-card { padding: 16px 18px; border: 1px solid var(--border-color, #e4e4e7); border-radius: 12px"
+      },
+      {
+        "line": 519,
+        "color": "#e2e8f0",
+        "text": ".case-status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; backgroun"
+      },
+      {
+        "line": 519,
+        "color": "#475569",
+        "text": ".case-status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; backgroun"
+      },
+      {
+        "line": 520,
+        "color": "#dcfce7",
+        "text": ".case-status.open, .case-status.active, .case-status.ongoing { background: #dcfce7; color: #166534; "
+      },
+      {
+        "line": 520,
+        "color": "#166534",
+        "text": ".case-status.open, .case-status.active, .case-status.ongoing { background: #dcfce7; color: #166534; "
+      },
+      {
+        "line": 521,
+        "color": "#f1f5f9",
+        "text": ".case-status.closed { background: #f1f5f9; color: #64748b; }"
+      },
+      {
+        "line": 521,
+        "color": "#64748b",
+        "text": ".case-status.closed { background: #f1f5f9; color: #64748b; }"
+      },
+      {
+        "line": 523,
+        "color": "#626779",
+        "text": ".case-description { margin: 0 0 12px; font-size: 14px; color: var(--text-muted, #626779); display: -"
+      },
+      {
+        "line": 525,
+        "color": "#626779",
+        "text": ".case-date { font-size: 13px; color: var(--text-muted, #626779); }"
+      },
+      {
+        "line": 527,
+        "color": "#626779",
+        "text": ".empty-state { grid-column: 1 / -1; text-align: center; padding: 28px 12px; color: var(--text-muted,"
+      },
+      {
+        "line": 529,
+        "color": "#18181b",
+        "text": ".empty-state h3 { margin: 0 0 4px; font-size: 17px; color: var(--text-primary, #18181b); }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/invoices/items/index.vue",
+    "hits": [
+      {
+        "line": 379,
+        "color": "#f8f9fa",
+        "text": "background: #f8f9fa;"
+      },
+      {
+        "line": 405,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 406,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 406,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 432,
+        "color": "#1e293b",
+        "text": "color: #1e293b;"
+      },
+      {
+        "line": 474,
+        "color": "#6b7280",
+        "text": "background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);"
+      },
+      {
+        "line": 474,
+        "color": "#4b5563",
+        "text": "background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);"
+      },
+      {
+        "line": 502,
+        "color": "#64748b",
+        "text": "color: #64748b;"
+      },
+      {
+        "line": 511,
+        "color": "#1e293b",
+        "text": "color: #1e293b;"
+      },
+      {
+        "line": 513,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 513,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 541,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 547,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 560,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 610,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 627,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 633,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 645,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 688,
+        "color": "#ef4444",
+        "text": "background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
+      },
+      {
+        "line": 688,
+        "color": "#dc2626",
+        "text": "background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
+      },
+      {
+        "line": 773,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 780,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 800,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 810,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 820,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 820,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 823,
+        "color": "#d1d5db",
+        "text": "border: 2px dashed #d1d5db;"
+      },
+      {
+        "line": 833,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 846,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 852,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 854,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 855,
+        "color": "#d1d5db",
+        "text": "border-color: #d1d5db;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/invoices/preview.vue",
+    "hits": [
+      {
+        "line": 284,
+        "color": "#f8f9fa",
+        "text": "background: #f8f9fa;"
+      },
+      {
+        "line": 324,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 3px solid #e5e7eb;"
+      },
+      {
+        "line": 344,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 351,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 351,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 359,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 385,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 392,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 406,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 406,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 422,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 431,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 436,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 443,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 450,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 485,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 490,
+        "color": "#f8fafc",
+        "text": "background: #f8fafc;"
+      },
+      {
+        "line": 499,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 518,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 518,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 527,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 531,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 537,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 544,
+        "color": "#1f2937",
+        "text": "border-top: 3px solid #1f2937;"
+      },
+      {
+        "line": 550,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 563,
+        "color": "#eff6ff",
+        "text": "background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);"
+      },
+      {
+        "line": 563,
+        "color": "#dbeafe",
+        "text": "background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);"
+      },
+      {
+        "line": 571,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 612,
+        "color": "#fff",
+        "text": ".btn-back { background: #fff; color: var(--text-secondary); border: 1px solid var(--border-color); b"
+      },
+      {
+        "line": 613,
+        "color": "#fff",
+        "text": ".btn-print { background: #fff; color: var(--text-secondary); border: 1px solid var(--border-color); "
+      },
+      {
+        "line": 615,
+        "color": "#fff",
+        "text": ".btn-pdf { background: #fff; color: var(--primary-700); border: 1px solid var(--primary-300); box-sh"
+      },
+      {
+        "line": 618,
+        "color": "#fff",
+        "text": ".btn-post { background: var(--primary-600); color: #fff; border: 1px solid var(--primary-600); box-s"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/data-table.vue",
+    "hits": [
+      {
+        "line": 551,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 554,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 559,
+        "color": "#e2e8f0",
+        "text": "background: var(--neutral-100, #e2e8f0);"
+      },
+      {
+        "line": 575,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 590,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 619,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 673,
+        "color": "#fff",
+        "text": "linear-gradient(to right, var(--card-bg, #fff) 30%, rgba(255, 255, 255, 0)) 0 0,"
+      },
+      {
+        "line": 674,
+        "color": "#fff",
+        "text": "linear-gradient(to left, var(--card-bg, #fff) 30%, rgba(255, 255, 255, 0)) 100% 0,"
+      },
+      {
+        "line": 678,
+        "color": "#fff",
+        "text": "background-color: var(--card-bg, #fff);"
+      },
+      {
+        "line": 701,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff);"
+      },
+      {
+        "line": 879,
+        "color": "#fff",
+        "text": ".actions-col { position: sticky; right: 0; background: var(--card-bg, #fff); box-shadow: -10px 0 10p"
+      },
+      {
+        "line": 880,
+        "color": "#f8f9f7",
+        "text": "thead .actions-col { background: var(--neutral-50, #f8f9f7); }"
+      },
+      {
+        "line": 884,
+        "color": "#93bcb0",
+        "text": "border: 1px solid var(--primary-300, #93bcb0); background: #fff; color: var(--primary-700, #0b5842);"
+      },
+      {
+        "line": 884,
+        "color": "#fff",
+        "text": "border: 1px solid var(--primary-300, #93bcb0); background: #fff; color: var(--primary-700, #0b5842);"
+      },
+      {
+        "line": 884,
+        "color": "#0b5842",
+        "text": "border: 1px solid var(--primary-300, #93bcb0); background: #fff; color: var(--primary-700, #0b5842);"
+      },
+      {
+        "line": 885,
+        "color": "#f3f8f6",
+        "text": "&:hover { background: var(--primary-50, #f3f8f6); }"
+      },
+      {
+        "line": 889,
+        "color": "#fff",
+        "text": ".record-dialog { width: 100%; max-width: 560px; max-height: calc(100vh - 32px); display: flex; flex-"
+      },
+      {
+        "line": 890,
+        "color": "#ebeee9",
+        "text": ".record-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20p"
+      },
+      {
+        "line": 892,
+        "color": "#dfe4de",
+        "text": ".record-x { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--b"
+      },
+      {
+        "line": 892,
+        "color": "#fff",
+        "text": ".record-x { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--b"
+      },
+      {
+        "line": 892,
+        "color": "#3c4a44",
+        "text": ".record-x { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--b"
+      },
+      {
+        "line": 893,
+        "color": "#fdecea",
+        "text": ".record-x:hover { background: #fdecea; color: #b42318; border-color: #f3b4ae; }"
+      },
+      {
+        "line": 893,
+        "color": "#b42318",
+        "text": ".record-x:hover { background: #fdecea; color: #b42318; border-color: #f3b4ae; }"
+      },
+      {
+        "line": 893,
+        "color": "#f3b4ae",
+        "text": ".record-x:hover { background: #fdecea; color: #b42318; border-color: #f3b4ae; }"
+      },
+      {
+        "line": 895,
+        "color": "#dfe4de",
+        "text": ".record-body dt, .record-body dd { padding: 11px 0; margin: 0; border-bottom: 1px dashed var(--borde"
+      },
+      {
+        "line": 896,
+        "color": "#5d6b64",
+        "text": ".record-body dt { font-size: 13.5px; color: var(--text-muted, #5d6b64); font-weight: 500; padding-ri"
+      },
+      {
+        "line": 897,
+        "color": "#16211d",
+        "text": ".record-body dd { font-weight: 600; color: var(--text-primary, #16211d); word-break: break-word; }"
+      },
+      {
+        "line": 898,
+        "color": "#ebeee9",
+        "text": ".record-foot { padding: 14px 20px; border-top: 1px solid var(--border-light, #ebeee9); text-align: r"
+      },
+      {
+        "line": 899,
+        "color": "#dfe4de",
+        "text": ".record-close { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border-color, #dfe4de"
+      },
+      {
+        "line": 899,
+        "color": "#fff",
+        "text": ".record-close { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border-color, #dfe4de"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/court/types.vue",
+    "hits": [
+      {
+        "line": 223,
+        "color": "#f9fafb",
+        "text": "background: #f9fafb;"
+      },
+      {
+        "line": 233,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 241,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 247,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 272,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 283,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid #e5e7eb;"
+      },
+      {
+        "line": 289,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 295,
+        "color": "#cffafe",
+        "text": "background: #cffafe;"
+      },
+      {
+        "line": 312,
+        "color": "#cffafe",
+        "text": "background: #cffafe;"
+      },
+      {
+        "line": 321,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 343,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 344,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 348,
+        "color": "#f59e0b",
+        "text": "background: #f59e0b;"
+      },
+      {
+        "line": 354,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 355,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 359,
+        "color": "#e7515a",
+        "text": "background: #e7515a;"
+      },
+      {
+        "line": 374,
+        "color": "#cffafe",
+        "text": "background: #cffafe;"
+      },
+      {
+        "line": 384,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 390,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 402,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 407,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 414,
+        "color": "#e5e7eb",
+        "text": "border: 1.5px solid #e5e7eb;"
+      },
+      {
+        "line": 417,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 418,
+        "color": "#ffffff",
+        "text": "background: #ffffff;"
+      },
+      {
+        "line": 425,
+        "color": "#cffafe",
+        "text": "box-shadow: 0 0 0 3px #cffafe;"
+      },
+      {
+        "line": 429,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 439,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/tasks/index.vue",
+    "hits": [
+      {
+        "line": 392,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 437,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 450,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 462,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 478,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 499,
+        "color": "#dbeafe",
+        "text": "background: #dbeafe;"
+      },
+      {
+        "line": 500,
+        "color": "#1e40af",
+        "text": "color: #1e40af;"
+      },
+      {
+        "line": 504,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 505,
+        "color": "#92400e",
+        "text": "color: #92400e;"
+      },
+      {
+        "line": 509,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 510,
+        "color": "#991b1b",
+        "text": "color: #991b1b;"
+      },
+      {
+        "line": 523,
+        "color": "#f3f4f6",
+        "text": "background: #f3f4f6;"
+      },
+      {
+        "line": 524,
+        "color": "#4b5563",
+        "text": "color: #4b5563;"
+      },
+      {
+        "line": 528,
+        "color": "#dbeafe",
+        "text": "background: #dbeafe;"
+      },
+      {
+        "line": 529,
+        "color": "#1e40af",
+        "text": "color: #1e40af;"
+      },
+      {
+        "line": 533,
+        "color": "#d1fae5",
+        "text": "background: #d1fae5;"
+      },
+      {
+        "line": 534,
+        "color": "#065f46",
+        "text": "color: #065f46;"
+      },
+      {
+        "line": 538,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 539,
+        "color": "#991b1b",
+        "text": "color: #991b1b;"
+      },
+      {
+        "line": 573,
+        "color": "#e7515a",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 573,
+        "color": "#c53040",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 636,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 639,
+        "color": "#f3f4f6",
+        "text": "border-bottom: 2px solid #f3f4f6;"
+      },
+      {
+        "line": 650,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 658,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 680,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 691,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "views/auth/login.vue",
+    "hits": [
+      {
+        "line": 389,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff);"
+      },
+      {
+        "line": 413,
+        "color": "#fff",
+        "text": "color: #fff;"
+      },
+      {
+        "line": 426,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 431,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 442,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 455,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 462,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 472,
+        "color": "#e7515a",
+        "text": "border-color: #e7515a;"
+      },
+      {
+        "line": 501,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 515,
+        "color": "#64748b",
+        "text": ".signup-cta { text-align: center; margin: 16px 0 0; font-size: 14px; color: var(--text-muted, #64748"
+      },
+      {
+        "line": 534,
+        "color": "#fff",
+        "text": "color: #fff;"
+      },
+      {
+        "line": 553,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 557,
+        "color": "#0f766e",
+        "text": "background: linear-gradient(135deg, #0f766e, #134e4a);"
+      },
+      {
+        "line": 557,
+        "color": "#134e4a",
+        "text": "background: linear-gradient(135deg, #0f766e, #134e4a);"
+      },
+      {
+        "line": 566,
+        "color": "#f1f5f9",
+        "text": "background: var(--primary-50, #f1f5f9);"
+      },
+      {
+        "line": 576,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 580,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 590,
+        "color": "#b42318",
+        "text": "color: #b42318;"
+      },
+      {
+        "line": 597,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 601,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 607,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 618,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 630,
+        "color": "#e7515a",
+        "text": "border-color: #e7515a;"
+      },
+      {
+        "line": 675,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 681,
+        "color": "#e2e8f0",
+        "text": "border-top: 1px solid var(--border-color, #e2e8f0);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/hearings/calendar.vue",
+    "hits": [
+      {
+        "line": 159,
+        "color": "#0284c7",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#7c3aed",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#059669",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#dc2626",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#d97706",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#db2777",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#4f46e5",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 159,
+        "color": "#0d9488",
+        "text": "const PALETTE = ['#0284c7', '#7c3aed', '#059669', '#dc2626', '#d97706', '#db2777', '#4f46e5', '#0d94"
+      },
+      {
+        "line": 388,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 400,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 404,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 460,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 479,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 500,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 514,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 546,
+        "color": "#cbd5e1",
+        "text": "color: #cbd5e1;"
+      },
+      {
+        "line": 558,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 603,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 612,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 625,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 635,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/invoices/index.vue",
+    "hits": [
+      {
+        "line": 443,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 515,
+        "color": "#e0e7ff",
+        "text": "background: #e0e7ff;"
+      },
+      {
+        "line": 526,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 542,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 557,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 564,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 577,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 578,
+        "color": "#92400e",
+        "text": "color: #92400e;"
+      },
+      {
+        "line": 582,
+        "color": "#d1fae5",
+        "text": "background: #d1fae5;"
+      },
+      {
+        "line": 583,
+        "color": "#065f46",
+        "text": "color: #065f46;"
+      },
+      {
+        "line": 587,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 588,
+        "color": "#991b1b",
+        "text": "color: #991b1b;"
+      },
+      {
+        "line": 648,
+        "color": "#ef4444",
+        "text": "background: linear-gradient(135deg, #ef4444, #dc2626);"
+      },
+      {
+        "line": 648,
+        "color": "#dc2626",
+        "text": "background: linear-gradient(135deg, #ef4444, #dc2626);"
+      },
+      {
+        "line": 711,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 714,
+        "color": "#f3f4f6",
+        "text": "border-bottom: 2px solid #f3f4f6;"
+      },
+      {
+        "line": 725,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 733,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 749,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 760,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/invoices/payments-panel.vue",
+    "hits": [
+      {
+        "line": 374,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 400,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 408,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 443,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 464,
+        "color": "#e7515a",
+        "text": "border: 1px solid #e7515a;"
+      },
+      {
+        "line": 465,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 471,
+        "color": "#e7515a",
+        "text": "background: #e7515a;"
+      },
+      {
+        "line": 489,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 494,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 514,
+        "color": "#fff",
+        "text": ".pay-dialog { width: 100%; max-width: 520px; max-height: calc(100vh - 32px); overflow-y: auto; backg"
+      },
+      {
+        "line": 517,
+        "color": "#64748b",
+        "text": ".pay-x { border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: #6474"
+      },
+      {
+        "line": 519,
+        "color": "#64748b",
+        "text": ".pay-tabs button { flex: 1; padding: 10px 6px; border: 0; border-bottom: 3px solid transparent; back"
+      },
+      {
+        "line": 520,
+        "color": "#1d4ed8",
+        "text": ".pay-tabs button.on { color: var(--primary-700, #1d4ed8); border-bottom-color: var(--primary-600, #2"
+      },
+      {
+        "line": 520,
+        "color": "#2563eb",
+        "text": ".pay-tabs button.on { color: var(--primary-700, #1d4ed8); border-bottom-color: var(--primary-600, #2"
+      },
+      {
+        "line": 522,
+        "color": "#475569",
+        "text": ".pay-due { margin-bottom: 14px; font-size: 14px; color: #475569; }"
+      },
+      {
+        "line": 523,
+        "color": "#0f172a",
+        "text": ".pay-due strong { font-size: 20px; color: #0f172a; margin-left: 6px; }"
+      },
+      {
+        "line": 524,
+        "color": "#b42318",
+        "text": ".pay-error { color: #b42318; background: rgba(231, 81, 90, 0.08); border-radius: 8px; padding: 10px "
+      },
+      {
+        "line": 526,
+        "color": "#047857",
+        "text": ".pay-note.ok { background: rgba(16, 185, 129, 0.12); color: #047857; }"
+      },
+      {
+        "line": 527,
+        "color": "#b42318",
+        "text": ".pay-note.bad { background: rgba(231, 81, 90, 0.08); color: #b42318; }"
+      },
+      {
+        "line": 532,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/roles/index.vue",
+    "hits": [
+      {
+        "line": 320,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 365,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 372,
+        "color": "#ec4899",
+        "text": "color: #ec4899;"
+      },
+      {
+        "line": 378,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 413,
+        "color": "#e7515a",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 413,
+        "color": "#c53040",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 476,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 479,
+        "color": "#f3f4f6",
+        "text": "border-bottom: 2px solid #f3f4f6;"
+      },
+      {
+        "line": 490,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 497,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 506,
+        "color": "#ec4899",
+        "text": "border-color: #ec4899;"
+      },
+      {
+        "line": 511,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 521,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 536,
+        "color": "#fdf2f8",
+        "text": "background: #fdf2f8;"
+      },
+      {
+        "line": 537,
+        "color": "#fce7f3",
+        "text": "border: 2px solid #fce7f3;"
+      },
+      {
+        "line": 544,
+        "color": "#fce7f3",
+        "text": "background: #fce7f3;"
+      },
+      {
+        "line": 545,
+        "color": "#ec4899",
+        "text": "border-color: #ec4899;"
+      },
+      {
+        "line": 563,
+        "color": "#d1d5db",
+        "text": "border: 2px solid #d1d5db;"
+      },
+      {
+        "line": 584,
+        "color": "#ec4899",
+        "text": "border-color: #ec4899;"
+      },
+      {
+        "line": 594,
+        "color": "#374151",
+        "text": "color: #374151;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/expenses/index.vue",
+    "hits": [
+      {
+        "line": 437,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 452,
+        "color": "#c2410c",
+        "text": "color: #c2410c;"
+      },
+      {
+        "line": 453,
+        "color": "#c2410c",
+        "text": "border: 1.5px solid #c2410c;"
+      },
+      {
+        "line": 509,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 510,
+        "color": "#92400e",
+        "text": "color: #92400e;"
+      },
+      {
+        "line": 517,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 530,
+        "color": "#fed7aa",
+        "text": "background: #fed7aa;"
+      },
+      {
+        "line": 531,
+        "color": "#9a3412",
+        "text": "color: #9a3412;"
+      },
+      {
+        "line": 568,
+        "color": "#e7515a",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 568,
+        "color": "#c53040",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 631,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 634,
+        "color": "#f3f4f6",
+        "text": "border-bottom: 2px solid #f3f4f6;"
+      },
+      {
+        "line": 645,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 653,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 663,
+        "color": "#f97316",
+        "text": "border-color: #f97316;"
+      },
+      {
+        "line": 669,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 680,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/hearings/index.vue",
+    "hits": [
+      {
+        "line": 437,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 480,
+        "color": "#ccfbf1",
+        "text": "background: #ccfbf1;"
+      },
+      {
+        "line": 481,
+        "color": "#115e59",
+        "text": "color: #115e59;"
+      },
+      {
+        "line": 491,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 507,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 521,
+        "color": "#99f6e4",
+        "text": "background: #99f6e4;"
+      },
+      {
+        "line": 522,
+        "color": "#134e4a",
+        "text": "color: #134e4a;"
+      },
+      {
+        "line": 559,
+        "color": "#e7515a",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 559,
+        "color": "#c53040",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 622,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 625,
+        "color": "#f3f4f6",
+        "text": "border-bottom: 2px solid #f3f4f6;"
+      },
+      {
+        "line": 636,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 644,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 666,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 677,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/subscription/index.vue",
+    "hits": [
+      {
+        "line": 187,
+        "color": "#b42318",
+        "text": "confirmButtonColor: '#b42318',"
+      },
+      {
+        "line": 208,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 212,
+        "color": "#b42318",
+        "text": "color: #b42318;"
+      },
+      {
+        "line": 234,
+        "color": "#fff8e6",
+        "text": "background: #fff8e6;"
+      },
+      {
+        "line": 235,
+        "color": "#744a00",
+        "text": "color: #744a00;"
+      },
+      {
+        "line": 255,
+        "color": "#e5e7eb",
+        "text": "border-bottom: 1px solid var(--border-color, #e5e7eb);"
+      },
+      {
+        "line": 270,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 285,
+        "color": "#067647",
+        "text": "color: #067647;"
+      },
+      {
+        "line": 286,
+        "color": "#ecfdf3",
+        "text": "background: #ecfdf3;"
+      },
+      {
+        "line": 291,
+        "color": "#9a6700",
+        "text": "color: #9a6700;"
+      },
+      {
+        "line": 292,
+        "color": "#fff8e6",
+        "text": "background: #fff8e6;"
+      },
+      {
+        "line": 296,
+        "color": "#667085",
+        "text": "color: #667085;"
+      },
+      {
+        "line": 297,
+        "color": "#f2f4f7",
+        "text": "background: #f2f4f7;"
+      },
+      {
+        "line": 331,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      }
+    ]
+  },
+  {
+    "file": "views/dashboard.vue",
+    "hits": [
+      {
+        "line": 338,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 352,
+        "color": "#eee",
+        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
+      },
+      {
+        "line": 352,
+        "color": "#f5f5f5",
+        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
+      },
+      {
+        "line": 352,
+        "color": "#eee",
+        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
+      },
+      {
+        "line": 365,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 428,
+        "color": "#fff",
+        "text": "background: var(--background, #fff);"
+      },
+      {
+        "line": 437,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 457,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 468,
+        "color": "#fff",
+        "text": "background: var(--background, #fff);"
+      },
+      {
+        "line": 485,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 493,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 539,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 556,
+        "color": "#b91c1c",
+        "text": "color: #b91c1c;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/activity-tab.vue",
+    "hits": [
+      {
+        "line": 99,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 100,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 100,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 114,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 123,
+        "color": "#e2e8f0",
+        "text": "border-left: 2px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 139,
+        "color": "#fff",
+        "text": "border: 2px solid #fff;"
+      },
+      {
+        "line": 142,
+        "color": "#8b5cf6",
+        "text": "background: #8b5cf6;"
+      },
+      {
+        "line": 149,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 154,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 165,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 167,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/overview-tab.vue",
+    "hits": [
+      {
+        "line": 132,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 133,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 133,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 151,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 154,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 162,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 163,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 164,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 172,
+        "color": "#e2e8f0",
+        "text": "background: var(--neutral-100, #e2e8f0);"
+      },
+      {
+        "line": 196,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 203,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/time-entries-panel.vue",
+    "hits": [
+      {
+        "line": 352,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 385,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 403,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 419,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 423,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 444,
+        "color": "#fef3c7",
+        "text": "background: #fef3c7;"
+      },
+      {
+        "line": 445,
+        "color": "#f59e0b",
+        "text": "color: #f59e0b;"
+      },
+      {
+        "line": 449,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 450,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 477,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 508,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/financials-tab.vue",
+    "hits": [
+      {
+        "line": 164,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 174,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 175,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 175,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 193,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 194,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 203,
+        "color": "#fff",
+        "text": "color: #fff;"
+      },
+      {
+        "line": 229,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 230,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 239,
+        "color": "#b45309",
+        "text": "color: #b45309;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/view-case.vue",
+    "hits": [
+      {
+        "line": 240,
+        "color": "#f8f9fa",
+        "text": "background: #f8f9fa;"
+      },
+      {
+        "line": 249,
+        "color": "#e2e8f0",
+        "text": "border-bottom: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 259,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 284,
+        "color": "#000",
+        "text": "color: #000;"
+      },
+      {
+        "line": 285,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 290,
+        "color": "#000",
+        "text": "border-bottom: 2px solid #000;"
+      },
+      {
+        "line": 300,
+        "color": "#444",
+        "text": "color: #444;"
+      },
+      {
+        "line": 314,
+        "color": "#000",
+        "text": "border-bottom: 1px solid #000;"
+      },
+      {
+        "line": 329,
+        "color": "#999",
+        "text": "border-bottom: 1px dotted #999;"
+      },
+      {
+        "line": 348,
+        "color": "#000",
+        "text": "border: 1px solid #000;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/expenses/categories.vue",
+    "hits": [
+      {
+        "line": 246,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 291,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 297,
+        "color": "#f97316",
+        "text": "color: #f97316;"
+      },
+      {
+        "line": 333,
+        "color": "#e7515a",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 333,
+        "color": "#c53040",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 395,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 402,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 411,
+        "color": "#f97316",
+        "text": "border-color: #f97316;"
+      },
+      {
+        "line": 416,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 426,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "components/session-expired-modal.vue",
+    "hits": [
+      {
+        "line": 186,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff);"
+      },
+      {
+        "line": 201,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 213,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 219,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 231,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 245,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 246,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 247,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 257,
+        "color": "#fff",
+        "text": "color: #fff;"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/lifecycle-stepper.vue",
+    "hits": [
+      {
+        "line": 83,
+        "color": "#f1f5f9",
+        "text": "background: var(--surface, #f1f5f9);"
+      },
+      {
+        "line": 84,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 85,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 89,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 94,
+        "color": "#fff",
+        "text": "color: #fff;"
+      },
+      {
+        "line": 107,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 113,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 114,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff);"
+      },
+      {
+        "line": 132,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/trust/index.vue",
+    "hits": [
+      {
+        "line": 247,
+        "color": "#64748b",
+        "text": ".hint, .muted { font-size: 13px; color: var(--text-secondary, #64748b); }"
+      },
+      {
+        "line": 248,
+        "color": "#15803d",
+        "text": ".ok { color: #15803d; }"
+      },
+      {
+        "line": 249,
+        "color": "#b45309",
+        "text": ".warn { color: #b45309; }"
+      },
+      {
+        "line": 251,
+        "color": "#e2e8f0",
+        "text": "button { border: 1px solid var(--border-color, #e2e8f0); background: var(--card-bg, #fff); padding: "
+      },
+      {
+        "line": 251,
+        "color": "#fff",
+        "text": "button { border: 1px solid var(--border-color, #e2e8f0); background: var(--card-bg, #fff); padding: "
+      },
+      {
+        "line": 252,
+        "color": "#fff",
+        "text": "&.active { background: var(--primary-600); color: #fff; border-color: transparent; } } }"
+      },
+      {
+        "line": 258,
+        "color": "#e2e8f0",
+        "text": ".figure { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 12px; display"
+      },
+      {
+        "line": 259,
+        "color": "#64748b",
+        "text": "span { font-size: 12px; color: var(--text-secondary, #64748b); } b { font-size: 20px; } small { font"
+      },
+      {
+        "line": 259,
+        "color": "#64748b",
+        "text": "span { font-size: 12px; color: var(--text-secondary, #64748b); } b { font-size: 20px; } small { font"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/documents-tab.vue",
+    "hits": [
+      {
+        "line": 261,
+        "color": "#e2e8f0",
+        "text": ".inside-hit { padding: 8px 0; border-bottom: 1px solid var(--border-color, #e2e8f0); }"
+      },
+      {
+        "line": 262,
+        "color": "#475569",
+        "text": ".inside-hit .snippet { margin: 4px 0 0; font-size: 13px; color: var(--text-secondary, #475569); over"
+      },
+      {
+        "line": 263,
+        "color": "#fef08a",
+        "text": ".inside-hit mark { padding: 0 2px; background: #fef08a; }"
+      },
+      {
+        "line": 264,
+        "color": "#64748b",
+        "text": ".hint { font-size: 12px; color: var(--text-secondary, #64748b); }"
+      },
+      {
+        "line": 272,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 273,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 273,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 292,
+        "color": "#fff",
+        "text": "color: #fff;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/hearings/types.vue",
+    "hits": [
+      {
+        "line": 254,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 299,
+        "color": "#1f2937",
+        "text": "color: #1f2937;"
+      },
+      {
+        "line": 341,
+        "color": "#e7515a",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 341,
+        "color": "#c53040",
+        "text": "background: linear-gradient(135deg, #e7515a, #c53040);"
+      },
+      {
+        "line": 403,
+        "color": "#374151",
+        "text": "color: #374151;"
+      },
+      {
+        "line": 410,
+        "color": "#e5e7eb",
+        "text": "border: 2px solid #e5e7eb;"
+      },
+      {
+        "line": 424,
+        "color": "#ef4444",
+        "text": "border-color: #ef4444;"
+      },
+      {
+        "line": 434,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/page-header.vue",
+    "hits": [
+      {
+        "line": 22,
+        "color": "#fff",
+        "text": ".lms-page-header { display: flex; align-items: center; gap: 16px; background: #fff; border: 1px soli"
+      },
+      {
+        "line": 22,
+        "color": "#e3ebe6",
+        "text": ".lms-page-header { display: flex; align-items: center; gap: 16px; background: #fff; border: 1px soli"
+      },
+      {
+        "line": 23,
+        "color": "#fff",
+        "text": ".lms-ph-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 13px; display: grid; place-"
+      },
+      {
+        "line": 23,
+        "color": "#148a67",
+        "text": ".lms-ph-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 13px; display: grid; place-"
+      },
+      {
+        "line": 23,
+        "color": "#0a5a43",
+        "text": ".lms-ph-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 13px; display: grid; place-"
+      },
+      {
+        "line": 25,
+        "color": "#16211d",
+        "text": ".lms-ph-text h1 { font-family: inherit !important; margin: 0; font-size: 1.35rem; font-weight: 700; "
+      },
+      {
+        "line": 26,
+        "color": "#5b6b64",
+        "text": ".lms-ph-text p { margin: 2px 0 0; color: #5b6b64; font-size: .92rem; }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/reports/index.vue",
+    "hits": [
+      {
+        "line": 174,
+        "color": "#fff",
+        "text": ".tile { background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e2e8f0); border-rad"
+      },
+      {
+        "line": 174,
+        "color": "#e2e8f0",
+        "text": ".tile { background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e2e8f0); border-rad"
+      },
+      {
+        "line": 175,
+        "color": "#64748b",
+        "text": "span { display: block; font-size: 12px; color: var(--text-secondary, #64748b); } b { font-size: 20px"
+      },
+      {
+        "line": 177,
+        "color": "#f1f5f9",
+        "text": ".bar-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid v"
+      },
+      {
+        "line": 179,
+        "color": "#b42318",
+        "text": ".neg { color: #b42318; }"
+      },
+      {
+        "line": 180,
+        "color": "#64748b",
+        "text": ".lag-note { font-size: 13px; color: var(--text-secondary, #64748b); margin: -4px 0 12px; }"
+      },
+      {
+        "line": 181,
+        "color": "#64748b",
+        "text": ".muted { color: var(--text-secondary, #64748b); }"
+      }
+    ]
+  },
+  {
+    "file": "components/two-factor-settings.vue",
+    "hits": [
+      {
+        "line": 103,
+        "color": "#dcfce7",
+        "text": "background: #dcfce7;"
+      },
+      {
+        "line": 104,
+        "color": "#166534",
+        "text": "color: #166534;"
+      },
+      {
+        "line": 108,
+        "color": "#f1f5f9",
+        "text": "background: #f1f5f9;"
+      },
+      {
+        "line": 109,
+        "color": "#475569",
+        "text": "color: #475569;"
+      },
+      {
+        "line": 114,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 123,
+        "color": "#f8fafc",
+        "text": "background: var(--surface-muted, #f8fafc);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/parties-tab.vue",
+    "hits": [
+      {
+        "line": 128,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 133,
+        "color": "#fff",
+        "text": ".party-dialog { background: #fff; border-radius: 14px; padding: 20px; width: min(440px, 92vw); box-s"
+      },
+      {
+        "line": 135,
+        "color": "#cfd8d3",
+        "text": ".btn-close-modern { width: 36px; height: 36px; border: 1px solid #cfd8d3; border-radius: 8px; backgr"
+      },
+      {
+        "line": 135,
+        "color": "#fff",
+        "text": ".btn-close-modern { width: 36px; height: 36px; border: 1px solid #cfd8d3; border-radius: 8px; backgr"
+      },
+      {
+        "line": 135,
+        "color": "#3c4a44",
+        "text": ".btn-close-modern { width: 36px; height: 36px; border: 1px solid #cfd8d3; border-radius: 8px; backgr"
+      },
+      {
+        "line": 137,
+        "color": "#64748b",
+        "text": "dt { color: #64748b; font-weight: 500; } dd { margin: 0; }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/invoices/online-payment-panel.vue",
+    "hits": [
+      {
+        "line": 71,
+        "color": "#e2e8f0",
+        "text": ".online-pay-card { margin-top: 16px; padding: 16px; border: 1px solid var(--border-color, #e2e8f0); "
+      },
+      {
+        "line": 71,
+        "color": "#fff",
+        "text": ".online-pay-card { margin-top: 16px; padding: 16px; border: 1px solid var(--border-color, #e2e8f0); "
+      },
+      {
+        "line": 72,
+        "color": "#64748b",
+        "text": ".head h3 { font-size: 16px; margin: 0; } .hint { font-size: 12px; color: var(--text-secondary, #6474"
+      },
+      {
+        "line": 75,
+        "color": "#b45309",
+        "text": ".warn { color: #b45309; font-size: 13px; }"
+      },
+      {
+        "line": 76,
+        "color": "#15803d",
+        "text": ".succeeded { color: #15803d; } .failed { color: #b42318; }"
+      },
+      {
+        "line": 76,
+        "color": "#b42318",
+        "text": ".succeeded { color: #15803d; } .failed { color: #b42318; }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/today/index.vue",
+    "hits": [
+      {
+        "line": 124,
+        "color": "#64748b",
+        "text": ".hint { font-size: 13px; color: var(--text-secondary, #64748b); margin: 0; }"
+      },
+      {
+        "line": 125,
+        "color": "#b45309",
+        "text": ".offline { color: #b45309; }"
+      },
+      {
+        "line": 126,
+        "color": "#fff",
+        "text": ".hearing { display: grid; grid-template-columns: 64px 1fr; gap: 8px 12px; padding: 12px; margin-bott"
+      },
+      {
+        "line": 126,
+        "color": "#e2e8f0",
+        "text": ".hearing { display: grid; grid-template-columns: 64px 1fr; gap: 8px 12px; padding: 12px; margin-bott"
+      },
+      {
+        "line": 134,
+        "color": "#e2e8f0",
+        "text": ".task { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var"
+      },
+      {
+        "line": 135,
+        "color": "#b42318",
+        "text": ".overdue { color: #b42318; }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/conflicts/index.vue",
+    "hits": [
+      {
+        "line": 169,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 193,
+        "color": "#15803d",
+        "text": "color: #15803d;"
+      },
+      {
+        "line": 197,
+        "color": "#b45309",
+        "text": "color: #b45309;"
+      },
+      {
+        "line": 230,
+        "color": "#b42318",
+        "text": "color: #b42318;"
+      },
+      {
+        "line": 234,
+        "color": "#b45309",
+        "text": "color: #b45309;"
+      }
+    ]
+  },
+  {
+    "file": "views/users/account_setting.vue",
+    "hits": [
+      {
+        "line": 221,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 242,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 263,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 267,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      },
+      {
+        "line": 274,
+        "color": "#ef4444",
+        "text": "color: #ef4444;"
+      }
+    ]
+  },
+  {
+    "file": "components/account-notice.vue",
+    "hits": [
+      {
+        "line": 44,
+        "color": "#fef9c3",
+        "text": "background: #fef9c3;"
+      },
+      {
+        "line": 45,
+        "color": "#713f12",
+        "text": "color: #713f12;"
+      },
+      {
+        "line": 49,
+        "color": "#fee2e2",
+        "text": "background: #fee2e2;"
+      },
+      {
+        "line": 50,
+        "color": "#7f1d1d",
+        "text": "color: #7f1d1d;"
+      }
+    ]
+  },
+  {
+    "file": "components/app-breadcrumbs.vue",
+    "hits": [
+      {
+        "line": 48,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      },
+      {
+        "line": 52,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 62,
+        "color": "#0f172a",
+        "text": "color: var(--text-primary, #0f172a);"
+      },
+      {
+        "line": 68,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/catalog-badge.vue",
+    "hits": [
+      {
+        "line": 26,
+        "color": "#f3f4f6",
+        "text": "background: var(--neutral-100, #f3f4f6);"
+      },
+      {
+        "line": 27,
+        "color": "#4b5563",
+        "text": "color: var(--text-secondary, #4b5563);"
+      },
+      {
+        "line": 28,
+        "color": "#e5e7eb",
+        "text": "border: 1px solid var(--border-color, #e5e7eb);"
+      },
+      {
+        "line": 33,
+        "color": "#6b7280",
+        "text": "color: var(--text-tertiary, #6b7280);"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/search-select.vue",
+    "hits": [
+      {
+        "line": 209,
+        "color": "#e7515a",
+        "text": "border-color: #e7515a;"
+      },
+      {
+        "line": 223,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff);"
+      },
+      {
+        "line": 224,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 244,
+        "color": "#94a3b8",
+        "text": "color: var(--text-tertiary, #94a3b8);"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/simple-bar-chart.vue",
+    "hits": [
+      {
+        "line": 79,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 99,
+        "color": "#7c3aed",
+        "text": "background: #7c3aed;"
+      },
+      {
+        "line": 113,
+        "color": "#7c3aed",
+        "text": "fill: #7c3aed;"
+      },
+      {
+        "line": 118,
+        "color": "#94a3b8",
+        "text": "fill: var(--text-tertiary, #94a3b8);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/emails-tab.vue",
+    "hits": [
+      {
+        "line": 138,
+        "color": "#64748b",
+        "text": ".hint { font-size: 13px; color: var(--text-secondary, #64748b); }"
+      },
+      {
+        "line": 141,
+        "color": "#f1f5f9",
+        "text": ".copy code { padding: 4px 8px; background: var(--surface-muted, #f1f5f9); border-radius: 6px; overfl"
+      },
+      {
+        "line": 149,
+        "color": "#e2e8f0",
+        "text": ".message { margin-top: 16px; border-top: 1px solid var(--border-color, #e2e8f0); padding-top: 12px; "
+      },
+      {
+        "line": 151,
+        "color": "#f8fafc",
+        "text": ".body { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; background: var(--surface-mut"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/hearings-tab.vue",
+    "hits": [
+      {
+        "line": 246,
+        "color": "#f1f5f9",
+        "text": "border-bottom: 1px solid #f1f5f9;"
+      },
+      {
+        "line": 247,
+        "color": "#f8fafc",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 247,
+        "color": "#ffffff",
+        "text": "background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);"
+      },
+      {
+        "line": 266,
+        "color": "#fff",
+        "text": "color: #fff;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/portal-tab.vue",
+    "hits": [
+      {
+        "line": 145,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 185,
+        "color": "#e2e8f0",
+        "text": "border: 1px solid var(--border-color, #e2e8f0);"
+      },
+      {
+        "line": 198,
+        "color": "#f1f5f9",
+        "text": "&.in { background: var(--surface-muted, #f1f5f9); }"
+      },
+      {
+        "line": 203,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/time-entries/index.vue",
+    "hits": [
+      {
+        "line": 105,
+        "color": "#f9fafb",
+        "text": "background: #f9fafb;"
+      },
+      {
+        "line": 121,
+        "color": "#6b7280",
+        "text": "color: #6b7280;"
+      },
+      {
+        "line": 126,
+        "color": "#fff",
+        "text": "background: #fff;"
+      },
+      {
+        "line": 156,
+        "color": "#b45309",
+        "text": "color: #b45309;"
+      }
+    ]
+  },
+  {
+    "file": "components/two-factor-enrol.vue",
+    "hits": [
+      {
+        "line": 143,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 176,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 187,
+        "color": "#f8fafc",
+        "text": "background: var(--surface-muted, #f8fafc);"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/crud-modal.vue",
+    "hits": [
+      {
+        "line": 101,
+        "color": "#fff",
+        "text": "color: #fff;"
+      },
+      {
+        "line": 106,
+        "color": "#fff",
+        "text": "color: #fff;"
+      },
+      {
+        "line": 126,
+        "color": "#fff",
+        "text": "color: #fff;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/cases/tabs/document-actions.vue",
+    "hits": [
+      {
+        "line": 136,
+        "color": "#e2e8f0",
+        "text": ".panel { display: grid; gap: 8px; margin-top: 12px; padding: 12px; border: 1px solid var(--border-co"
+      },
+      {
+        "line": 141,
+        "color": "#e2e8f0",
+        "text": ".request { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: "
+      },
+      {
+        "line": 142,
+        "color": "#64748b",
+        "text": ".hint { font-size: 13px; color: var(--text-secondary, #64748b); }"
+      }
+    ]
+  },
+  {
+    "file": "views/auth/two_factor.vue",
+    "hits": [
+      {
+        "line": 53,
+        "color": "#fff",
+        "text": "background: var(--card-bg, #fff);"
+      },
+      {
+        "line": 67,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/branding/index.vue",
+    "hits": [
+      {
+        "line": 150,
+        "color": "#e2e8f0",
+        "text": ".color-input { width: 44px; height: 38px; padding: 2px; border: 1px solid var(--border-color, #e2e8f"
+      },
+      {
+        "line": 154,
+        "color": "#64748b",
+        "text": ".hint { font-size: 12px; color: var(--text-secondary, #64748b); }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/calendar/sync.vue",
+    "hits": [
+      {
+        "line": 135,
+        "color": "#64748b",
+        "text": ".hint, .muted { font-size: 13px; color: var(--text-secondary, #64748b); }"
+      },
+      {
+        "line": 136,
+        "color": "#e2e8f0",
+        "text": ".row-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: "
+      }
+    ]
+  },
+  {
+    "file": "components/global-search.vue",
+    "hits": [
+      {
+        "line": 263,
+        "color": "#fff",
+        "text": "background: var(--background, #fff);"
+      }
+    ]
+  },
+  {
+    "file": "components/ui/app-date-picker.vue",
+    "hits": [
+      {
+        "line": 72,
+        "color": "#e7515a",
+        "text": "border-color: #e7515a;"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/calendar/court-diary.vue",
+    "hits": [
+      {
+        "line": 91,
+        "color": "#64748b",
+        "text": ".hint, .muted { font-size: 13px; color: var(--text-secondary, #64748b); }"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/organisation/index.vue",
+    "hits": [
+      {
+        "line": 225,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      }
+    ]
+  },
+  {
+    "file": "views/menu/templates/index.vue",
+    "hits": [
+      {
+        "line": 110,
+        "color": "#64748b",
+        "text": ".hint { font-size: 13px; color: var(--text-secondary, #64748b); }"
+      }
+    ]
+  }
+]

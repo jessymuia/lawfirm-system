@@ -1,0 +1,7 @@
+# TEN-17: tests that only make sense on a self-hosted (single-firm) install. Excluded from the multi-tenant CI run.
+# One per line, with the reason. This list may only shrink.
+AppInstallTest                                                    # app:install sets up a self-hosted install
+LicenseTest                                                       # signed licenses exist for self-hosted installs only
+AuthTest::test_password_reset_succeeds_within_the_expiry_window   # single-install reset table; multi: TenantPasswordRecoveryTest
+FirmRateLimitTest::test_a_single_firm_install_has_no_firm_wide_limit_by_default   # the self-hosted default
+PortabilityTest::test_zip_round_trip_through_the_commands         # install-to-install copy; a firm's round trip: PortabilityTenantTest

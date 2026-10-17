@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Task;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Task>
+ * @extends Factory<Task>
  */
 class TaskFactory extends Factory
 {
@@ -16,17 +18,25 @@ class TaskFactory extends Factory
      */
     public function definition()
     {
-        // obtain all the users in the database with a role that does not have the word 'admin' in them
-        $assignedToArray = \App\Models\User::query()
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('name', 'admin');
-            })->pluck('id')->toArray();
-
+        // Self-sufficient: creates its own assignable user if none
+        // exists, instead of erroring against Faker::randomElement([])
+        // in a fresh test database.
         return [
             //
             'description' => $this->faker->sentence(),
             'title' => $this->faker->sentence(),
-            'assigned_to' => $this->faker->randomElement($assignedToArray),
+            'assigned_to' => function () {
+                $assignedToArray = User::query()
+                    ->whereDoesntHave('roles', function ($query) {
+                        $query->where('name', 'admin');
+                    })->pluck('id')->toArray();
+
+                if (! empty($assignedToArray)) {
+                    return $this->faker->randomElement($assignedToArray);
+                }
+
+                return User::factory()->create()->id;
+            },
             'due_date' => $this->faker->dateTime(),
             'priority' => $this->faker->randomElement(['low', 'medium', 'high']),
         ];

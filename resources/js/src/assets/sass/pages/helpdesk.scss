@@ -144,7 +144,7 @@ body {
                     width: 17px;
                     vertical-align: middle;
                     margin-right: 11px;
-                    color: #888ea8;
+                    color: var(--text-muted);
                 }
 
                 &[aria-expanded='true'] svg {
@@ -275,7 +275,7 @@ body {
             height: 6px;
             border-radius: 50%;
             opacity: 1;
-            background-color: #888ea8;
+            background-color: var(--text-muted);
 
             &.active {
                 background-color: #4361ee;

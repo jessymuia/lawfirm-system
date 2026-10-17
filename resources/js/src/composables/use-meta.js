@@ -11,6 +11,9 @@ export const usePageTitle = (pageTitle) =>
         }))
     );
 
+// The tab shows the system's own name, never a firm's: "Matters | Law Management System".
+const productName = () => document.getElementById('app')?.dataset.productName || 'Law Management System';
+
 export const useMeta = (data) => {
-    return useHead({ ...data, title: `${data.title} | Ouma Njoga & Co. Advocates ` });
+    return useHead(computed(() => ({ ...data, title: `${data.title} | ${productName()}` })));
 };

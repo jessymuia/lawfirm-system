@@ -70,6 +70,25 @@ return [
             'days' => 14,
         ],
 
+        // ENG-24: one JSON object per line (request_id, tenant, user_id in `extra`).
+        // Set LOG_CHANNEL=json (files) or LOG_CHANNEL=stderr_json (containers).
+        'json' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.json.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+            'formatter_with' => ['batchMode' => \Monolog\Formatter\JsonFormatter::BATCH_MODE_NEWLINES, 'appendNewline' => true],
+        ],
+
+        'stderr_json' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => \Monolog\Handler\StreamHandler::class,
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+            'with' => ['stream' => 'php://stderr'],
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

@@ -528,3 +528,196 @@ body.dark {
         }
     }
 }
+
+// Trust Ledger section (FUN-2). Self-contained styling since
+// .cases-section/.section-header/.section-title above have no base
+// definitions anywhere in this file (only a stray media-query reference)
+// — rather than depend on undefined classes, this section defines
+// everything it needs.
+.trust-section {
+    margin-top: 32px;
+    background: var(--card-bg, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+    }
+
+    .trust-balance-badge {
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        font-weight: 700;
+        font-size: 14px;
+
+        &.zero-balance {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+    }
+
+    .trust-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) 1fr;
+        gap: 20px;
+
+        @media (max-width: 900px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .trust-form-card, .trust-history-card {
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 10px;
+        padding: 20px;
+
+        h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 16px;
+        }
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary, #6b7280);
+            margin-bottom: 6px;
+        }
+    }
+
+    .btn-submit-trust {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(135deg, #4361ee, #3651d4);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 4px;
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    .trust-loading {
+        padding: 20px 0;
+        text-align: center;
+        color: var(--text-tertiary, #999);
+        font-size: 13px;
+    }
+
+    .empty-state.small {
+        padding: 20px 0;
+        text-align: center;
+        color: var(--text-tertiary, #999);
+        font-size: 13px;
+    }
+
+    .trust-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 420px;
+        overflow-y: auto;
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color, #eee);
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &.voided {
+                opacity: 0.5;
+            }
+        }
+    }
+
+    .trust-list-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .trust-type {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+
+        &.deposit { color: #10b981; }
+        &.disbursement { color: #e7515a; }
+    }
+
+    .trust-desc {
+        font-size: 13px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .trust-date {
+        font-size: 11px;
+        color: var(--text-tertiary, #999);
+    }
+
+    .trust-list-side {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .trust-amount {
+        font-weight: 700;
+        font-size: 14px;
+
+        &.deposit { color: #10b981; }
+        &.disbursement { color: #e7515a; }
+    }
+
+    .btn-void {
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        border: 1px solid #e7515a;
+        color: #e7515a;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+
+        &:hover {
+            background: #e7515a;
+            color: white;
+        }
+    }
+}

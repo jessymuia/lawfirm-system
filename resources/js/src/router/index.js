@@ -1,244 +1,388 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import Home from '../views/dashboard.vue';
-import store from '../store';
+import { pinia } from '../stores';
+import { useAppStore } from '../stores/app';
 
+// UI-1: template purge. This router previously carried ~83 routes for
+// demo apps (chat, mailbox, scrumboard, notes, todo, a duplicate demo
+// invoice module), component/element/form/table style-guide pages, and
+// three alternate dashboards (index.vue, index1.0.vue, index2.vue) — none
+// of them linked from the actual sidebar/header nav (verified against
+// components/layout/sidebar.vue and header.vue). Only the firm's real
+// modules and the two routes actually linked from the header dropdown
+// (profile, account settings) remain below.
 
 const routes = [
-    //dashboard
-    { path: '/', name: 'Home', component: Home },
+    // dashboard
+    { path: '/', name: 'Home', component: Home, meta: { authRequired: true } },
 
-    {
-        path: '/index2',
-        name: 'index2',
-        component: () => import(/* webpackChunkName: "index2" */ '../views/index2.vue'),
-    },
-
-    //users
+    // users
     {
         path: '/users',
         name: 'users',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/users/index.vue'),
+        component: () => import(/* webpackChunkName: "users" */ '../views/menu/users/index.vue'),
     },
 
-    //hearing types
-
+    // hearing types
     {
         path: '/hearingtypes',
         name: 'hearing-types',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/hearings/types.vue'),
+        component: () => import(/* webpackChunkName: "hearings" */ '../views/menu/hearings/types.vue'),
     },
 
-    //expense categories
+    // expense categories
     {
         path: '/expense-categories',
         name: 'expense-categories',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/expenses/categories.vue'),
+        component: () => import(/* webpackChunkName: "expenses" */ '../views/menu/expenses/categories.vue'),
     },
 
-    //court types
+    // courts / court types
     {
         path: '/courts',
         name: 'courts',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/index.vue'),
+        component: () => import(/* webpackChunkName: "courts" */ '../views/menu/court/index.vue'),
     },
     {
         path: '/courttypes',
         name: 'court-types',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/court/types.vue'),
+        component: () => import(/* webpackChunkName: "courts" */ '../views/menu/court/types.vue'),
     },
 
-    //court types
+    // expenses
     {
         path: '/expenses',
         name: 'expenses',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/expenses/index.vue'),
-    },
-    //heearings types
-    {
-        path: '/hearings',
-        name: 'hearings',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/hearings/index.vue'),
-    },
-    //tasks types
-    {
-        path: '/tasks',
-        name: 'tasks',
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/tasks/index.vue'),
+        component: () => import(/* webpackChunkName: "expenses" */ '../views/menu/expenses/index.vue'),
     },
 
-    // clients menu
+    // time entries
     {
-        path: "/clients",
-        name: "clients",
-        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/clients/list-clients.vue'),
+        path: '/time-entries',
+        name: 'time-entries',
+        component: () => import(/* webpackChunkName: "time-entries" */ '../views/menu/time-entries/index.vue'),
         meta: {
             authRequired: true,
         },
     },
-    // view client details
+
+    // hearings
     {
-        path: "/clients/:id",
-        name: "client-details",
-        component: () => import(/* webpackChunkName: "client" */ '../views/menu/clients/view-client.vue'),
+        path: '/hearings',
+        name: 'hearings',
+        component: () => import(/* webpackChunkName: "hearings" */ '../views/menu/hearings/index.vue'),
+    },
+    {
+        path: '/hearings/calendar',
+        name: 'hearings-calendar',
+        component: () => import(/* webpackChunkName: "hearings" */ '../views/menu/hearings/calendar.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // tasks
+    {
+        path: '/tasks',
+        name: 'tasks',
+        component: () => import(/* webpackChunkName: "tasks" */ '../views/menu/tasks/index.vue'),
+    },
+
+    // clients
+    {
+        path: '/clients',
+        name: 'clients',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/clients/list-clients.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Clients' }],
+        },
+    },
+    {
+        path: '/clients/:id',
+        name: 'client-details',
+        component: () => import(/* webpackChunkName: "clients" */ '../views/menu/clients/view-client.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Clients', name: 'clients' }, { label: 'Client' }],
+        },
     },
 
     // cases
     {
-        path: "/cases",
-        name: "cases",
+        path: '/cases',
+        name: 'cases',
         component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/list-cases.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Cases' }],
+        },
+    },
+    {
+        path: '/view-case',
+        name: 'case-details',
+        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/view-case.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Cases', name: 'cases' }, { label: 'Case' }],
+        },
+    },
+    {
+        path: '/cases/create',
+        name: 'create-case',
+        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/cases/create-case.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Cases', name: 'cases' }, { label: 'New case' }],
+        },
     },
 
+    // invoices
     {
-        path: "/view-case",
-        name: "case-details",
-        component: () => import(/* webpackChunkName: "case" */ '../views/menu/cases/view-case.vue'),
+        path: '/invoices',
+        name: 'invoices',
+        component: () => import(/* webpackChunkName: "invoices" */ '../views/menu/invoices/index.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Invoices' }],
+        },
     },
     {
-        path: "/invoices",
-        name: "invoices",
-        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/invoices/index.vue'),
-    },
-    {
-        path: "/view-invoice",
-        name: "invoice-details",
-        component: () => import(/* webpackChunkName: "case" */ '../views/menu/invoices/items/index.vue'),
+        path: '/view-invoice',
+        name: 'invoice-details',
+        component: () => import(/* webpackChunkName: "invoices" */ '../views/menu/invoices/items/index.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Invoices', name: 'invoices' }, { label: 'Invoice items' }],
+        },
     },
     {
         path: '/invoice-preview',
         name: 'invoice-preview-d',
-        component: () => import(/* webpackChunkName: "apps-invoice-preview" */ '../views/menu/invoices/preview.vue'),
-    },
-    {
-        path: "/roles",
-        name: "roles",
-        component: () => import(/* webpackChunkName: "cases" */ '../views/menu/roles/index.vue'),
-    },
-    {
-        path: "/cases/create",
-        name: "create-case",
-        component: () => import(/* webpackChunkName: "create-case" */ '../views/menu/cases/create-case.vue'),
+        component: () => import(/* webpackChunkName: "invoices" */ '../views/menu/invoices/preview.vue'),
+        meta: {
+            authRequired: true,
+            breadcrumb: [{ label: 'Invoices', name: 'invoices' }, { label: 'Preview' }],
+        },
     },
 
+    // roles
+    {
+        path: '/roles',
+        name: 'roles',
+        component: () => import(/* webpackChunkName: "roles" */ '../views/menu/roles/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-19: the hearing-day view (the installed app opens here).
+    {
+        path: '/today',
+        name: 'today',
+        component: () => import(/* webpackChunkName: "today" */ '../views/menu/today/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-14: document templates.
+    {
+        path: '/document-templates',
+        name: 'document-templates',
+        component: () => import(/* webpackChunkName: "templates" */ '../views/menu/templates/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-16: the court diary and a person's calendar sync.
+    {
+        path: '/court-diary',
+        name: 'court-diary',
+        component: () => import(/* webpackChunkName: "calendar" */ '../views/menu/calendar/court-diary.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+    {
+        path: '/calendar-sync',
+        name: 'calendar-sync',
+        component: () => import(/* webpackChunkName: "calendar" */ '../views/menu/calendar/sync.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-17: partner reports (view-partner-reports).
+    {
+        path: '/reports',
+        name: 'reports',
+        component: () => import(/* webpackChunkName: "reports" */ '../views/menu/reports/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-12: trust three-way reconciliation and retainers.
+    {
+        path: '/trust',
+        name: 'trust',
+        component: () => import(/* webpackChunkName: "trust" */ '../views/menu/trust/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-18: offices and practice groups (manage-organisation).
+    {
+        path: '/settings/organisation',
+        name: 'organisation',
+        component: () => import(/* webpackChunkName: "organisation" */ '../views/menu/organisation/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // FUN-9: conflict-of-interest checks (run-conflict-checks; register and policy need manage-conflicts).
+    {
+        path: '/conflicts',
+        name: 'conflicts',
+        component: () => import(/* webpackChunkName: "conflicts" */ '../views/menu/conflicts/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // PLAT-13: the firm's plan and trial (manage-subscription).
+    {
+        path: '/settings/subscription',
+        name: 'subscription',
+        component: () => import(/* webpackChunkName: "subscription" */ '../views/menu/subscription/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+        // plans and payments are managed by the platform operator unless self-service billing is switched on
+        beforeEnter: (to, from, next) => (document.getElementById('app')?.dataset.firmBilling === '1' ? next() : next('/')),
+    },
+
+    // UI-13: the firm's logo, colour and letterhead (manage-branding).
+    {
+        path: '/settings/branding',
+        name: 'branding-settings',
+        component: () => import(/* webpackChunkName: "branding" */ '../views/menu/branding/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // DATA-14: base currency, currencies, exchange rates and tax rates (manage-finance-settings).
+    {
+        path: '/settings/finance',
+        name: 'finance-settings',
+        component: () => import(/* webpackChunkName: "finance" */ '../views/menu/finance/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // SEC-13: legal holds, retention schedule and data-subject requests (manage-compliance).
+    {
+        path: '/settings/compliance',
+        name: 'compliance-settings',
+        component: () => import(/* webpackChunkName: "compliance" */ '../views/menu/compliance/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // PLAT-8: the firm approves, limits and reviews platform-support access (manage-support-access).
+    {
+        path: '/settings/support-access',
+        name: 'support-access-settings',
+        component: () => import(/* webpackChunkName: "support-access" */ '../views/menu/support-access/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // SEC-11: ethical walls (manage-ethical-screens).
+    {
+        path: '/settings/ethical-walls',
+        name: 'ethical-walls-settings',
+        component: () => import(/* webpackChunkName: "ethical-walls" */ '../views/menu/ethical-walls/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // PLAT-11: API keys and webhooks (manage-api-access).
+    {
+        path: '/settings/api-access',
+        name: 'api-access-settings',
+        component: () => import(/* webpackChunkName: "api-access" */ '../views/menu/integrations/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // SEC-12: the firm's two-factor policy and single sign-on (manage-security-settings).
+    {
+        path: '/settings/security',
+        name: 'security-settings',
+        component: () => import(/* webpackChunkName: "security-settings" */ '../views/menu/security/index.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // account settings (linked from the header dropdown) — the dead
+    // '/users/profile' route (static demo content: "Skills", "Bio",
+    // "GitHub Contributor" — leftover admin-template bloat unrelated to
+    // this app, with no real data behind it at all) has been removed;
+    // account_setting.vue now covers real profile + password settings.
+    {
+        path: '/users/account-setting',
+        name: 'account-setting',
+        component: () => import(/* webpackChunkName: "profile" */ '../views/users/account_setting.vue'),
+        meta: {
+            authRequired: true,
+        },
+    },
+
+    // auth
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import(/* webpackChunkName: "auth-login" */ '../views/auth/login.vue'),
+        meta: { layout: 'auth' },
+    },
     {
         path: '/auth/reset/:token',
         name: 'reset-password-token',
-        component: () => import(/* webpackChunkName: "components-tabs" */ '../views/auth/resetPassword.vue'),
+        component: () => import(/* webpackChunkName: "auth-reset" */ '../views/auth/resetPassword.vue'),
         meta: { layout: 'auth' },
     },
-
-    //components
     {
-        path: '/components/tabs',
-        name: 'tabs',
-        component: () => import(/* webpackChunkName: "components-tabs" */ '../views/components/tabs.vue'),
+        path: '/auth/pass-recovery',
+        name: 'pass-recovery',
+        component: () => import(/* webpackChunkName: "auth-pass-recovery" */ '../views/auth/pass_recovery.vue'),
+        meta: { layout: 'auth' },
     },
     {
-        path: '/components/accordions',
-        name: 'accordions',
-        component: () => import(/* webpackChunkName: "components-accordions" */ '../views/components/accordions.vue'),
-    },
-    {
-        path: '/components/modals',
-        name: 'modals',
-        component: () => import(/* webpackChunkName: "components-modals" */ '../views/components/modals.vue'),
-    },
-    {
-        path: '/components/cards',
-        name: 'cards',
-        component: () => import(/* webpackChunkName: "components-cards" */ '../views/components/cards.vue'),
-    },
-    {
-        path: '/components/carousel',
-        name: 'carousel',
-        component: () => import(/* webpackChunkName: "components-carousel" */ '../views/components/carousel.vue'),
+        // SEC-12: two-factor enrolment the firm's policy requires before anything else.
+        path: '/auth/two-factor',
+        name: 'two-factor',
+        component: () => import(/* webpackChunkName: "auth-two-factor" */ '../views/auth/two_factor.vue'),
+        meta: { layout: 'auth', authRequired: true },
     },
 
+    // error pages (UI-2: dedicated 403 alongside the existing 404/500/503)
     {
-        path: '/components/timeline',
-        name: 'timeline',
-        component: () => import(/* webpackChunkName: "components-timeline" */ '../views/components/timeline.vue'),
-    },
-    {
-        path: '/components/media-object',
-        name: 'media-object',
-        component: () => import(/* webpackChunkName: "components-media-object" */ '../views/components/media_object.vue'),
-    },
-    {
-        path: '/components/list-group',
-        name: 'list-group',
-        component: () => import(/* webpackChunkName: "components-list-group" */ '../views/components/list_group.vue'),
-    },
-    {
-        path: '/components/pricing-table',
-        name: 'pricing-table',
-        component: () => import(/* webpackChunkName: "components-pricing-table" */ '../views/components/pricing_table.vue'),
-    },
-    {
-        path: '/components/notifications',
-        name: 'notifications',
-        component: () => import(/* webpackChunkName: "components-notifications" */ '../views/components/toast.vue'),
-    },
-
-    {
-        path: '/components/lightbox',
-        name: 'lightbox',
-        component: () => import(/* webpackChunkName: "components-lightbox" */ '../views/components/lightbox.vue'),
-    },
-    {
-        path: '/components/countdown',
-        name: 'countdown',
-        component: () => import(/* webpackChunkName: "components-countdown" */ '../views/components/countdown.vue'),
-    },
-    {
-        path: '/components/counter',
-        name: 'counter',
-        component: () => import(/* webpackChunkName: "components-counter" */ '../views/components/counter.vue'),
-    },
-    {
-        path: '/components/sweetalert',
-        name: 'sweetalert',
-        component: () => import(/* webpackChunkName: "components-sweetalert" */ '../views/components/sweetalert.vue'),
-    },
-
-    //fonts
-    {
-        path: '/font-icons',
-        name: 'font-icons',
-        component: () => import(/* webpackChunkName: "font-icons" */ '../views/font_icons.vue'),
-    },
-
-    //pages
-    {
-        path: '/pages/helpdesk',
-        name: 'helpdesk',
-        component: () => import(/* webpackChunkName: "pages-helpdesk" */ '../views/pages/helpdesk.vue'),
-    },
-    {
-        path: '/pages/contact-us',
-        name: 'contact-us',
-        component: () => import(/* webpackChunkName: "pages-contact-us" */ '../views/pages/contact_us.vue'),
-    },
-    {
-        path: '/pages/faq',
-        name: 'faq',
-        component: () => import(/* webpackChunkName: "pages-faq" */ '../views/pages/faq.vue'),
-    },
-    {
-        path: '/pages/faq2',
-        name: 'faq2',
-        component: () => import(/* webpackChunkName: "pages-faq2" */ '../views/pages/faq2.vue'),
-    },
-    {
-        path: '/pages/privacy-policy',
-        name: 'privacy-policy',
-        component: () => import(/* webpackChunkName: "pages-privacy-policy" */ '../views/pages/privacy_policy.vue'),
-    },
-    {
-        path: '/pages/coming-soon',
-        name: 'coming-soon',
-        component: () => import(/* webpackChunkName: "pages-coming-soon" */ '../views/pages/coming_soon.vue'),
+        path: '/pages/error403',
+        name: 'error403',
+        component: () => import(/* webpackChunkName: "pages-error403" */ '../views/pages/error403.vue'),
         meta: { layout: 'auth' },
     },
     {
@@ -259,401 +403,18 @@ const routes = [
         component: () => import(/* webpackChunkName: "pages-error503" */ '../views/pages/error503.vue'),
         meta: { layout: 'auth' },
     },
+
+    // catch-all: any unmatched path lands on the 404 page rather than a
+    // blank screen.
     {
-        path: '/pages/maintenence',
-        name: 'maintenence',
-        component: () => import(/* webpackChunkName: "pages-maintenence" */ '../views/pages/maintenence.vue'),
+        path: '/:pathMatch(.*)*',
+        name: 'not-found',
+        component: () => import(/* webpackChunkName: "pages-error404" */ '../views/pages/error404.vue'),
         meta: { layout: 'auth' },
-    },
-    {
-        path: '/pages/blank-page',
-        name: 'blank-page',
-        component: () => import(/* webpackChunkName: "pages-blank-page" */ '../views/pages/blank_page.vue'),
-    },
-    {
-        path: '/pages/sample',
-        name: 'sample',
-        component: () => import(/* webpackChunkName: "pages-sample" */ '../views/pages/sample.vue'),
-    },
-
-    //auth
-    {
-        path: '/auth/login-boxed',
-        name: 'login-boxed',
-        component: () => import(/* webpackChunkName: "auth-login-boxed" */ '../views/auth/login_boxed.vue'),
-        meta: { layout: 'auth' },
-    },
-    {
-        path: '/auth/register-boxed',
-        name: 'register-boxed',
-        component: () => import(/* webpackChunkName: "auth-register-boxed" */ '../views/auth/register_boxed.vue'),
-        meta: { layout: 'auth' },
-    },
-    {
-        path: '/auth/lockscreen-boxed',
-        name: 'lockscreen-boxed',
-        component: () => import(/* webpackChunkName: "auth-lockscreen-boxed" */ '../views/auth/lockscreen_boxed.vue'),
-        meta: { layout: 'auth' },
-    },
-    {
-        path: '/auth/pass-recovery-boxed',
-        name: 'pass-recovery-boxed',
-        component: () => import(/* webpackChunkName: "auth-pass-recovery-boxed" */ '../views/auth/pass_recovery_boxed.vue'),
-        meta: { layout: 'auth' },
-    },
-    {
-        path: '/login',
-        name: 'login',
-        component: () => import(/* webpackChunkName: "auth-login" */ '../views/auth/login.vue'),
-        meta: {
-            layout: 'auth',
-        },
-    },
-    {
-        path: '/auth/register',
-        name: 'register',
-        component: () => import(/* webpackChunkName: "auth-register" */ '../views/auth/register.vue'),
-        meta: { layout: 'auth' },
-    },
-    {
-        path: '/auth/lockscreen',
-        name: 'lockscreen',
-        component: () => import(/* webpackChunkName: "auth-lockscreen" */ '../views/auth/lockscreen.vue'),
-        meta: { layout: 'auth' },
-    },
-    {
-        path: '/auth/pass-recovery',
-        name: 'pass-recovery',
-        component: () => import(/* webpackChunkName: "auth-pass-recovery" */ '../views/auth/pass_recovery.vue'),
-        meta: { layout: 'auth' },
-    },
-
-    //elements
-    {
-        path: '/elements/alerts',
-        name: 'alerts',
-        component: () => import(/* webpackChunkName: "elements-alerts" */ '../views/elements/alerts.vue'),
-    },
-    {
-        path: '/elements/avatar',
-        name: 'avatar',
-        component: () => import(/* webpackChunkName: "elements-avatar" */ '../views/elements/avatar.vue'),
-    },
-    {
-        path: '/elements/badges',
-        name: 'badges',
-        component: () => import(/* webpackChunkName: "elements-badges" */ '../views/elements/badges.vue'),
-    },
-    {
-        path: '/elements/breadcrumbs',
-        name: 'breadcrumbs',
-        component: () => import(/* webpackChunkName: "elements-breadcrumbs" */ '../views/elements/breadcrumbs.vue'),
-    },
-    {
-        path: '/elements/buttons',
-        name: 'buttons',
-        component: () => import(/* webpackChunkName: "elements-buttons" */ '../views/elements/buttons.vue'),
-    },
-    {
-        path: '/elements/buttons-group',
-        name: 'buttons-group',
-        component: () => import(/* webpackChunkName: "elements-buttons-group" */ '../views/elements/buttons_group.vue'),
-    },
-    {
-        path: '/elements/color-library',
-        name: 'color-library',
-        component: () => import(/* webpackChunkName: "elements-color-library" */ '../views/elements/color_library.vue'),
-    },
-    {
-        path: '/elements/dropdown',
-        name: 'dropdown',
-        component: () => import(/* webpackChunkName: "elements-dropdown" */ '../views/elements/dropdown.vue'),
-    },
-    {
-        path: '/elements/infobox',
-        name: 'infobox',
-        component: () => import(/* webpackChunkName: "elements-infobox" */ '../views/elements/infobox.vue'),
-    },
-    {
-        path: '/elements/jumbotron',
-        name: 'jumbotron',
-        component: () => import(/* webpackChunkName: "elements-jumbotron" */ '../views/elements/jumbotron.vue'),
-    },
-    {
-        path: '/elements/loader',
-        name: 'loader',
-        component: () => import(/* webpackChunkName: "elements-loader" */ '../views/elements/loader.vue'),
-    },
-    {
-        path: '/elements/pagination',
-        name: 'pagination',
-        component: () => import(/* webpackChunkName: "elements-pagination" */ '../views/elements/pagination.vue'),
-    },
-    {
-        path: '/elements/popovers',
-        name: 'popovers',
-        component: () => import(/* webpackChunkName: "elements-popovers" */ '../views/elements/popovers.vue'),
-    },
-    {
-        path: '/elements/progress-bar',
-        name: 'progress-bar',
-        component: () => import(/* webpackChunkName: "elements-progress-bar" */ '../views/elements/progress_bar.vue'),
-    },
-    {
-        path: '/elements/search',
-        name: 'search',
-        component: () => import(/* webpackChunkName: "elements-search" */ '../views/elements/search.vue'),
-    },
-    {
-        path: '/elements/tooltips',
-        name: 'tooltips',
-        component: () => import(/* webpackChunkName: "elements-tooltips" */ '../views/elements/tooltips.vue'),
-    },
-    {
-        path: '/elements/treeview',
-        name: 'treeview',
-        component: () => import(/* webpackChunkName: "elements-treeview" */ '../views/elements/treeview.vue'),
-    },
-    {
-        path: '/elements/typography',
-        name: 'typography',
-        component: () => import(/* webpackChunkName: "elements-typography" */ '../views/elements/typography.vue'),
-    },
-
-    //tables
-    {
-        path: '/tables',
-        name: 'tables',
-        component: () => import(/* webpackChunkName: "tables" */ '../views/tables.vue'),
-    },
-
-    //users
-    {
-        path: '/users/profile',
-        name: 'profile',
-        component: () => import(/* webpackChunkName: "users-profile" */ '../views/users/profile.vue'),
-    },
-    {
-        path: '/users/account-setting',
-        name: 'account-setting',
-        component: () => import(/* webpackChunkName: "users-account-setting" */ '../views/users/account_setting.vue'),
-    },
-
-    //drag&drop
-    {
-        path: '/dragndrop',
-        name: 'dragndrop',
-        component: () => import(/* webpackChunkName: "dragndrop" */ '../views/dragndrop.vue'),
-    },
-
-    //charts
-    {
-        path: '/charts/apex-chart',
-        name: 'apex-chart',
-        component: () => import(/* webpackChunkName: "charts-apex-chart" */ '../views/charts/apex_chart.vue'),
-    },
-
-    //widgets
-    {
-        path: '/widgets',
-        name: 'widgets',
-        component: () => import(/* webpackChunkName: "widgets" */ '../views/widgets.vue'),
-    },
-
-    //forms
-    {
-        path: '/forms/basic',
-        name: 'basic',
-        component: () => import(/* webpackChunkName: "forms-basic" */ '../views/forms/basic.vue'),
-    },
-    {
-        path: '/forms/input-group',
-        name: 'input-group',
-        component: () => import(/* webpackChunkName: "forms-input-group" */ '../views/forms/input_group.vue'),
-    },
-    {
-        path: '/forms/layouts',
-        name: 'layouts',
-        component: () => import(/* webpackChunkName: "forms-layouts" */ '../views/forms/layouts.vue'),
-    },
-    {
-        path: '/forms/validation',
-        name: 'validation',
-        component: () => import(/* webpackChunkName: "forms-validation" */ '../views/forms/validation.vue'),
-    },
-    {
-        path: '/forms/checkbox-radio',
-        name: 'checkbox-radio',
-        component: () => import(/* webpackChunkName: "forms-checkbox-radio" */ '../views/forms/checkbox_radio.vue'),
-    },
-    {
-        path: '/forms/switches',
-        name: 'switches',
-        component: () => import(/* webpackChunkName: "forms-switches" */ '../views/forms/switches.vue'),
-    },
-    {
-        path: '/forms/wizards',
-        name: 'wizards',
-        component: () => import(/* webpackChunkName: "forms-wizards" */ '../views/forms/wizards.vue'),
-    },
-    {
-        path: '/forms/file-upload',
-        name: 'file-upload',
-        component: () => import(/* webpackChunkName: "forms-file-upload" */ '../views/forms/fileupload.vue'),
-    },
-    {
-        path: '/forms/clipboard',
-        name: 'clipboard',
-        component: () => import(/* webpackChunkName: "forms-clipboard" */ '../views/forms/clipboard.vue'),
-    },
-    {
-        path: '/forms/date-picker',
-        name: 'date-picker',
-        component: () => import(/* webpackChunkName: "forms-date-picker" */ '../views/forms/date_range_picker.vue'),
-    },
-    {
-        path: '/forms/input-mask',
-        name: 'input-mask',
-        component: () => import(/* webpackChunkName: "forms-input-mask" */ '../views/forms/input_mask.vue'),
-    },
-    {
-        path: '/forms/quill-editor',
-        name: 'quill-editor',
-        component: () => import(/* webpackChunkName: "forms-quill-editor" */ '../views/forms/quill_editor.vue'),
-    },
-    {
-        path: '/forms/touchspin',
-        name: 'touchspin',
-        component: () => import(/* webpackChunkName: "forms-touchspin" */ '../views/forms/touchspin.vue'),
-    },
-    {
-        path: '/forms/markdown-editor',
-        name: 'markdown-editor',
-        component: () => import(/* webpackChunkName: "forms-markdown-editor" */ '../views/forms/markdown_editor.vue'),
-    },
-    {
-        path: '/forms/select2',
-        name: 'select2',
-        component: () => import(/* webpackChunkName: "forms-select2" */ '../views/forms/select2.vue'),
-    },
-
-    //apps
-    {
-        path: '/apps/chat',
-        name: 'chat',
-        component: () => import(/* webpackChunkName: "apps-chat" */ '../views/apps/chat.vue'),
-    },
-    {
-        path: '/apps/mailbox',
-        name: 'mailbox',
-        component: () => import(/* webpackChunkName: "apps-mailbox" */ '../views/apps/mailbox.vue'),
-    },
-    {
-        path: '/apps/todo-list',
-        name: 'todo-list',
-        component: () => import(/* webpackChunkName: "apps-todo-list" */ '../views/apps/todo_list.vue'),
-    },
-    {
-        path: '/apps/contacts',
-        name: 'contacts',
-        component: () => import(/* webpackChunkName: "apps-contacts" */ '../views/apps/contacts.vue'),
-    },
-    {
-        path: '/apps/notes',
-        name: 'notes',
-        component: () => import(/* webpackChunkName: "apps-notes" */ '../views/apps/notes.vue'),
-    },
-    {
-        path: '/apps/scrumboard',
-        name: 'scrumboard',
-        component: () => import(/* webpackChunkName: "apps-scrumboard" */ '../views/apps/scrumboard.vue'),
-    },
-    {
-        path: '/apps/calendar',
-        name: 'calendar',
-        component: () => import(/* webpackChunkName: "apps-calendar" */ '../views/apps/calendar.vue'),
-    },
-    {
-        path: '/apps/invoice/list',
-        name: 'invoice-list',
-        component: () => import(/* webpackChunkName: "apps-invoice-list" */ '../views/apps/invoice/list.vue'),
-    },
-    {
-        path: '/apps/invoice/preview',
-        name: 'invoice-preview',
-        component: () => import(/* webpackChunkName: "apps-invoice-preview" */ '../views/apps/invoice/preview.vue'),
-    },
-    {
-        path: '/apps/invoice/add',
-        name: 'invoice-add',
-        component: () => import(/* webpackChunkName: "apps-invoice-add" */ '../views/apps/invoice/add.vue'),
-    },
-    {
-        path: '/apps/invoice/edit',
-        name: 'invoice-edit',
-        component: () => import(/* webpackChunkName: "apps-invoice-edit" */ '../views/apps/invoice/edit.vue'),
-    },
-
-    //tables
-    {
-        path: '/tables/basic',
-        name: 'table-basic',
-        component: () => import(/* webpackChunkName: "tables-basic" */ '../views/tables/basic.vue'),
-    },
-    {
-        path: '/tables/striped',
-        name: 'striped',
-        component: () => import(/* webpackChunkName: "tables-striped" */ '../views/tables/striped.vue'),
-    },
-    {
-        path: '/tables/order-sorting',
-        name: 'order-sorting',
-        component: () => import(/* webpackChunkName: "tables-order-sorting" */ '../views/tables/order_sorting.vue'),
-    },
-    {
-        path: '/tables/multi-column',
-        name: 'multi-column',
-        component: () => import(/* webpackChunkName: "tables-multi-column" */ '../views/tables/multi_column.vue'),
-    },
-    {
-        path: '/tables/multiple-tables',
-        name: 'multiple-tables',
-        component: () => import(/* webpackChunkName: "tables-multiple-tables" */ '../views/tables/multiple_tables.vue'),
-    },
-    {
-        path: '/tables/alt-pagination',
-        name: 'alt-pagination',
-        component: () => import(/* webpackChunkName: "tables-alt-pagination" */ '../views/tables/alt_pagination.vue'),
-    },
-    {
-        path: '/tables/custom',
-        name: 'custom',
-        component: () => import(/* webpackChunkName: "tables-custom" */ '../views/tables/custom.vue'),
-    },
-    {
-        path: '/tables/range-search',
-        name: 'range-search',
-        component: () => import(/* webpackChunkName: "tables-range-search" */ '../views/tables/range_search.vue'),
-    },
-    {
-        path: '/tables/export',
-        name: 'export',
-        component: () => import(/* webpackChunkName: "tables-export" */ '../views/tables/export.vue'),
-    },
-    {
-        path: '/tables/live-dom-ordering',
-        name: 'live-dom-ordering',
-        component: () => import(/* webpackChunkName: "tables-live-dom-ordering" */ '../views/tables/live_dom_ordering.vue'),
-    },
-    {
-        path: '/tables/miscellaneous',
-        name: 'miscellaneous',
-        component: () => import(/* webpackChunkName: "tables-miscellaneous" */ '../views/tables/miscellaneous.vue'),
     },
 ];
 
 const router = new createRouter({
-    // mode: 'history',
     history: createWebHistory(),
     linkExactActiveClass: 'active',
     routes,
@@ -668,13 +429,19 @@ const router = new createRouter({
 
 router.beforeEach((to, from, next) => {
     if (to.meta && to.meta.layout && to.meta.layout == 'auth') {
-        store.commit('setLayout', 'auth');
+        useAppStore(pinia).setLayout('auth');
     } else {
-        store.commit('setLayout', 'app');
+        useAppStore(pinia).setLayout('app');
     }
     const authRequired = to.matched.some((route) => route.meta.authRequired);
     if (!authRequired) return next();
 
+    // Client-side check only: a UX shortcut to avoid an unnecessary round
+    // trip when we already know there's no session. It is not a security
+    // boundary — every actual permission/authorization check happens
+    // server-side (see SEC-3/SEC-8), and this flag holds no session
+    // secret, just a login/display marker, since the real session lives
+    // in an httpOnly cookie.
     if (localStorage.getItem('user')) {
         next();
     } else {

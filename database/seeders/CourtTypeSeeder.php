@@ -2,27 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\CourtType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Catalog\SystemCatalog;
 use Illuminate\Database\Seeder;
 
+/**
+ * TEN-11: courts, court types and hearing types are platform-owned system rows
+ * defined in App\Catalog\SystemCatalog. Kept as a seeder so existing seeding
+ * entry points still work; it only runs the (idempotent) catalog sync.
+ */
 class CourtTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        //
-        // create the various court types
-        CourtType::create(['name' => 'Supreme Court']);
-        CourtType::create(['name' => 'Court of Appeal']);
-        CourtType::create(['name' => 'High Court']);
-        CourtType::create(['name' => 'Magistrate Court']);
-        CourtType::create(['name' => 'Family Court']);
-        CourtType::create(['name' => 'Small Claims Court']);
-        CourtType::create(['name' => 'Juvenile Court']);
+        SystemCatalog::sync();
     }
 }

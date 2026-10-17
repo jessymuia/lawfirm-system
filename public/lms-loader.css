@@ -1,0 +1,23 @@
+/* The system-wide preloader, as plain CSS: used by the HTML shell before Vue loads and by the operator console. */
+.lms-loader{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,.82),color-mix(in srgb,var(--lms-c,#0e6b50) 9%,white));backdrop-filter:blur(6px) saturate(1.1);-webkit-backdrop-filter:blur(6px) saturate(1.1);font-family:'Public Sans',system-ui,sans-serif}
+.lms-loader.block{pointer-events:all;cursor:progress}
+.lms-loader.boot{background:radial-gradient(ellipse at 50% 35%,var(--lms-c,#0e6b50) 0%,color-mix(in srgb,var(--lms-c,#0e6b50) 48%,black) 55%,color-mix(in srgb,var(--lms-c,#0e6b50) 28%,black) 100%);backdrop-filter:none;color:#fff}
+.lms-loader[hidden]{display:none}
+.lms-loader-card{display:flex;flex-direction:column;align-items:center;gap:14px;color:#16211d}
+.lms-loader.boot .lms-loader-card{color:#fff}
+.lms-orbit{position:relative;width:92px;height:92px;display:grid;place-items:center}
+.lms-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,color-mix(in srgb,var(--lms-c,#0e6b50) 0%,transparent) 0deg,var(--lms-c,#0e6b50) 200deg,#c9a24b 330deg,rgba(201,162,75,0) 360deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:lms-spin 1.15s linear infinite}
+.lms-loader.boot .lms-ring{background:conic-gradient(from 0deg,rgba(255,255,255,0) 0deg,color-mix(in srgb,var(--lms-c,#0e6b50) 55%,white) 200deg,#e6c571 330deg,rgba(230,197,113,0) 360deg)}
+.lms-tile{width:56px;height:56px;border-radius:17px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,color-mix(in srgb,var(--lms-c,#0e6b50) 85%,white),color-mix(in srgb,var(--lms-c,#0e6b50) 78%,black));box-shadow:0 10px 26px color-mix(in srgb,var(--lms-c,#0e6b50) 38%,transparent),inset 0 1px 0 rgba(255,255,255,.25);animation:lms-pulse 1.8s ease-in-out infinite}
+.lms-tile svg{width:30px;height:30px}
+.lms-loader.boot .lms-tile{background:rgba(255,255,255,.12);box-shadow:0 10px 30px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3)}
+.lms-name{font-family:'Source Serif 4',Georgia,serif;font-size:1.55rem;font-weight:600;letter-spacing:-.01em}
+.lms-label{font-size:.86rem;font-weight:600;letter-spacing:.02em;opacity:.75}
+.lms-shimmer{width:150px;height:3px;border-radius:3px;background:color-mix(in srgb,var(--lms-c,#0e6b50) 15%,transparent);overflow:hidden}
+.lms-shimmer span{display:block;width:45%;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--lms-c,#0e6b50),#c9a24b);animation:lms-slide 1.05s ease-in-out infinite}
+.lms-loader.boot .lms-shimmer{background:rgba(255,255,255,.16)}
+.lms-loader.boot .lms-shimmer span{background:linear-gradient(90deg,color-mix(in srgb,var(--lms-c,#0e6b50) 55%,white),#e6c571)}
+@keyframes lms-spin{to{transform:rotate(360deg)}}
+@keyframes lms-pulse{0%,100%{transform:scale(1)}50%{transform:scale(.93)}}
+@keyframes lms-slide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+@media (prefers-reduced-motion:reduce){.lms-ring,.lms-tile,.lms-shimmer span{animation-duration:3s}}

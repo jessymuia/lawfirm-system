@@ -2,37 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Catalog\SystemCatalog;
 use Illuminate\Database\Seeder;
 
+/**
+ * TEN-11: courts, court types and hearing types are platform-owned system rows
+ * defined in App\Catalog\SystemCatalog. Kept as a seeder so existing seeding
+ * entry points still work; it only runs the (idempotent) catalog sync.
+ */
 class HearingTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        //
-        // create init hearing types
-        $hearingTypes = [
-            "Plea Taking",
-            "Pretrial Conference",
-            "Hearing of Substantive applications",
-            "Case Management conference",
-            "Trial",
-            "Sentence Hearing",
-            "Appeal hearing",
-            "Interlocutory Application",
-            "Judgment delivery",
-            "Evidence hearing",
-        ];
-
-        foreach($hearingTypes as $hearingType){
-            \App\Models\HearingType::create([
-                'name' => $hearingType
-            ]);
-        }
+        SystemCatalog::sync();
     }
 }
