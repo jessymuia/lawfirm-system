@@ -2,10 +2,18 @@
 
 namespace App\Tenancy;
 
+use App\Catalog\SystemCatalog;
+use App\Jobs\BackfillCaseTypes;
+use App\Jobs\BackfillDocumentText;
+use App\Jobs\BackfillInvoiceFx;
+use App\Jobs\BackfillMatterParties;
+use App\Jobs\BackfillPublicIds;
+use App\Support\RoleCatalog;
 use App\Tenancy\Models\Tenant;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 /**
@@ -16,9 +24,7 @@ use Throwable;
  */
 class TenantMigrator
 {
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     /** Outcome of the last migrate() call: ok | failed | busy (another run holds this firm's lock; nothing was changed). */
     public ?string $lastResult = null;
@@ -68,21 +74,21 @@ class TenantMigrator
             }
 
             // Permissions added by a release must reach this firm's admin role, exactly as app:upgrade does for a single install.
-            if (\Illuminate\Support\Facades\Schema::hasTable('permissions') && \Illuminate\Support\Facades\Schema::hasTable('roles')) {
-                \App\Support\RoleCatalog::sync();
+            if (Schema::hasTable('permissions') && Schema::hasTable('roles')) {
+                RoleCatalog::sync();
             }
             // TEN-11: platform-owned courts / court types / hearing types are re-synced on every upgrade.
-            \App\Catalog\SystemCatalog::sync();
+            SystemCatalog::sync();
             // DATA-9: give pre-existing records their public id; queued, so a big firm never holds up the fleet migration.
             // Only for active firms: jobs refuse inactive ones (TEN-3), a provisioning firm has nothing to fill, and any
             // row still missing an id gets one on first use (HasPublicId::publicId()). Never fails the migration.
             if ($tenant->isActive()) {
                 try {
-                    \App\Jobs\BackfillPublicIds::dispatch();
-                    \App\Jobs\BackfillMatterParties::dispatch();   // FUN-9: past opposing parties into the conflicts register
-                    \App\Jobs\BackfillDocumentText::dispatch();     // FUN-8: make earlier documents searchable
-                    \App\Jobs\BackfillCaseTypes::dispatch();        // DATA-12: matters' free-text types into the case_types list
-                    \App\Jobs\BackfillInvoiceFx::dispatch();       // DATA-14: issued invoices in the base currency get rate 1
+                    BackfillPublicIds::dispatch();
+                    BackfillMatterParties::dispatch();   // FUN-9: past opposing parties into the conflicts register
+                    BackfillDocumentText::dispatch();     // FUN-8: make earlier documents searchable
+                    BackfillCaseTypes::dispatch();        // DATA-12: matters' free-text types into the case_types list
+                    BackfillInvoiceFx::dispatch();       // DATA-14: issued invoices in the base currency get rate 1
                 } catch (Throwable $e) {
                     report($e);
                 }

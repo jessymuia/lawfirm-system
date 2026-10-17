@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\PlatformConsoleController;
 use App\Models\Client;
+use App\Models\User;
 use App\Tenancy\CellRegistry;
 use App\Tenancy\Models\Cell;
 use App\Tenancy\Models\Tenant;
@@ -13,10 +15,11 @@ use App\Tenancy\TenantRelocator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-4 cells and placement, TEN-15 region pinning, TEN-16 relocation between cells. Real SQLite databases. */
-class CellsTest extends TestCase implements \Tests\OwnsTenancy
+class CellsTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -201,7 +204,7 @@ class CellsTest extends TestCase implements \Tests\OwnsTenancy
         $this->cell('a');   // keeps the firm's database in this test's temp directory, not database/tenants/
         $tenant = $this->provision('busy', ['domain' => 'busy.app.test']);
         $tenant->update(['read_only_reason' => 'This firm is being moved to a new server.']);
-        $user = app(TenantManager::class)->runIn($tenant, fn () => \App\Models\User::first());
+        $user = app(TenantManager::class)->runIn($tenant, fn () => User::first());
 
         $this->actingAsOnHost($user, 'busy.app.test');
         $this->postJson('http://busy.app.test/api/v1/clients', ['name' => 'X'])->assertStatus(503)->assertJsonPath('code', 'maintenance_read_only')->assertHeader('Retry-After');
@@ -213,7 +216,7 @@ class CellsTest extends TestCase implements \Tests\OwnsTenancy
         $this->cell('a', ['capacity' => 4, 'region' => 'ke']);
         $this->provision('x', ['cell' => 'a']);
 
-        $rows = collect(app(\App\Http\Controllers\PlatformConsoleController::class)->cells(app(CellRegistry::class))->getData(true)['data']);
+        $rows = collect(app(PlatformConsoleController::class)->cells(app(CellRegistry::class))->getData(true)['data']);
 
         $this->assertSame(['name' => 'a', 'region' => 'ke', 'host' => null, 'capacity' => 4, 'accepting' => true, 'firms' => 1, 'utilisation' => 0.25, 'files_disk' => null, 'queue' => null], $rows->firstWhere('name', 'a'));
     }

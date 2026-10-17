@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Cases;
 use App\Models\Client;
+use App\Models\Hearing;
 use App\Models\User;
 use App\Portability\Bundle;
 use App\Portability\Exporter;
@@ -12,11 +13,18 @@ use App\Portability\Importer;
 use App\Portability\PortabilityException;
 use App\Portability\RowHash;
 use App\Portability\TableCatalog;
+use App\Support\RoleCatalog;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\Config;
+use League\Flysystem\Filesystem;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use PHPUnit\Framework\Attributes\Group;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -97,7 +105,7 @@ class PortabilityTest extends TestCase
         $advocate = User::factory()->create(['name' => 'Wanjiru Advocate']);
         $client = Client::factory()->create();
         $case = Cases::factory()->create(['client_id' => $client->id]);
-        $hearing = \App\Models\Hearing::factory()->create(['case_id' => $case->id]);
+        $hearing = Hearing::factory()->create(['case_id' => $case->id]);
 
         $invoice = $this->row('invoices', ['case_id' => $case->id, 'client_id' => $client->id]);
         $this->row('invoice_items', ['invoice_id' => $invoice]);
@@ -108,7 +116,7 @@ class PortabilityTest extends TestCase
         $this->row('ethical_screens', ['user_id' => $advocate->id, 'case_id' => $case->id]);
 
         $files = [];
-        foreach (['a.pdf' => "%PDF-1.4 alpha \x00\xff binary", 'b.txt' => "plain text é ü", 'c.bin' => random_bytes(3000)] as $name => $bytes) {
+        foreach (['a.pdf' => "%PDF-1.4 alpha \x00\xff binary", 'b.txt' => 'plain text é ü', 'c.bin' => random_bytes(3000)] as $name => $bytes) {
             $path = "tenants/default/cases/docs/{$name}";
             Storage::disk('srcdocs')->put($path, $bytes);
             $id = $this->row('documents', ['case_id' => $case->id, 'filename' => $name, 'filepath' => $path, 'full_path' => $path, 'disk' => 'srcdocs',
@@ -121,7 +129,7 @@ class PortabilityTest extends TestCase
         // a platform support principal: must never travel
         $principal = User::factory()->create(['email' => 'support-1-abc@support.invalid']);
         DB::table('users')->where('id', $principal->id)->update(['platform_staff_id' => 77]);
-        $role = \Spatie\Permission\Models\Role::findOrCreate('support-read', 'web');
+        $role = Role::findOrCreate('support-read', 'web');
         $principal->assignRole($role);
 
         return compact('admin', 'advocate', 'client', 'case', 'invoice', 'files', 'principal');
@@ -155,7 +163,7 @@ class PortabilityTest extends TestCase
         Artisan::call('migrate', ['--database' => 'target', '--force' => true]);
         if ($seedInstall) {
             Artisan::call('law:setup-permissions');
-            \App\Support\RoleCatalog::sync();
+            RoleCatalog::sync();
             User::factory()->create(['email' => 'bootstrap-admin@example.test']);
         }
 
@@ -435,7 +443,6 @@ class PortabilityTest extends TestCase
         file_put_contents("{$dir}/manifest.sha256", hash('sha256', $json)."  manifest.json\n");
     }
 
-
     public function test_silent_corruption_during_load_is_caught_and_nothing_is_kept(): void
     {
         if (getenv('PORTABILITY_TARGET_MYSQL')) {
@@ -464,15 +471,16 @@ class PortabilityTest extends TestCase
         [$bundle] = $this->exportTo();
         $this->freshTarget();
         // a disk whose writes lose a byte
-        Storage::extend('lossy', fn ($app, $config) => new \Illuminate\Filesystem\FilesystemAdapter(
-            new \League\Flysystem\Filesystem(new class("{$this->work}/lossy") extends \League\Flysystem\Local\LocalFilesystemAdapter {
-                public function writeStream(string $path, $contents, \League\Flysystem\Config $config): void
+        Storage::extend('lossy', fn ($app, $config) => new FilesystemAdapter(
+            new Filesystem(new class("{$this->work}/lossy") extends LocalFilesystemAdapter
+            {
+                public function writeStream(string $path, $contents, Config $config): void
                 {
                     $data = stream_get_contents($contents);
                     $this->write($path, substr($data, 0, -1), $config);
                 }
             }),
-            new \League\Flysystem\Local\LocalFilesystemAdapter("{$this->work}/lossy"),
+            new LocalFilesystemAdapter("{$this->work}/lossy"),
             $config
         ));
         config(['filesystems.disks.lossy' => ['driver' => 'lossy', 'root' => "{$this->work}/lossy"]]);
@@ -526,7 +534,7 @@ class PortabilityTest extends TestCase
         $this->assertStringNotContainsString('support.invalid', $all);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('single-mode')]   // install to install; a firm's round trip is PortabilityTenantTest
+    #[Group('single-mode')] // install to install; a firm's round trip is PortabilityTenantTest
     public function test_zip_round_trip_through_the_commands(): void
     {
         $firm = $this->seedFirm();

@@ -20,7 +20,7 @@ class WarehouseExporter
     /**
      * Run inside the firm (its database active).
      *
-     * @param array<string, mixed> $firm the dim_firm row, from the platform registry
+     * @param  array<string, mixed>  $firm  the dim_firm row, from the platform registry
      * @return array<string, int> rows per table
      */
     public function exportFirm(string $date, string $tenantKey, array $firm): array

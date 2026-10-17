@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EthicalScreen\LiftRequest;
+use App\Http\Requests\EthicalScreen\StoreRequest;
 use App\Models\EthicalScreen;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -77,7 +79,7 @@ class EthicalScreenController extends Controller
             : $this->response(true, 'success', $rows, 200);
     }
 
-    public function store(\App\Http\Requests\EthicalScreen\StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $data = $request->validated();
         if ((int) $data['user_id'] === Auth::id()) {
@@ -97,7 +99,7 @@ class EthicalScreenController extends Controller
         return $this->response(true, 'success', $screen, 201);
     }
 
-    public function lift(\App\Http\Requests\EthicalScreen\LiftRequest $request, int $id): JsonResponse
+    public function lift(LiftRequest $request, int $id): JsonResponse
     {
         $data = $request->validated();
         $screen = EthicalScreen::active()->findOrFail($id);

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PaymentLink\MpesaRequest;
+use App\Http\Requests\PaymentLink\SendRequest;
 use App\Jobs\SendSmsJob;
 use App\Models\Invoice;
 use App\Payments\OnlinePayments;
 use App\Payments\PaymentGatewayException;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +18,7 @@ class PaymentLinkController extends Controller
 {
     public function __construct(private OnlinePayments $pay) {}
 
-    public function store(\App\Http\Requests\PaymentLink\SendRequest $r, int $invoice): JsonResponse
+    public function store(SendRequest $r, int $invoice): JsonResponse
     {
         $inv = Invoice::with('client')->findOrFail($invoice);   // matter access applies
         if ($inv->workflow_status !== 'submitted') {
@@ -38,7 +40,7 @@ class PaymentLinkController extends Controller
      * Staff-initiated M-Pesa: push an STK prompt to the client's phone for what is outstanding. Uses a fresh payment link
      * internally, so the result lands through the same callback / attempt record as a client paying from a texted link.
      */
-    public function mpesa(\App\Http\Requests\PaymentLink\MpesaRequest $r, int $invoice): JsonResponse
+    public function mpesa(MpesaRequest $r, int $invoice): JsonResponse
     {
         $data = $r->validated();
         $inv = Invoice::findOrFail($invoice);   // matter access applies

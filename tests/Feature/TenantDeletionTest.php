@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Cases;
 use App\Models\Client;
+use App\Models\User;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
 use App\Portability\Bundle;
+use App\Tenancy\IdentityService;
 use App\Tenancy\Models\Identity;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\PurgeStep;
@@ -17,10 +20,11 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-9: deletion is one sequence: final export -> retention window -> database, files, keys, warehouse, sign-in gone. */
-class TenantDeletionTest extends TestCase implements \Tests\OwnsTenancy
+class TenantDeletionTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -59,7 +63,7 @@ class TenantDeletionTest extends TestCase implements \Tests\OwnsTenancy
         return app(TenantLifecycle::class);
     }
 
-    private function firm(string $slug, string $admin = null): Tenant
+    private function firm(string $slug, ?string $admin = null): Tenant
     {
         $t = $this->lifecycle()->provision(['slug' => $slug, 'name' => ucfirst($slug), 'admin_email' => $admin ?? "admin@{$slug}.test",
             'domain' => "{$slug}.app.test", 'database' => "{$this->dir}/{$slug}.sqlite"])['tenant'];
@@ -67,7 +71,7 @@ class TenantDeletionTest extends TestCase implements \Tests\OwnsTenancy
             $client = Client::factory()->create(['name' => "Client of {$slug}"]);
             $path = app(TenantContext::class)->storagePrefix("cases/docs/{$slug}.pdf");
             Storage::disk('local')->put($path, "document of {$slug}");
-            DB::table('documents')->insert(['case_id' => \App\Models\Cases::factory()->create(['client_id' => $client->id])->id, 'version' => 1, 'is_current' => 1,
+            DB::table('documents')->insert(['case_id' => Cases::factory()->create(['client_id' => $client->id])->id, 'version' => 1, 'is_current' => 1,
                 'title' => 'd', 'filename' => "{$slug}.pdf", 'filepath' => $path, 'full_path' => $path, 'disk' => 'local', 'mimetype' => 'application/pdf',
                 'filesize' => 20, 'checksum' => hash('sha256', "document of {$slug}"), 'extension' => 'pdf', 'created_at' => now(), 'updated_at' => now()]);
         });
@@ -99,9 +103,9 @@ class TenantDeletionTest extends TestCase implements \Tests\OwnsTenancy
     {
         $t = $this->firm('acme', 'shared@people.test');
         $this->firm('other', 'shared@people.test');            // the same person also works at another firm
-        app(TenantManager::class)->runIn($t, fn () => \App\Models\User::factory()->create(['email' => 'only-acme@people.test']));
+        app(TenantManager::class)->runIn($t, fn () => User::factory()->create(['email' => 'only-acme@people.test']));
         $only = Identity::create(['email' => 'only-acme@people.test', 'password' => Hash::make('x')]);
-        app(\App\Tenancy\IdentityService::class)->link($only, $t, app(TenantManager::class)->runIn($t, fn () => \App\Models\User::where('email', 'only-acme@people.test')->first()));
+        app(IdentityService::class)->link($only, $t, app(TenantManager::class)->runIn($t, fn () => User::where('email', 'only-acme@people.test')->first()));
         $this->lifecycle()->offboard($t, 0);
         $export = $t->fresh()->final_export_path;
 

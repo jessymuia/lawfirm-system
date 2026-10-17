@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Actions\Hearings\ScheduleHearing;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Hearing\DestroyManyRequest;
+use App\Http\Requests\Hearing\StoreRequest;
+use App\Http\Requests\Hearing\UpdateRequest;
+use App\Http\Resources\V1\HearingResource;
 use App\Models\Hearing;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -53,7 +57,7 @@ class HearingController extends Controller
         $hearings = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\HearingResource::make($row)->resolve(),
+            fn ($row) => HearingResource::make($row)->resolve(),
             25,
             ['hearing_date'],
             ['notes', 'outcome']
@@ -67,7 +71,7 @@ class HearingController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Hearing\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_HEARINGS)) {
             abort(403);
@@ -75,7 +79,7 @@ class HearingController extends Controller
 
         $hearing = $this->hearings->schedule($this->hearingData($request) + $request->only(['start_time', 'duration_minutes', 'courtroom', 'judicial_officer', 'efiling_reference']), Auth::user());   // FUN-16
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\HearingResource::make($hearing->load(['case', 'court', 'hearingTypeName']))->resolve(), 201);
+        return $this->response(true, 'success', HearingResource::make($hearing->load(['case', 'court', 'hearingTypeName']))->resolve(), 201);
     }
 
     /**
@@ -83,7 +87,7 @@ class HearingController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\Hearing\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_HEARINGS)) {
             abort(403);
@@ -92,13 +96,13 @@ class HearingController extends Controller
         $hearing = $this->hearings->change(Hearing::findOrFail($id), $this->hearingData($request)
             + $request->only(array_values(array_filter(['start_time', 'duration_minutes', 'courtroom', 'judicial_officer', 'efiling_reference'], fn ($f) => $request->exists($f)))), Auth::user());   // FUN-16: only when sent
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\HearingResource::make($hearing->fresh(['case', 'court', 'hearingTypeName']))->resolve(), 200);
+        return $this->response(true, 'success', HearingResource::make($hearing->fresh(['case', 'court', 'hearingTypeName']))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
@@ -115,7 +119,7 @@ class HearingController extends Controller
      * UI-20: bulk delete — see CasesController::destroyMany for the
      * general pattern this mirrors.
      */
-    public function destroyMany(\App\Http\Requests\Hearing\DestroyManyRequest $request)
+    public function destroyMany(DestroyManyRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_HEARINGS)) {
             abort(403);

@@ -2,8 +2,10 @@
 
 namespace App\Sso;
 
-use App\Tenancy\Keys\FirmCrypt;
+use App\Entitlements\Entitlements;
 use App\Models\User;
+use App\Sso\Saml\SamlValidator;
+use App\Tenancy\Keys\FirmCrypt;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -27,7 +29,7 @@ class SsoService
     /** SSO is a plan feature (`sso`); a downgrade switches it off without deleting the configuration. */
     public function available(): bool
     {
-        return app(\App\Entitlements\Entitlements::class)->has('sso') && $this->provider() !== null;
+        return app(Entitlements::class)->has('sso') && $this->provider() !== null;
     }
 
     /** @return string the URL to send the browser to */
@@ -161,11 +163,11 @@ class SsoService
         if ($xml === false) {
             throw new SsoException('Response is not base64.');
         }
-        $certs = \App\Sso\Saml\SamlValidator::parseCertificates((string) $p->saml_certificate);
+        $certs = SamlValidator::parseCertificates((string) $p->saml_certificate);
         if (! $certs) {
             throw new SsoException('No usable IdP certificate is configured.');
         }
-        $result = (new \App\Sso\Saml\SamlValidator())->validate($xml, [
+        $result = (new SamlValidator)->validate($xml, [
             'idp_entity_id' => $p->issuer, 'certificates' => $certs, 'sp_entity_id' => self::samlEntityId($host),
             'acs_url' => self::samlAcsUrl($host), 'request_id' => $row->nonce, 'leeway' => (int) config('sso.leeway'),
         ]);
@@ -234,7 +236,7 @@ class SsoService
         if ($entity === '') {
             throw new SsoException('The identity provider entity ID is required.');
         }
-        $certs = \App\Sso\Saml\SamlValidator::parseCertificates((string) ($d['saml_certificate'] ?? ($existing->saml_certificate ?? '')));
+        $certs = SamlValidator::parseCertificates((string) ($d['saml_certificate'] ?? ($existing->saml_certificate ?? '')));
         if (! $certs) {
             throw new SsoException('Paste the identity provider signing certificate (PEM).');
         }

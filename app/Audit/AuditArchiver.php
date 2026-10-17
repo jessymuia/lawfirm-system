@@ -3,8 +3,10 @@
 namespace App\Audit;
 
 use App\Entitlements\Entitlements;
+use App\Tenancy\FirmStorage;
 use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -20,9 +22,7 @@ use RuntimeException;
  */
 class AuditArchiver
 {
-    public function __construct(private AuditPartitions $partitions, private Entitlements $entitlements)
-    {
-    }
+    public function __construct(private AuditPartitions $partitions, private Entitlements $entitlements) {}
 
     /** null = keep everything online. */
     public function onlineMonths(): ?int
@@ -69,7 +69,7 @@ class AuditArchiver
             return ['month' => $month, 'rows' => (int) $existing->rows, 'removed' => $removed, 'path' => $existing->path, 'how' => 'resumed'];
         }
 
-        $disk = (string) (config('audit_retention.disk') ?: \App\Tenancy\FirmStorage::disk());
+        $disk = (string) (config('audit_retention.disk') ?: FirmStorage::disk());
         $path = app(TenantContext::class)->storagePrefix("audit-archive/{$month}.jsonl.gz");
         $tmp = tempnam(sys_get_temp_dir(), 'audit-');
         $gz = gzopen($tmp, 'wb6');
@@ -160,7 +160,7 @@ class AuditArchiver
         return $restored;
     }
 
-    private function monthQuery(CarbonImmutable $start, CarbonImmutable $end): \Illuminate\Database\Query\Builder
+    private function monthQuery(CarbonImmutable $start, CarbonImmutable $end): Builder
     {
         return DB::table(AuditPartitions::TABLE)->where('created_at', '>=', $start)->where('created_at', '<', $end);
     }

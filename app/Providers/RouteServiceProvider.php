@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Tenancy\TenantContext;
+use App\Tenancy\TenantManager;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -84,7 +86,7 @@ class RouteServiceProvider extends ServiceProvider
 
             // ENG-25: and a ceiling for the whole firm, so one tenant cannot use up the cell (see config/api.php).
             if ($perFirm = self::firmRateLimit()) {
-                $limits[] = Limit::perMinute($perFirm)->by('firm:'.app(\App\Tenancy\TenantContext::class)->key())
+                $limits[] = Limit::perMinute($perFirm)->by('firm:'.app(TenantContext::class)->key())
                     ->response(fn (Request $r, array $headers) => response()->json([
                         'success' => false, 'code' => 'firm_rate_limited',
                         'message' => 'Too many requests from your firm right now. Please retry shortly.',
@@ -98,7 +100,7 @@ class RouteServiceProvider extends ServiceProvider
     /** ENG-25: requests per minute allowed for the current firm, or null for no firm-wide limit. */
     public static function firmRateLimit(): ?int
     {
-        $tenant = app(\App\Tenancy\TenantManager::class)->current();
+        $tenant = app(TenantManager::class)->current();
         if ($tenant === null) {
             return config('api.firm_rate_limit_single_tenant');   // one firm per installation
         }

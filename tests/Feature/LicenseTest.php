@@ -3,15 +3,22 @@
 namespace Tests\Feature;
 
 use App\Entitlements\Entitlements;
+use App\Entitlements\EntitlementSource;
+use App\Entitlements\TenantPlanSource;
 use App\Licensing\LicenseManager;
+use App\Licensing\LicenseStatus;
+use App\Licensing\LicenseVerifier;
+use App\Models\Client;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
 /** PLAT-2: signed, expiring, offline-verifiable license; expiry degrades to read-only, never destroys. */
-#[\PHPUnit\Framework\Attributes\Group('single-mode')]   // self-hosted installs only (TEN-17)
+#[Group('single-mode')] // self-hosted installs only (TEN-17)
 class LicenseTest extends TestCase
 {
     use CreatesTestUsers;
@@ -42,7 +49,7 @@ class LicenseTest extends TestCase
     protected function tearDown(): void
     {
         Carbon::setTestNow();
-        \Carbon\CarbonImmutable::setTestNow();
+        CarbonImmutable::setTestNow();
         parent::tearDown();
     }
 
@@ -56,7 +63,7 @@ class LicenseTest extends TestCase
     private function now(string $when): void
     {
         Carbon::setTestNow($when);
-        \Carbon\CarbonImmutable::setTestNow($when);
+        CarbonImmutable::setTestNow($when);
         $this->reset();
     }
 
@@ -73,7 +80,7 @@ class LicenseTest extends TestCase
         return file_get_contents($out);
     }
 
-    private function install(string $contents): \App\Licensing\LicenseStatus
+    private function install(string $contents): LicenseStatus
     {
         $s = app(LicenseManager::class)->install($contents);
         $this->reset();
@@ -159,7 +166,7 @@ class LicenseTest extends TestCase
         Artisan::call('license:keygen', ['--out' => $new]);
         config(['entitlements.license.public_keys' => [$this->publicKey, trim(file_get_contents("{$new}/license-public.key"))]]);
         // the verifier captures its keys when first built; rebuild it as a fresh process would
-        $this->app->forgetInstance(\App\Licensing\LicenseVerifier::class);
+        $this->app->forgetInstance(LicenseVerifier::class);
         $this->app->forgetInstance(LicenseManager::class);
         $this->now('2026-10-01 10:00:00');
 
@@ -227,12 +234,12 @@ class LicenseTest extends TestCase
         $this->now('2026-10-01 10:00:00');
         $this->install($this->issue(['--days' => 10, '--grace' => 0]));
         $user = $this->userWithPermissions(['create-clients', 'list-clients', 'delete-clients', 'export-firm-data', 'list-cases']);
-        $client = \App\Models\Client::factory()->create();
+        $client = Client::factory()->create();
         $this->now('2027-01-01 10:00:00');
 
         $this->actingAs($user)->postJson('/api/v1/clients', [])->assertStatus(403)->assertJson(['code' => 'license_expired']);
         $this->actingAs($user)->deleteJson("/api/v1/clients/{$client->id}")->assertStatus(403)->assertJson(['code' => 'license_expired']);
-        $this->assertNotNull(\App\Models\Client::find($client->id), 'nothing was deleted');
+        $this->assertNotNull(Client::find($client->id), 'nothing was deleted');
 
         $this->actingAs($user)->getJson('/api/v1/clients')->assertOk();
         $this->actingAs($user)->getJson('/api/v1/export/firm-data')->assertOk();
@@ -304,10 +311,10 @@ class LicenseTest extends TestCase
     {
         // SaaS entitlements come from the tenant plan (PLAT-1); a missing license must never make SaaS read-only.
         config(['tenancy.mode' => 'multi']);
-        $this->app->forgetInstance(\App\Entitlements\EntitlementSource::class);
+        $this->app->forgetInstance(EntitlementSource::class);
         $this->app->forgetInstance(Entitlements::class);
 
-        $this->assertInstanceOf(\App\Entitlements\TenantPlanSource::class, app(\App\Entitlements\EntitlementSource::class));
+        $this->assertInstanceOf(TenantPlanSource::class, app(EntitlementSource::class));
         $this->assertFalse(app(Entitlements::class)->set()->readOnly);
     }
 

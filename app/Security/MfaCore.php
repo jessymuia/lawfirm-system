@@ -6,6 +6,7 @@ use App\Tenancy\Keys\FirmCrypt;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 /**
@@ -132,16 +133,16 @@ class MfaCore
 
         // Per person, not per challenge: asking for a fresh challenge (needs the password) must not reset the guessing budget.
         $key = 'mfa-fail:'.$this->table.':'.$row->{$this->subject};
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, self::MAX_FAILURES)) {
+        if (RateLimiter::tooManyAttempts($key, self::MAX_FAILURES)) {
             return null;
         }
         $id = (int) $row->{$this->subject};
         if (! $this->verify($id, $input)) {
-            \Illuminate\Support\Facades\RateLimiter::hit($key, self::LOCK_SECONDS);
+            RateLimiter::hit($key, self::LOCK_SECONDS);
 
             return null;
         }
-        \Illuminate\Support\Facades\RateLimiter::clear($key);
+        RateLimiter::clear($key);
         $this->db()->table($this->challenges)->where('id', $row->id)->delete();   // single use
 
         return $id;
@@ -160,6 +161,7 @@ class MfaCore
             if ($left === null) {
                 return false;
             }
+
             // compare-and-set on the stored list, so one recovery code cannot be spent twice by parallel requests
             return $this->db()->table($this->table)->where($this->subject, $id)->where('recovery_codes', $row->recovery_codes)
                 ->update(['recovery_codes' => json_encode($left), 'updated_at' => now()]) === 1;

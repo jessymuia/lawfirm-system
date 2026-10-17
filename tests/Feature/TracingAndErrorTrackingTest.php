@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Entitlements\EntitlementException;
 use App\Observability\ErrorReporter;
 use App\Observability\Instrumentation;
 use App\Observability\Tracer;
+use App\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as SentRequest;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -86,7 +90,7 @@ class TracingAndErrorTrackingTest extends TestCase
         $spans = $this->spansSent();
         $root = collect($spans)->firstWhere('kind', 2);
         $this->assertSame('GET /api/v1/__trace/{id}', $root['name']);
-        $this->assertSame(app(\App\Tenancy\TenantContext::class)->key(), self::attr($root, 'tenant'));
+        $this->assertSame(app(TenantContext::class)->key(), self::attr($root, 'tenant'));
         $this->assertSame('req-12345678', self::attr($root, 'request_id'));
         $this->assertSame('200', self::attr($root, 'http.response.status_code'));
         $this->assertSame('/api/v1/__trace/{id}', self::attr($root, 'http.route'));
@@ -134,7 +138,7 @@ class TracingAndErrorTrackingTest extends TestCase
         $tracer = app(Tracer::class);
 
         $root = $tracer->begin('HTTP POST', 2);
-        \Illuminate\Support\Facades\Context::addHidden('traceparent', $tracer->traceparent());
+        Context::addHidden('traceparent', $tracer->traceparent());
         // inline (sync) job inside the request: a child span
         $tracer->startJob('App\\Jobs\\Inline');
         $tracer->endJob();
@@ -155,7 +159,7 @@ class TracingAndErrorTrackingTest extends TestCase
 
     public function test_an_unreachable_collector_never_breaks_the_request(): void
     {
-        Http::fake(['collector.test/*' => fn () => throw new \Illuminate\Http\Client\ConnectionException('down')]);
+        Http::fake(['collector.test/*' => fn () => throw new ConnectionException('down')]);
         $this->tracing();
 
         $this->getJson('/api/v1/__trace/1')->assertOk();
@@ -175,7 +179,7 @@ class TracingAndErrorTrackingTest extends TestCase
             [$header, $item, $event] = array_map(fn ($l) => json_decode($l, true), explode("\n", trim($r->body())));
             $this->assertSame($event['event_id'], $header['event_id']);
             $this->assertSame('event', $item['type']);
-            $tenant = app(\App\Tenancy\TenantContext::class)->key();
+            $tenant = app(TenantContext::class)->key();
             $this->assertSame($tenant, $event['tags']['tenant']);
             $this->assertSame('req-abcdefgh', $event['tags']['request_id']);
             $this->assertSame('/api/v1/__boom', $event['tags']['route']);
@@ -200,7 +204,7 @@ class TracingAndErrorTrackingTest extends TestCase
         $event = app(ErrorReporter::class)->event(new \LogicException('x'));
         $this->assertArrayNotHasKey('fingerprint', $event);
 
-        report(new \App\Entitlements\EntitlementException('plan', 'feature', 'x'));   // a dontReport type
+        report(new EntitlementException('plan', 'feature', 'x'));   // a dontReport type
         Http::assertNothingSent();
         report(new \LogicException('y'));
         Http::assertSent(fn (SentRequest $r) => $r->url() === 'http://errors.test:9000/api/7/envelope/');
@@ -212,7 +216,7 @@ class TracingAndErrorTrackingTest extends TestCase
             config(['observability.errors.dsn' => $dsn]);
             $this->assertFalse(app(ErrorReporter::class)->enabled(), $dsn);
         }
-        Http::fake(['errors.test/*' => fn () => throw new \Illuminate\Http\Client\ConnectionException('down')]);
+        Http::fake(['errors.test/*' => fn () => throw new ConnectionException('down')]);
         config(['observability.errors.dsn' => 'https://k@errors.test/1']);
         app(ErrorReporter::class)->report(new \RuntimeException('z'));
         $this->assertTrue(true, 'no exception escaped');

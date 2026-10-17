@@ -4,7 +4,11 @@ namespace Tests\Feature;
 
 use App\Console\Commands\StorageIamPolicy;
 use App\Models\Cases;
+use App\Portability\Bundle;
+use App\Portability\Importer;
 use App\Tenancy\TenantContext;
+use App\Tenancy\TenantLifecycle;
+use App\Tenancy\TenantManager;
 use Aws\CommandInterface;
 use Aws\MockHandler;
 use Aws\Result;
@@ -13,10 +17,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-12: firm files live under tenants/<firm>/, older files are moved there verified, and storage credentials are confined to it. */
-class StorageIsolationTest extends TestCase implements \Tests\OwnsTenancy
+class StorageIsolationTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -82,11 +87,11 @@ class StorageIsolationTest extends TestCase implements \Tests\OwnsTenancy
             'tenancy.tenant_connection_template' => 'sqlite', 'tenancy.storage_disks' => ['local'],
         ]);
         Artisan::call('migrate', ['--database' => 'control', '--path' => 'database/migrations/control', '--force' => true]);
-        $manager = app(\App\Tenancy\TenantManager::class);
+        $manager = app(TenantManager::class);
         $firms = [];
         $run = substr(uniqid(), -6);
         foreach (["alpha{$run}", "beta{$run}"] as $slug) {
-            $firms[$slug] = app(\App\Tenancy\TenantLifecycle::class)->provision(['slug' => $slug, 'name' => $slug, 'admin_email' => "a@{$slug}.test"])['tenant'];
+            $firms[$slug] = app(TenantLifecycle::class)->provision(['slug' => $slug, 'name' => $slug, 'admin_email' => "a@{$slug}.test"])['tenant'];
         }
         config(['tenancy.mode' => 'multi']);
 
@@ -264,8 +269,8 @@ class StorageIsolationTest extends TestCase implements \Tests\OwnsTenancy
     public function test_imported_files_always_land_under_the_importing_firm(): void
     {
         app(TenantContext::class)->activate('beta');
-        $importer = app(\App\Portability\Importer::class);
-        $bundle = (new \ReflectionClass(\App\Portability\Bundle::class))->newInstanceWithoutConstructor();
+        $importer = app(Importer::class);
+        $bundle = (new \ReflectionClass(Bundle::class))->newInstanceWithoutConstructor();
         $target = fn (string $p) => (new \ReflectionMethod($importer, 'targetPath'))->invoke($importer, $bundle, $p);
 
         $this->assertSame('tenants/beta/cases/docs/a.pdf', $target('tenants/alpha/cases/docs/a.pdf'));

@@ -25,8 +25,7 @@ class Entitlements
         private EntitlementSource $source,
         private TenantContext $tenant,
         private UsageMetrics $usage,
-    ) {
-    }
+    ) {}
 
     public function set(): EntitlementSet
     {

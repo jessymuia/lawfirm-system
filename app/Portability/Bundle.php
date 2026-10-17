@@ -7,9 +7,7 @@ class Bundle
 {
     public array $manifest = [];
 
-    private function __construct(public readonly string $dir, private bool $temporary = false)
-    {
-    }
+    private function __construct(public readonly string $dir, private bool $temporary = false) {}
 
     public static function open(string $path): self
     {

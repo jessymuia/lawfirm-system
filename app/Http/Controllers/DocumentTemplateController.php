@@ -13,6 +13,7 @@ use App\Security\SecurityPolicy;
 use App\Tenancy\FirmStorage;
 use App\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -114,7 +115,7 @@ class DocumentTemplateController extends Controller
     }
 
     /** @return array{0: string, 1: string, 2: list<string>} */
-    private function keep(\Illuminate\Http\UploadedFile $file): array
+    private function keep(UploadedFile $file): array
     {
         try {
             $fields = DocxTemplate::fields($file->getRealPath());

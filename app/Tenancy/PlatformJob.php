@@ -8,6 +8,4 @@ namespace App\Tenancy;
  * fail-closed, and the job activates whichever firm it names itself (allowing inactive firms, which only platform
  * work may touch). Every other job must carry its firm (TEN-3); this marker is the one, explicit exception.
  */
-interface PlatformJob
-{
-}
+interface PlatformJob {}

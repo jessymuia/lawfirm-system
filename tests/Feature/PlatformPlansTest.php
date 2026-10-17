@@ -12,10 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-4: the operator-managed plan catalogue: list, add, edit, archive, delete, and that billing really uses it. */
-class PlatformPlansTest extends TestCase implements \Tests\OwnsTenancy
+class PlatformPlansTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 

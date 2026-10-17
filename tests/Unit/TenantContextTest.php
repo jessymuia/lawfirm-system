@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Tenancy\TenantContext;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
@@ -37,7 +38,7 @@ class TenantContextTest extends TestCase
         $ctx->activate('firm-a');
         $this->assertSame('A-value', Cache::get('shared-name'));
 
-        (new \Illuminate\Filesystem\Filesystem)->deleteDirectory($path);
+        (new Filesystem)->deleteDirectory($path);
     }
 
     public function test_storage_prefix_carries_tenant_key(): void

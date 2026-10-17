@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Catalog\HandlesCatalogRows;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Court\StoreRequest;
+use App\Http\Requests\Court\UpdateRequest;
+use App\Http\Resources\V1\CourtResource;
 use App\Models\Court;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -29,7 +32,7 @@ class CourtController extends Controller
         $courts = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\CourtResource::make($row)->resolve(),
+            fn ($row) => CourtResource::make($row)->resolve(),
             25,
             sortableColumns: ['name'],
             searchableColumns: ['name', 'alias']
@@ -43,7 +46,7 @@ class CourtController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Court\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_COURTS)) {
             abort(403);
@@ -54,7 +57,7 @@ class CourtController extends Controller
             'type' => $request->type,
         ]);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\CourtResource::make($court->load('courtType'))->resolve(), 201);
+        return $this->response(true, 'success', CourtResource::make($court->load('courtType'))->resolve(), 201);
     }
 
     /**
@@ -62,7 +65,7 @@ class CourtController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\Court\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_COURTS)) {
             abort(403);
@@ -71,7 +74,7 @@ class CourtController extends Controller
         $court = Court::findOrFail($id);
         if ($court->is_system) {
             // TEN-11: a firm can only give a system row a local name.
-            return $this->response(true, 'success', \App\Http\Resources\V1\CourtResource::make($this->updateCatalogAlias($request, $court)->load('courtType'))->resolve(), 200);
+            return $this->response(true, 'success', CourtResource::make($this->updateCatalogAlias($request, $court)->load('courtType'))->resolve(), 200);
         }
 
         $court->name = $request->name;
@@ -79,13 +82,13 @@ class CourtController extends Controller
         $court->updated_by = auth()->user()->id;
         $court->save();
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\CourtResource::make($court->fresh('courtType'))->resolve(), 200);
+        return $this->response(true, 'success', CourtResource::make($court->fresh('courtType'))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

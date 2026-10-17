@@ -23,9 +23,7 @@ class RequestContext
 {
     public const HEADER = 'X-Request-Id';
 
-    public function __construct(private TenantContext $tenant)
-    {
-    }
+    public function __construct(private TenantContext $tenant) {}
 
     public function handle(Request $request, Closure $next): Response
     {

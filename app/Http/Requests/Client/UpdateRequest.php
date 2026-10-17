@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Client;
 
 use App\Http\Requests\Concerns\RouteRecord;
+use App\Models\Client;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for ClientController::update(). Authorization is declared on the route (authz:*), not here. */
@@ -10,7 +11,7 @@ class UpdateRequest extends FormRequest
 {
     use RouteRecord;
 
-    protected string $recordModel = \App\Models\Client::class;
+    protected string $recordModel = Client::class;
 
     protected string $recordParameter = 'client';
 

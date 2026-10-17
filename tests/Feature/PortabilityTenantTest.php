@@ -22,11 +22,13 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-9 in SaaS mode: eject a firm, import into another (relocation / restore / import-from-self-host), platform eject. */
-class PortabilityTenantTest extends TestCase implements \Tests\OwnsTenancy
+class PortabilityTenantTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -92,7 +94,7 @@ class PortabilityTenantTest extends TestCase implements \Tests\OwnsTenancy
     private function docDefaults(): array
     {
         $extra = [];
-        foreach (\Illuminate\Support\Facades\Schema::getColumns('documents') as $c) {
+        foreach (Schema::getColumns('documents') as $c) {
             if (! $c['nullable'] && $c['default'] === null && ! $c['auto_increment'] && ! in_array($c['name'], ['case_id', 'version', 'is_current', 'title', 'filename', 'filepath', 'full_path', 'disk', 'mimetype', 'filesize', 'checksum', 'extension', 'created_at', 'updated_at'], true)) {
                 $extra[$c['name']] = 1;
             }

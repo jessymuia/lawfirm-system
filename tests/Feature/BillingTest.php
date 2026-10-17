@@ -10,16 +10,18 @@ use App\Mail\DunningNotice;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable as C;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-4: subscriptions, proration, metered overage, payments, dunning, signed webhooks. Money is integer minor units. */
-class BillingTest extends TestCase implements \Tests\OwnsTenancy
+class BillingTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -51,7 +53,7 @@ class BillingTest extends TestCase implements \Tests\OwnsTenancy
     protected function tearDown(): void
     {
         DB::setDefaultConnection($this->originalDefault);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         parent::tearDown();
     }
 
@@ -466,7 +468,7 @@ class BillingTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertTrue(Webhooks::stripeSignatureValid($b, $sig($now - 300), 'sec', 300, $now));
         $this->assertFalse(Webhooks::stripeSignatureValid($b, '', 'sec', 300, $now));
         $this->assertFalse(Webhooks::stripeSignatureValid($b, 'v1=abc', 'sec', 300, $now));                      // no timestamp
-        $this->assertFalse(Webhooks::stripeSignatureValid($b, "t=abc,v1=x", 'sec', 300, $now));
+        $this->assertFalse(Webhooks::stripeSignatureValid($b, 't=abc,v1=x', 'sec', 300, $now));
         $this->assertFalse(Webhooks::stripeSignatureValid($b, $sig($now, ''), '', 300, $now));                  // no secret configured: reject all
     }
 

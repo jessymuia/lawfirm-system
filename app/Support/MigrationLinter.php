@@ -62,6 +62,7 @@ class MigrationLinter
 
     /**
      * @param-out array<int, array{rule:string, line:int, message:string, code:string}> $problems
+     *
      * @return array<string,true>
      */
     private function allowances(string $source, ?array &$problems): array

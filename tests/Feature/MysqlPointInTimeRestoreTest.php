@@ -12,6 +12,7 @@ use App\Tenancy\TenantManager;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /**
@@ -20,7 +21,7 @@ use Tests\TestCase;
  * database is MySQL/MariaDB with the binary log on and mysqldump/mysqlbinlog installed (the backend-mysql CI job);
  * skipped elsewhere.
  */
-class MysqlPointInTimeRestoreTest extends TestCase implements \Tests\OwnsTenancy
+class MysqlPointInTimeRestoreTest extends TestCase implements OwnsTenancy
 {
     private string $dir;
 

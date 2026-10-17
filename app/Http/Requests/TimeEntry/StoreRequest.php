@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\TimeEntry;
 
-use App\Models\TimeEntry;
+use App\EBilling\Utbms;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for TimeEntryController::store(). Authorization is declared on the route (authz:*), not here. */
@@ -17,8 +17,8 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'utbms_task_code' => 'nullable|string|in:'.implode(',', array_keys(\App\EBilling\Utbms::TASKS)),   // FUN-13
-            'utbms_activity_code' => 'nullable|string|in:'.implode(',', array_keys(\App\EBilling\Utbms::ACTIVITIES)),   // FUN-13
+            'utbms_task_code' => 'nullable|string|in:'.implode(',', array_keys(Utbms::TASKS)),   // FUN-13
+            'utbms_activity_code' => 'nullable|string|in:'.implode(',', array_keys(Utbms::ACTIVITIES)),   // FUN-13
             'case_id' => 'required|integer|exists:cases,id',
             'description' => 'required|string|max:255',
             'date' => 'required|date_format:d/m/Y',

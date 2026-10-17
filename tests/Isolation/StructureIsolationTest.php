@@ -2,7 +2,9 @@
 
 namespace Tests\Isolation;
 
+use App\Entitlements\Entitlements;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -41,7 +43,7 @@ class StructureIsolationTest extends IsolationTestCase
             $this->assertSame(404, $r->getStatusCode(), "{$host} must not resolve to any firm");
             $this->assertStringNotContainsString('CANARY', $r->getContent());
         }
-        app(\App\Tenancy\TenantManager::class)->failClosed();
+        app(TenantManager::class)->failClosed();
         $this->expectException(\InvalidArgumentException::class);
         DB::table('clients')->count();
     }
@@ -50,7 +52,7 @@ class StructureIsolationTest extends IsolationTestCase
     {
         config(['sso.block_private_hosts' => false]);
         Tenant::query()->update(['plan' => 'professional']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $a = $this->api('a', 'POST', '/integrations/api-keys', ['name' => 'k', 'scopes' => ['clients:read']])->assertCreated()->json('data.key');
         $b = $this->api('b', 'POST', '/integrations/api-keys', ['name' => 'k', 'scopes' => ['clients:read']])->assertCreated()->json('data.key');
 
@@ -70,7 +72,7 @@ class StructureIsolationTest extends IsolationTestCase
     {
         config(['sso.block_private_hosts' => false]);
         Tenant::query()->update(['plan' => 'professional']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $a = $this->api('a', 'POST', '/integrations/api-keys', ['name' => 'k', 'scopes' => ['clients:read']])->assertCreated()->json('data.key');
 
         $this->http($this->firm['a']['host'], 'GET', '/clients', [], [], ['Authorization' => "Bearer {$a}"])->assertStatus(401);

@@ -6,9 +6,7 @@ use App\Tenancy\TenantManager;
 
 class TenantFlagOverrides implements FlagOverrides
 {
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     public function forTenant(): array
     {

@@ -7,6 +7,7 @@ use App\Jobs\SendSmsJob;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Document;
+use App\Models\HearingType;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -114,7 +115,7 @@ class ClientPortalTest extends TestCase
         $internal = $this->document($this->matter, 'Internal memo');
         $foreign = $this->document($other, 'Foreign');
         DB::table('hearings')->insert(['case_id' => $this->matter->id, 'court_id' => $this->matter->court_id, 'hearing_date' => now()->addWeek()->toDateString(),
-            'hearing_type' => \App\Models\HearingType::factory()->create()->id, 'notes' => 'Partner thinks the judge dislikes us', 'outcome' => '', 'created_at' => now(), 'updated_at' => now()]);
+            'hearing_type' => HearingType::factory()->create()->id, 'notes' => 'Partner thinks the judge dislikes us', 'outcome' => '', 'created_at' => now(), 'updated_at' => now()]);
         $this->enable();
         $share = $this->actingAs($this->staff)->postJson("/api/v1/cases/{$this->matter->id}/portal/documents", ['document_id' => $shared->id, 'notify' => true])
             ->assertCreated()->json('data.0.id');

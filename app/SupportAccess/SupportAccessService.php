@@ -2,6 +2,7 @@
 
 namespace App\SupportAccess;
 
+use App\Constants\ModulePermissions;
 use App\Mail\SupportAccessNotice;
 use App\Models\SupportAccessSession;
 use App\Models\User;
@@ -202,7 +203,7 @@ class SupportAccessService
     private function notify(SupportAccessSession $s, string $headline): void
     {
         try {
-            $admins = User::permission(\App\Constants\ModulePermissions::MANAGE_SUPPORT_ACCESS)->whereNull('platform_staff_id')->get();
+            $admins = User::permission(ModulePermissions::MANAGE_SUPPORT_ACCESS)->whereNull('platform_staff_id')->get();
             foreach ($admins as $admin) {
                 Mail::to($admin->email)->queue(new SupportAccessNotice($s, $headline));
             }

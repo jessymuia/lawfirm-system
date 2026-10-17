@@ -2,15 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\Group;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /** PLAT-5: first-run/upgrade installer is idempotent and never destructive. */
-#[\PHPUnit\Framework\Attributes\Group('single-mode')]   // self-hosted installs only (TEN-17)
+#[Group('single-mode')] // self-hosted installs only (TEN-17)
 class AppInstallTest extends TestCase
 {
     use RefreshDatabase;
@@ -45,13 +47,13 @@ class AppInstallTest extends TestCase
     public function test_it_never_wipes_existing_data(): void
     {
         $existing = User::factory()->create(['email' => 'keep@firm.test']);
-        $client = \App\Models\Client::factory()->create();
+        $client = Client::factory()->create();
         $usersBefore = User::count();
 
         $this->install()->assertExitCode(0);   // no admin options needed once users exist
 
         $this->assertNotNull(User::find($existing->id));
-        $this->assertNotNull(\App\Models\Client::find($client->id));
+        $this->assertNotNull(Client::find($client->id));
         $this->assertSame($usersBefore, User::count(), 'no second admin is invented');
     }
 

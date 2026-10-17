@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\CourtType;
+use App\Models\ExpenseCategory;
+use App\Models\HearingType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
@@ -101,9 +104,9 @@ class ListEndpointsFormatRowTest extends TestCase
     public static function optionEndpoints(): array
     {
         return [
-            'court types' => ['/api/v1/courttypes/options', \App\Models\CourtType::class],
-            'hearing types' => ['/api/v1/hearingtypes/options', \App\Models\HearingType::class],
-            'expense categories' => ['/api/v1/expense-categories/options', \App\Models\ExpenseCategory::class],
+            'court types' => ['/api/v1/courttypes/options', CourtType::class],
+            'hearing types' => ['/api/v1/hearingtypes/options', HearingType::class],
+            'expense categories' => ['/api/v1/expense-categories/options', ExpenseCategory::class],
         ];
     }
 

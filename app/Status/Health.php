@@ -4,6 +4,7 @@ namespace App\Status;
 
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantManager;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -28,9 +29,7 @@ class Health
 
     public const UNKNOWN = 'unknown';
 
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     /** The platform's own store: the control plane in multi mode, the one database otherwise. Never the request's tenant connection. */
     public function store()
@@ -216,7 +215,7 @@ class Health
         $newest = null;
         foreach ($this->probed() as $c) {
             $row = $db->table('health_probes')->where('component', $c)->orderByDesc('probed_at')->orderByDesc('id')->first();
-            $at = $row ? \Illuminate\Support\Carbon::parse($row->probed_at) : null;
+            $at = $row ? Carbon::parse($row->probed_at) : null;
             $newest = $at && (! $newest || $at->gt($newest)) ? $at : $newest;
             $fresh = $at && $at->gte($stale);
             $out[$c] = ['status' => $fresh ? $row->status : self::UNKNOWN, 'latency_ms' => $fresh ? (int) $row->latency_ms : null, 'detail' => $fresh ? $row->detail : 'no recent measurement', 'checked_at' => $at?->toIso8601String()];
@@ -245,7 +244,7 @@ class Health
         $step = (int) config('status.probe_interval_minutes');
         $db = $this->store();
         $first = $db->table('health_probes')->min('probed_at');
-        $effectiveFrom = $first ? \Illuminate\Support\Carbon::parse($first)->max($from) : $from;
+        $effectiveFrom = $first ? Carbon::parse($first)->max($from) : $from;
         $expected = max(1, (int) floor($effectiveFrom->diffInMinutes($to) / $step));
         $windows = $this->maintenanceWindows($from, $to);
 
@@ -261,7 +260,7 @@ class Health
             }
             $n = fn ($s) => max(0, (int) ($total[$s] ?? 0) - $excluded[$s]);
             $measured = $n('operational') + $n('degraded') + $n('down');
-            $present = array_sum(array_map('intval', $total->all())) ;
+            $present = array_sum(array_map('intval', $total->all()));
             $out[$c] = [
                 'availability' => $measured ? round(($measured - $n('down')) / $measured * 100, 3) : null,
                 'measured_minutes' => $measured * $step, 'down_minutes' => $n('down') * $step, 'degraded_minutes' => $n('degraded') * $step,
@@ -273,13 +272,13 @@ class Health
         return $out;
     }
 
-    /** @return array<int,array{0:\Illuminate\Support\Carbon,1:\Illuminate\Support\Carbon,2:array}> */
+    /** @return array<int,array{0:Carbon,1:Carbon,2:array}> */
     private function maintenanceWindows($from, $to): array
     {
         $w = [];
         foreach ($this->store()->table('status_incidents')->where('impact', 'maintenance')->where('started_at', '<=', $to)->get() as $i) {
-            $a = \Illuminate\Support\Carbon::parse($i->started_at);
-            $b = $i->resolved_at ? \Illuminate\Support\Carbon::parse($i->resolved_at) : ($i->ends_at ? \Illuminate\Support\Carbon::parse($i->ends_at) : $to);
+            $a = Carbon::parse($i->started_at);
+            $b = $i->resolved_at ? Carbon::parse($i->resolved_at) : ($i->ends_at ? Carbon::parse($i->ends_at) : $to);
             if ($b->lt($from) || $b->lte($a)) {
                 continue;
             }

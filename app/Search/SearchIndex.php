@@ -3,6 +3,7 @@
 namespace App\Search;
 
 use App\Jobs\IndexForSearch;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -82,7 +83,7 @@ class SearchIndex
     }
 
     /** Rows that belong in the index (live, current), read past every user scope. */
-    private function base(string $entity): \Illuminate\Database\Query\Builder
+    private function base(string $entity): Builder
     {
         return match ($entity) {
             'clients' => DB::table('clients')->whereNull('clients.deleted_at')->select('clients.id', 'clients.name', 'clients.phone_number'),

@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Calendar\CalendarSync;
 use App\Constants\ModulePermissions as P;
+use App\Jobs\SyncCalendarConnection;
 use App\Models\Cases;
 use App\Models\Hearing;
 use App\Models\HearingType;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Crypt;
@@ -30,7 +32,7 @@ class CalendarTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->travelTo(\Carbon\Carbon::parse('2026-10-05 08:00:00'));
+        $this->travelTo(Carbon::parse('2026-10-05 08:00:00'));
         $this->lawyer = $this->userWithPermissions([P::LIST_HEARINGS, P::CREATE_HEARINGS, P::UPDATE_HEARINGS, P::LIST_CASES]);
         $this->lawyer->forceFill(['name' => 'Njeri Kamau'])->save();
         $this->matter = Cases::factory()->create(['case_number' => 'HCCC 44/2026', 'assigned_to' => $this->lawyer->id]);
@@ -132,7 +134,7 @@ class CalendarTest extends TestCase
     private function googleConnection(): int
     {
         // changes would otherwise sync inline on the sync queue; these tests run the sync themselves
-        Bus::fake([\App\Jobs\SyncCalendarConnection::class]);
+        Bus::fake([SyncCalendarConnection::class]);
         config(['calendar.google.client_id' => 'gid', 'calendar.google.client_secret' => 'gsecret']);
 
         return DB::table('calendar_connections')->insertGetId(['user_id' => $this->lawyer->id, 'provider' => 'google', 'access_token' => Crypt::encryptString('at1'),
@@ -158,7 +160,7 @@ class CalendarTest extends TestCase
         $this->assertSame(0, array_sum(app(CalendarSync::class)->run($id)), 'nothing changed: nothing sent');
 
         $h->update(['courtroom' => 'Court 7']);
-        Bus::assertDispatched(\App\Jobs\SyncCalendarConnection::class, fn ($j) => $j->connectionId === $id);   // a change triggers a sync
+        Bus::assertDispatched(SyncCalendarConnection::class, fn ($j) => $j->connectionId === $id);   // a change triggers a sync
         Http::assertSent(fn ($r) => $r->method() === 'POST' && ($r['start']['dateTime'] ?? null) === '2026-10-07T09:30:00+03:00' && $r['start']['timeZone'] === 'Africa/Nairobi');
         $this->assertSame(1, app(CalendarSync::class)->run($id)['updated']);
         Http::assertSent(fn ($r) => $r->method() === 'PUT' && str_contains($r['location'] ?? '', 'Court 7'));
@@ -218,7 +220,7 @@ class CalendarTest extends TestCase
     public function test_microsoft_events_are_created_through_graph(): void
     {
         config(['calendar.microsoft.client_id' => 'mid', 'calendar.microsoft.client_secret' => 'msecret']);
-        Bus::fake([\App\Jobs\SyncCalendarConnection::class]);
+        Bus::fake([SyncCalendarConnection::class]);
         $this->hearing('2026-10-07', '09:30');
         $id = DB::table('calendar_connections')->insertGetId(['user_id' => $this->lawyer->id, 'provider' => 'microsoft', 'access_token' => Crypt::encryptString('at'),
             'expires_at' => now()->addHour(), 'created_at' => now(), 'updated_at' => now()]);

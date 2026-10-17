@@ -6,8 +6,9 @@ use App\Status\Health;
 use App\Status\Incidents;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * PLAT-12: public health endpoints and status page. Reachable on every host (a load balancer probes by address) and independent of
@@ -15,9 +16,7 @@ use Illuminate\Http\Response;
  */
 class HealthController extends Controller
 {
-    public function __construct(private Health $health, private Incidents $incidents)
-    {
-    }
+    public function __construct(private Health $health, private Incidents $incidents) {}
 
     /** Liveness: the process answers. Touches nothing, so a database outage never gets the app restarted in a loop. */
     public function live(): JsonResponse
@@ -51,9 +50,9 @@ class HealthController extends Controller
             'components' => $components,
             'incidents' => array_map(fn ($i) => [
                 'id' => $i->id, 'title' => $i->title, 'impact' => $i->impact, 'status' => $i->status, 'components' => $i->components,
-                'started_at' => \Illuminate\Support\Carbon::parse($i->started_at)->toIso8601String(),
-                'ends_at' => $i->ends_at ? \Illuminate\Support\Carbon::parse($i->ends_at)->toIso8601String() : null,
-                'resolved_at' => $i->resolved_at ? \Illuminate\Support\Carbon::parse($i->resolved_at)->toIso8601String() : null,
+                'started_at' => Carbon::parse($i->started_at)->toIso8601String(),
+                'ends_at' => $i->ends_at ? Carbon::parse($i->ends_at)->toIso8601String() : null,
+                'resolved_at' => $i->resolved_at ? Carbon::parse($i->resolved_at)->toIso8601String() : null,
                 'updates' => array_map(fn ($u) => (array) $u, $i->updates),
             ], $this->incidents->recent(90)),
         ];

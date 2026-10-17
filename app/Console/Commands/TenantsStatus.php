@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantMigrator;
 use Illuminate\Console\Command;
 
 class TenantsStatus extends Command
@@ -19,7 +20,7 @@ class TenantsStatus extends Command
             ->groupBy(fn ($t) => ($t->schema_version ?? '(none)').'|'.$t->migration_status)
             ->map(fn ($g, $k) => [...explode('|', $k), $g->count()])->values()->all());
 
-        $latest = \App\Tenancy\TenantMigrator::latestVersion();
+        $latest = TenantMigrator::latestVersion();
         $live = $tenants->whereNotIn('status', ['offboarded', 'purged']);
         $behind = $live->filter(fn ($t) => $t->schema_version === null || strcmp((string) $t->schema_version, (string) $latest) < 0)->count();
         $this->line("Latest migration: {$latest}");

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route as Router;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\In;
+use Illuminate\Validation\Rules\Password;
 use ReflectionMethod;
 use ReflectionNamedType;
 
@@ -247,7 +248,7 @@ class OpenApiSpec
 
                 continue;
             }
-            if ($r instanceof \Illuminate\Validation\Rules\Password) {
+            if ($r instanceof Password) {
                 $applied = $r->appliedRules();
                 $s['minLength'] = max((int) ($s['minLength'] ?? 0), (int) $applied['min']);
                 $needs = array_keys(array_filter(['letters' => $applied['letters'], 'mixed case' => $applied['mixedCase'], 'numbers' => $applied['numbers'], 'symbols' => $applied['symbols']]));

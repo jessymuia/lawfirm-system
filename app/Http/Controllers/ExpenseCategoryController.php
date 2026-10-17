@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
+use App\Http\Requests\ExpenseCategory\StoreRequest;
+use App\Http\Requests\ExpenseCategory\UpdateRequest;
+use App\Http\Resources\V1\ExpenseCategoryResource;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class ExpenseCategoryController extends Controller
@@ -26,7 +28,7 @@ class ExpenseCategoryController extends Controller
         $types = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\ExpenseCategoryResource::make($row)->resolve(),
+            fn ($row) => ExpenseCategoryResource::make($row)->resolve(),
             25,
             ['name'],
             ['name']
@@ -36,7 +38,7 @@ class ExpenseCategoryController extends Controller
     }
 
     /** ENG-16: dropdown options (id + name), capped; see Controller::optionsResponse(). */
-    public function options(\Illuminate\Http\Request $request): JsonResponse
+    public function options(Request $request): JsonResponse
     {
         return $this->optionsResponse($request, ExpenseCategory::query(), fn ($r) => $r->name);
     }
@@ -46,7 +48,7 @@ class ExpenseCategoryController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(\App\Http\Requests\ExpenseCategory\StoreRequest $request)
+    public function store(StoreRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_EXPENSES)) {
             abort(403);
@@ -56,7 +58,7 @@ class ExpenseCategoryController extends Controller
             'name' => $request->name,
         ]);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseCategoryResource::make($type)->resolve(), 201);
+        return $this->response(true, 'success', ExpenseCategoryResource::make($type)->resolve(), 201);
     }
 
     /**
@@ -64,7 +66,7 @@ class ExpenseCategoryController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(\App\Http\Requests\ExpenseCategory\UpdateRequest $request, $id)
+    public function update(UpdateRequest $request, $id)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_EXPENSES)) {
             abort(403);
@@ -75,13 +77,13 @@ class ExpenseCategoryController extends Controller
         $type->updated_by = auth()->user()->id;
         $type->save();
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseCategoryResource::make($type)->resolve(), 200);
+        return $this->response(true, 'success', ExpenseCategoryResource::make($type)->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

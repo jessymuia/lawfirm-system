@@ -30,7 +30,7 @@ class FirmMail
                     'transport' => 'smtp', 'host' => $host, 'port' => (int) ($c->resolve('mail', 'port') ?: 587),
                     'username' => $c->resolve('mail', 'username'), 'password' => $c->resolve('mail', 'password'),
                     'scheme' => $c->resolve('mail', 'scheme') ?: null, 'timeout' => 15,
-                ], fn ($v) => $v !== null && $v !== '' ), 'mail.default' => 'firm']);
+                ], fn ($v) => $v !== null && $v !== ''), 'mail.default' => 'firm']);
                 Mail::purge('firm');
             }
             if ($from) {

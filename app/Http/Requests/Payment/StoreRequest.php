@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Payment;
 
 use App\Enums\PaymentMethod;
-use App\Models\Payment;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for PaymentController::store(). Authorization is declared on the route (authz:*), not here. */

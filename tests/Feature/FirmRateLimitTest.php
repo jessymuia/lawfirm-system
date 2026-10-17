@@ -7,6 +7,7 @@ use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ class FirmRateLimitTest extends TestCase
             ->assertHeader('Retry-After');
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('single-mode')]
+    #[Group('single-mode')]
     public function test_a_single_firm_install_has_no_firm_wide_limit_by_default(): void
     {
         $this->assertNull(RouteServiceProvider::firmRateLimit());

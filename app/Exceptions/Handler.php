@@ -2,8 +2,16 @@
 
 namespace App\Exceptions;
 
+use App\Catalog\SystemCatalogException;
+use App\Compliance\ComplianceException;
+use App\Compliance\LegalHoldException;
+use App\Entitlements\EntitlementException;
+use App\Observability\ErrorReporter;
+use App\Tenancy\TenantContext;
+use App\Webhooks\WebhookException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Context;
 use Psr\Log\LogLevel;
 use Throwable;
 
@@ -45,8 +53,8 @@ class Handler extends ExceptionHandler
     protected function context(): array
     {
         return array_merge(parent::context(), array_filter([
-            'tenant' => app(\App\Tenancy\TenantContext::class)->key(),
-            'request_id' => \Illuminate\Support\Facades\Context::get('request_id'),
+            'tenant' => app(TenantContext::class)->key(),
+            'request_id' => Context::get('request_id'),
         ]));
     }
 
@@ -59,24 +67,24 @@ class Handler extends ExceptionHandler
     {
         // ENG-24: to the error tracker (Sentry protocol), tagged and grouped per firm; a no-op without a DSN
         $this->reportable(function (Throwable $e) {
-            app(\App\Observability\ErrorReporter::class)->report($e);
+            app(ErrorReporter::class)->report($e);
         });
 
         // PLAT-1: a plan/limit denial is a clean, machine-readable 403 the SPA can turn into an upgrade prompt.
-        $this->dontReport([\App\Compliance\LegalHoldException::class, \App\Compliance\ComplianceException::class]);
+        $this->dontReport([LegalHoldException::class, ComplianceException::class]);
         // TEN-11: platform-owned reference rows are read-only to firms.
-        $this->dontReport([\App\Catalog\SystemCatalogException::class]);
-        $this->renderable(fn (\App\Catalog\SystemCatalogException $e) => response()->json(['success' => false, 'code' => 'system_catalog', 'message' => $e->getMessage()], 409));
-        $this->renderable(function (\App\Compliance\LegalHoldException $e) {
+        $this->dontReport([SystemCatalogException::class]);
+        $this->renderable(fn (SystemCatalogException $e) => response()->json(['success' => false, 'code' => 'system_catalog', 'message' => $e->getMessage()], 409));
+        $this->renderable(function (LegalHoldException $e) {
             $e->recordAudit();   // a refusal inside a transaction is audited once the transaction has rolled back
 
             return response()->json(['success' => false, 'code' => 'legal_hold', 'message' => $e->getMessage()], 423);
         });
-        $this->renderable(fn (\App\Compliance\ComplianceException $e) => response()->json(['success' => false, 'code' => 'compliance_refused', 'message' => $e->getMessage()], $e->status));
-        $this->dontReport(\App\Webhooks\WebhookException::class);
-        $this->renderable(fn (\App\Webhooks\WebhookException $e) => response()->json(['success' => false, 'code' => 'webhook_refused', 'message' => $e->getMessage()], $e->status));
-        $this->dontReport(\App\Entitlements\EntitlementException::class);
-        $this->renderable(function (\App\Entitlements\EntitlementException $e) {
+        $this->renderable(fn (ComplianceException $e) => response()->json(['success' => false, 'code' => 'compliance_refused', 'message' => $e->getMessage()], $e->status));
+        $this->dontReport(WebhookException::class);
+        $this->renderable(fn (WebhookException $e) => response()->json(['success' => false, 'code' => 'webhook_refused', 'message' => $e->getMessage()], $e->status));
+        $this->dontReport(EntitlementException::class);
+        $this->renderable(function (EntitlementException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
                 'code' => 'entitlement_required',

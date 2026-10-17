@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Constants\ModulePermissions as P;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /** ENG-11: payments (append-only: no update; delete reverses). */
 class PaymentPolicy extends ModulePolicy
@@ -15,7 +16,7 @@ class PaymentPolicy extends ModulePolicy
 
     protected function caseIdOf(Model $record): ?int
     {
-        $caseId = \Illuminate\Support\Facades\DB::table('invoices')->where('id', $record->getAttribute('invoice_id'))->value('case_id');
+        $caseId = DB::table('invoices')->where('id', $record->getAttribute('invoice_id'))->value('case_id');
 
         return $caseId === null ? null : (int) $caseId;
     }

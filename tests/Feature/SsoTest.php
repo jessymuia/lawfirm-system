@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Entitlements\Entitlements;
 use App\Models\User;
 use App\Sso\Jwt;
 use App\Sso\SsoException;
@@ -10,10 +9,12 @@ use App\Sso\SsrfGuard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Testing\TestResponse;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -144,7 +145,7 @@ class SsoTest extends TestCase
         return $this->get('/api/v1/sso/callback?'.http_build_query(['code' => $code, 'state' => $state]));
     }
 
-    private function ssoLogin(array $claims = [], string $email = 'partner@firm.test'): \Illuminate\Testing\TestResponse
+    private function ssoLogin(array $claims = [], string $email = 'partner@firm.test'): TestResponse
     {
         $this->partner($email);
         $this->claims = $claims;
@@ -153,7 +154,7 @@ class SsoTest extends TestCase
         return $this->hitCallback($state);
     }
 
-    private function assertDenied(\Illuminate\Testing\TestResponse $r): void
+    private function assertDenied(TestResponse $r): void
     {
         $r->assertRedirect(config('sso.failure_redirect'));
         $this->getJson('/api/v1/user')->assertUnauthorized();
@@ -168,13 +169,13 @@ class SsoTest extends TestCase
         $this->assertStringNotContainsString('super-secret', $r->getContent());
         $row = DB::table('sso_providers')->first();
         $this->assertStringNotContainsString('super-secret', $row->client_secret);
-        $this->assertSame('super-secret', \Illuminate\Support\Facades\Crypt::decryptString($row->client_secret));
+        $this->assertSame('super-secret', Crypt::decryptString($row->client_secret));
 
         $this->actingAs($this->admin())->getJson('/api/v1/security/sso')->assertOk()->assertJsonMissingPath('data.client_secret');
 
         // changing other fields keeps the stored secret when none is sent
         $this->configure(['client_secret' => null, 'enforce' => false, 'allowed_email_domains' => ['Firm.test']])->assertOk()->assertJsonPath('data.allowed_email_domains.0', 'firm.test');
-        $this->assertSame('super-secret', \Illuminate\Support\Facades\Crypt::decryptString(DB::table('sso_providers')->value('client_secret')));
+        $this->assertSame('super-secret', Crypt::decryptString(DB::table('sso_providers')->value('client_secret')));
         $this->assertSame(1, DB::table('audits')->where('event', 'sso_configured')->where('new_values', 'like', '%idp.example.test%')->count() ? 1 : 0);
     }
 

@@ -4,6 +4,4 @@ namespace App\Billing;
 
 use RuntimeException;
 
-class BillingException extends RuntimeException
-{
-}
+class BillingException extends RuntimeException {}

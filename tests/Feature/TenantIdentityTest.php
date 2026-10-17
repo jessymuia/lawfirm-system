@@ -13,10 +13,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-5: one login, many firms; deactivation is per firm; tenant dumps stay self-contained. */
-class TenantIdentityTest extends TestCase implements \Tests\OwnsTenancy
+class TenantIdentityTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 

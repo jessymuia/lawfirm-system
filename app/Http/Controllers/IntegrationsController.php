@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\ApiKeyAuth;
+use App\Http\Requests\Integrations\CreateHookRequest;
+use App\Http\Requests\Integrations\CreateKeyRequest;
+use App\Http\Requests\Integrations\UpdateHookRequest;
+use App\Models\User;
 use App\Security\SecurityPolicy;
 use App\Webhooks\WebhookException;
 use App\Webhooks\WebhookService;
@@ -12,9 +16,7 @@ use Illuminate\Support\Facades\DB;
 /** PLAT-11: a firm administrator manages API keys and webhooks. Secrets are shown once, at creation. */
 class IntegrationsController extends Controller
 {
-    public function __construct(private WebhookService $webhooks)
-    {
-    }
+    public function __construct(private WebhookService $webhooks) {}
 
     // ---- API keys --------------------------------------------------------------------------------------------------
 
@@ -29,12 +31,12 @@ class IntegrationsController extends Controller
         return response()->json(['data' => DB::table('api_keys')->orderByDesc('id')->get()->map(fn ($k) => $this->keyView($k))]);
     }
 
-    public function createKey(\App\Http\Requests\Integrations\CreateKeyRequest $r)
+    public function createKey(CreateKeyRequest $r)
     {
         $d = $r->validated();
         // the key acts as a person: by default the creator. Acting as someone else needs the same permission, and the person must be a real firm user.
         $userId = (int) ($d['user_id'] ?? $r->user()->id);
-        if (! \App\Models\User::whereKey($userId)->whereNull('platform_staff_id')->exists()) {
+        if (! User::whereKey($userId)->whereNull('platform_staff_id')->exists()) {
             throw new WebhookException('No such user.');
         }
         $g = ApiKeyAuth::generate();
@@ -71,7 +73,7 @@ class IntegrationsController extends Controller
         return response()->json(['data' => DB::table('webhook_endpoints')->orderBy('id')->get()->map(fn ($e) => $this->hookView($e)), 'events' => config('public_api.events')]);
     }
 
-    public function createHook(\App\Http\Requests\Integrations\CreateHookRequest $r)
+    public function createHook(CreateHookRequest $r)
     {
         $d = $r->validated();
         $res = $this->webhooks->create($d['url'], $d['events'], $d['description'] ?? null, $r->user()->id);
@@ -79,7 +81,7 @@ class IntegrationsController extends Controller
         return response()->json(['data' => $this->hookView($res['endpoint']) + ['secret' => $res['secret']], 'notice' => 'Copy the signing secret now: it is not shown again.'], 201);
     }
 
-    public function updateHook(\App\Http\Requests\Integrations\UpdateHookRequest $r, int $id)
+    public function updateHook(UpdateHookRequest $r, int $id)
     {
         $d = $r->validated();
 

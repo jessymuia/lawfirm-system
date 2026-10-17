@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Flags\Flags;
 use App\Jobs\SendSmsJob;
+use App\Matters\MatterAccess;
+use App\Matters\WallAttempts;
 use App\Models\Hearing;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -31,7 +34,7 @@ class SendHearingReminders extends Command
     public function handle(): int
     {
         // PLAT-3: ops kill switch, per firm or everywhere.
-        if (! app(\App\Flags\Flags::class)->enabled('hearing_sms_reminders')) {
+        if (! app(Flags::class)->enabled('hearing_sms_reminders')) {
             $this->warn('Flag hearing_sms_reminders is off: no reminders sent.');
 
             return CommandAlias::SUCCESS;
@@ -67,8 +70,8 @@ class SendHearingReminders extends Command
 
             // SEC-11: never notify a screened user about a matter they are walled from (logged as an attempt).
             $attorney = $case->attorney;
-            if ($attorney && \App\Matters\MatterAccess::isWalled($attorney->id, $case->id)) {
-                \App\Matters\WallAttempts::record($attorney->id, 'notification', $case->id, null, ['method' => 'hearings:send-reminders']);
+            if ($attorney && MatterAccess::isWalled($attorney->id, $case->id)) {
+                WallAttempts::record($attorney->id, 'notification', $case->id, null, ['method' => 'hearings:send-reminders']);
                 $attorney = null;
             }
             if ($attorney && $attorney->phone_number) {

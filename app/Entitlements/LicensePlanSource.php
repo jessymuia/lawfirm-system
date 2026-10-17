@@ -3,7 +3,6 @@
 namespace App\Entitlements;
 
 use App\Licensing\LicenseManager;
-use App\Licensing\LicenseStatus;
 
 /**
  * PLAT-2: self-hosted entitlements from the signed license.
@@ -13,9 +12,7 @@ use App\Licensing\LicenseStatus;
  */
 class LicensePlanSource implements EntitlementSource
 {
-    public function __construct(private LicenseManager $licenses, private PlanCatalog $catalog, private ConfiguredPlanSource $configured)
-    {
-    }
+    public function __construct(private LicenseManager $licenses, private PlanCatalog $catalog, private ConfiguredPlanSource $configured) {}
 
     public function resolve(): EntitlementSet
     {

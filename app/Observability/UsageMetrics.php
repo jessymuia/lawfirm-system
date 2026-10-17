@@ -22,9 +22,7 @@ class UsageMetrics
 {
     public const API_CALLS = 'api_calls';
 
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     /** Count one API call for the tenant currently active. No-op in single mode. */
     public function countApiCall(): void

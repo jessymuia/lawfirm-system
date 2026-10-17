@@ -9,19 +9,24 @@ use App\Jobs\ProvisionSignup;
 use App\Mail\SignupVerification;
 use App\Models\User;
 use App\Platform\PlatformStaff;
+use App\Tenancy\IdentityService;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantContext;
+use App\Tenancy\TenantLifecycle;
 use App\Tenancy\TenantManager;
 use Carbon\CarbonImmutable as C;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-13: self-service signup -> verified email -> provisioned firm on a trial -> conversion or lapse. */
-class SignupTest extends TestCase implements \Tests\OwnsTenancy
+class SignupTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -53,7 +58,7 @@ class SignupTest extends TestCase implements \Tests\OwnsTenancy
     protected function tearDown(): void
     {
         DB::setDefaultConnection($this->originalDefault);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         parent::tearDown();
     }
 
@@ -117,7 +122,7 @@ class SignupTest extends TestCase implements \Tests\OwnsTenancy
 
         // the person signs in with the password they chose, as the firm's administrator
         app(TenantManager::class)->runIn($tenant, function () use ($tenant) {
-            $this->assertNotNull(app(\App\Tenancy\IdentityService::class)->attempt('grace@wanjiru.co.ke', 'long-enough-pass-1', $tenant));
+            $this->assertNotNull(app(IdentityService::class)->attempt('grace@wanjiru.co.ke', 'long-enough-pass-1', $tenant));
             $u = User::where('email', 'grace@wanjiru.co.ke')->firstOrFail();
             $this->assertSame('Grace Wanjiru', $u->name);
             $this->assertTrue($u->hasRole('admin'));
@@ -144,7 +149,7 @@ class SignupTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_the_address_must_be_valid_free_and_not_reserved(): void
     {
-        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);   // many submissions; the limit has its own test
+        $this->withoutMiddleware(ThrottleRequests::class);   // many submissions; the limit has its own test
         Tenant::create(['slug' => 'taken', 'name' => 'Taken', 'status' => 'active', 'database' => "{$this->dir}/taken.sqlite"]);
 
         foreach (['taken' => 'taken', 'admin' => 'reserved', 'a' => 'Use 3 to 32', 'Bad_Slug' => 'Use 3 to 32', 'x--y' => 'Use 3 to 32', '-abc' => 'Use 3 to 32'] as $slug => $why) {
@@ -173,7 +178,7 @@ class SignupTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_form_rules_terms_password_and_the_bot_trap(): void
     {
-        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+        $this->withoutMiddleware(ThrottleRequests::class);
         $this->postJson(self::HOST.'/api/signup', $this->form(['accept_terms' => false]))->assertUnprocessable()->assertJsonValidationErrors('accept_terms');
         $this->postJson(self::HOST.'/api/signup', $this->form(['password' => 'short1', 'password_confirmation' => 'short1']))->assertUnprocessable()->assertJsonValidationErrors('password');
         $this->postJson(self::HOST.'/api/signup', $this->form(['password' => 'onlyletterslong', 'password_confirmation' => 'onlyletterslong']))->assertUnprocessable()->assertJsonValidationErrors('password');
@@ -227,7 +232,7 @@ class SignupTest extends TestCase implements \Tests\OwnsTenancy
         $this->postJson(self::HOST.'/api/signup/verify', ['token' => $token])->assertOk()->assertJsonPath('data.status', 'provisioning');
         Queue::assertPushed(ProvisionSignup::class, 2);
 
-        (new ProvisionSignup((int) $this->ctl()->table('signups')->value('id')))->handle(app(\App\Tenancy\TenantLifecycle::class), app(Billing::class));
+        (new ProvisionSignup((int) $this->ctl()->table('signups')->value('id')))->handle(app(TenantLifecycle::class), app(Billing::class));
         $this->getJson(self::HOST.'/api/signup/status?token='.$token)->assertJsonPath('data.status', 'ready');
     }
 
@@ -241,7 +246,7 @@ class SignupTest extends TestCase implements \Tests\OwnsTenancy
         $this->postJson(self::HOST.'/api/signup/verify', ['token' => $token])->assertOk();
         $second = Tenant::where('slug', 'wanjiru-two')->firstOrFail();
 
-        $ids = app(\App\Tenancy\IdentityService::class);
+        $ids = app(IdentityService::class);
         $tenants = app(TenantManager::class);
         $this->assertNotNull($tenants->runIn($second, fn () => $ids->attempt('grace@wanjiru.co.ke', 'long-enough-pass-1', $second)), 'one person, one login: the existing password');
         $this->assertNull($tenants->runIn($first, fn () => $ids->attempt('grace@wanjiru.co.ke', 'another-pass-22', $first)));

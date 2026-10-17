@@ -2,6 +2,8 @@
 
 namespace Tests\Isolation;
 
+use App\Models\Cases;
+use App\Models\Client;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -157,11 +159,11 @@ class ApiIsolationTest extends IsolationTestCase
     private function assertNothingChangedIn(string $slug): void
     {
         $this->inFirm($slug, function () {
-            $this->assertSame(5, \App\Models\Client::count());
-            $this->assertSame(5, \App\Models\Cases::count());
-            $this->assertSame(0, \App\Models\Client::where('name', 'HACKED')->count());
-            $this->assertSame(0, \App\Models\Client::onlyTrashed()->count());
-            $this->assertSame(0, \App\Models\Cases::onlyTrashed()->count());
+            $this->assertSame(5, Client::count());
+            $this->assertSame(5, Cases::count());
+            $this->assertSame(0, Client::where('name', 'HACKED')->count());
+            $this->assertSame(0, Client::onlyTrashed()->count());
+            $this->assertSame(0, Cases::onlyTrashed()->count());
         });
     }
 }

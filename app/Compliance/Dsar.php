@@ -4,6 +4,9 @@ namespace App\Compliance;
 
 use App\Models\Client;
 use App\Security\SecurityPolicy;
+use App\Tenancy\FirmStorage;
+use App\Tenancy\TenantContext;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -26,9 +29,7 @@ class Dsar
 
     public const METHODS = ['id_document', 'known_contact', 'in_person', 'other'];
 
-    public function __construct(private LegalHolds $holds, private ClientAnonymiser $anonymiser)
-    {
-    }
+    public function __construct(private LegalHolds $holds, private ClientAnonymiser $anonymiser) {}
 
     public function create(string $type, int $clientId, string $name, ?string $email, ?string $received, ?int $actor): object
     {
@@ -36,7 +37,7 @@ class Dsar
             throw new ComplianceException('Type must be "access" or "erasure".');
         }
         Client::whereKey($clientId)->first() ?? throw new ComplianceException('No such client.', 404);
-        $receivedAt = $received ? \Carbon\Carbon::parse($received)->startOfDay() : now()->startOfDay();
+        $receivedAt = $received ? Carbon::parse($received)->startOfDay() : now()->startOfDay();
         $id = DB::table('dsar_requests')->insertGetId([
             'type' => $type, 'client_id' => $clientId, 'requester_name' => $name, 'requester_email' => $email,
             'status' => 'pending_verification', 'received_at' => $receivedAt->toDateString(),
@@ -123,9 +124,9 @@ class Dsar
                 'The contents of documents (listed in document_index; release after review).',
             ],
         ];
-        $prefix = app(\App\Tenancy\TenantContext::class)->storagePrefix('dsar');
+        $prefix = app(TenantContext::class)->storagePrefix('dsar');
         $path = "{$prefix}/request-{$id}.json";
-        Storage::disk(\App\Tenancy\FirmStorage::disk())->put($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+        Storage::disk(FirmStorage::disk())->put($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
         DB::table('dsar_requests')->where('id', $id)->update([
             'status' => 'completed', 'handled_by' => $actor, 'completed_at' => $r->completed_at ?? now(),
             'outcome' => json_encode(['export' => $path, 'rows' => ['matters' => $cases->count(), 'invoices' => $invoices->count(), 'payments' => $payments->count(), 'trust' => $trust->count(), 'documents' => $documents->count()]]),
@@ -141,7 +142,7 @@ class Dsar
         $r = $this->find($id);
         $out = json_decode((string) $r->outcome, true);
         $path = $out['export'] ?? null;
-        $disk = Storage::disk(\App\Tenancy\FirmStorage::disk());
+        $disk = Storage::disk(FirmStorage::disk());
         if (! $path || ! $disk->exists($path)) {
             throw new ComplianceException('No export has been produced for that request.', 404);
         }

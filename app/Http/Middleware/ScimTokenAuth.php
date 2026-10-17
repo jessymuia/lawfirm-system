@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 /**
  * SEC-12: `scim.token` authenticates `Authorization: Bearer scm_<prefix>_<secret>` from an identity provider.
@@ -16,15 +17,13 @@ use Illuminate\Support\Facades\RateLimiter;
  */
 class ScimTokenAuth
 {
-    public function __construct(private Entitlements $entitlements)
-    {
-    }
+    public function __construct(private Entitlements $entitlements) {}
 
     /** @return array{prefix: string, secret: string, token: string, hash: string} */
     public static function generate(): array
     {
         $prefix = bin2hex(random_bytes(4));
-        $secret = \Illuminate\Support\Str::random(40);
+        $secret = Str::random(40);
 
         return ['prefix' => $prefix, 'secret' => $secret, 'token' => "scm_{$prefix}_{$secret}", 'hash' => hash('sha256', $secret)];
     }

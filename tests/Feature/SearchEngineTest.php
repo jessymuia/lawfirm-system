@@ -3,12 +3,15 @@
 namespace Tests\Feature;
 
 use App\Constants\ModulePermissions as P;
+use App\Jobs\ExtractDocumentText;
 use App\Matters\MatterAccess;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Document;
 use App\Models\User;
 use App\Search\MeilisearchEngine;
+use App\Search\SearchEngine;
+use App\Search\SearchIndex;
 use App\Search\SearchPurgeStep;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
@@ -39,10 +42,10 @@ class SearchEngineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Bus::fake([\App\Jobs\ExtractDocumentText::class]);
+        Bus::fake([ExtractDocumentText::class]);
         config(['search.engine' => 'meilisearch', 'search.meilisearch.host' => 'http://search.test:7700', 'search.meilisearch.key' => 'master-key',
             'search.index_prefix' => 'lf_']);
-        $this->app->forgetInstance(\App\Search\SearchEngine::class);
+        $this->app->forgetInstance(SearchEngine::class);
         $this->firm = app(TenantContext::class)->key();
         Http::fake(function (Request $r) {
             if ($this->down) {
@@ -98,7 +101,7 @@ class SearchEngineTest extends TestCase
         DB::table('document_texts')->insert(['document_id' => $v2->id, 'state' => 'done', 'content' => str_repeat('negligence ', 5000), 'created_at' => now(), 'updated_at' => now()]);
         config(['search.document_text_chars' => 100]);
 
-        $records = app(\App\Search\SearchIndex::class)->records('documents', [$v1->id, $v2->id]);
+        $records = app(SearchIndex::class)->records('documents', [$v1->id, $v2->id]);
         $this->assertSame([$v2->id], $records->keys()->all());
         $this->assertSame(100, mb_strlen($records[$v2->id]['content']));
         $this->assertSame([$matter->case_number, $matter->client_id], [$records[$v2->id]['case_number'], $records[$v2->id]['client_id']]);
@@ -165,7 +168,7 @@ class SearchEngineTest extends TestCase
     public function test_without_an_engine_nothing_is_sent_anywhere(): void
     {
         config(['search.engine' => 'database']);
-        $this->app->forgetInstance(\App\Search\SearchEngine::class);
+        $this->app->forgetInstance(SearchEngine::class);
         Cases::factory()->create(['case_number' => 'ELC 5/2026']);
         $this->actingAs($this->lawyer)->getJson('/api/v1/search?q=ELC 5')->assertOk()->assertJsonPath('data.cases.0.title', 'ELC 5/2026');
         Artisan::call('search:reindex');

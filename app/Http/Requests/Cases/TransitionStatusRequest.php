@@ -3,15 +3,16 @@
 namespace App\Http\Requests\Cases;
 
 use App\Enums\MatterStatus;
+use App\Http\Requests\Concerns\RouteRecord;
 use App\Models\Cases;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for CasesController::transitionStatus(). Authorization is declared on the route (authz:*), not here. */
 class TransitionStatusRequest extends FormRequest
 {
-    use \App\Http\Requests\Concerns\RouteRecord;
+    use RouteRecord;
 
-    protected string $recordModel = \App\Models\Cases::class;
+    protected string $recordModel = Cases::class;
 
     protected string $recordParameter = 'id';
 

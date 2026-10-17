@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Security\Mfa;
 use App\Security\Totp;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
@@ -12,10 +13,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** SEC-12 in SaaS mode: the second factor belongs to the firm's user row, so firms are independent. */
-class MfaTenantLoginTest extends TestCase implements \Tests\OwnsTenancy
+class MfaTenantLoginTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -71,7 +73,7 @@ class MfaTenantLoginTest extends TestCase implements \Tests\OwnsTenancy
         // enrol in alpha only
         $secret = $this->in('alpha', function () {
             $u = User::where('email', 'owner@shared.test')->first();
-            $m = new \App\Security\Mfa;
+            $m = new Mfa;
             $s = $m->begin($u)['secret'];
             $m->confirm($u, Totp::code($s, Totp::currentStep()));
 

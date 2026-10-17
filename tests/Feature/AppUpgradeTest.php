@@ -3,17 +3,18 @@
 namespace Tests\Feature;
 
 use App\Support\ReleaseLog;
-use App\Tenancy\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-6: app:upgrade is idempotent, guarded against downgrades, and never leaves the site down. */
-class AppUpgradeTest extends TestCase implements \Tests\OwnsTenancy
+class AppUpgradeTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -130,7 +131,8 @@ class AppUpgradeTest extends TestCase implements \Tests\OwnsTenancy
     {
         self::$called = [];
         foreach (['config:cache', 'route:cache', 'view:cache', 'event:cache', 'queue:restart'] as $name) {
-            Artisan::registerCommand(new class($name) extends Command {
+            Artisan::registerCommand(new class($name) extends Command
+            {
                 public function __construct(private string $n)
                 {
                     $this->signature = $n;
@@ -157,7 +159,8 @@ class AppUpgradeTest extends TestCase implements \Tests\OwnsTenancy
     public function test_failed_migration_stops_before_recording_and_lifts_maintenance(): void
     {
         config(['app.version' => '3.0.0']);
-        Artisan::registerCommand(new class extends Command {
+        Artisan::registerCommand(new class extends Command
+        {
             protected $signature = 'migrate {--force} {--database=} {--path=}';
 
             public function handle(): int
@@ -168,7 +171,8 @@ class AppUpgradeTest extends TestCase implements \Tests\OwnsTenancy
             }
         });
         foreach (['down', 'up'] as $name) {
-            Artisan::registerCommand(new class($name) extends Command {
+            Artisan::registerCommand(new class($name) extends Command
+            {
                 public function __construct(private string $n)
                 {
                     $this->signature = $n.' {--retry=}';
@@ -216,7 +220,7 @@ class AppUpgradeTest extends TestCase implements \Tests\OwnsTenancy
         try {
             $this->upgrade()->expectsOutputToContain('Pending migrations: '.count(glob(database_path('migrations/control/*.php'))))->assertExitCode(0);
             $this->assertSame('1.2.0', DB::connection('control')->table('app_releases')->value('version'));
-            $this->assertTrue(\Illuminate\Support\Facades\Schema::connection('control')->hasTable('tenants'));
+            $this->assertTrue(Schema::connection('control')->hasTable('tenants'));
 
             $this->upgrade()->expectsOutputToContain('Pending migrations: none')->assertExitCode(0);
         } finally {

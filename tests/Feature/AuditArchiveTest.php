@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Audit\AuditArchiver;
 use App\Audit\AuditPartitions;
 use App\Entitlements\Entitlements;
+use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -43,12 +45,12 @@ class AuditArchiveTest extends TestCase
     /** the active firm: `default` on a single-firm install, the test firm in multi mode (TEN-17) */
     private function firm(): string
     {
-        return app(\App\Tenancy\TenantContext::class)->key();
+        return app(TenantContext::class)->key();
     }
 
     private function prefix(string $path): string
     {
-        return app(\App\Tenancy\TenantContext::class)->storagePrefix($path);
+        return app(TenantContext::class)->storagePrefix($path);
     }
 
     private function archiver(): AuditArchiver
@@ -190,14 +192,14 @@ class AuditArchiveTest extends TestCase
             $this->assertSame(1, DB::table('audits')->count());
             $this->audit('2026-10-20 00:00:00');   // writes keep working
             $this->travelTo(CarbonImmutable::parse('2027-01-10'));
-            $this->assertSame(3, $partitions->ensure(), "January, February and March");
-            $this->assertSame(0, $partitions->ensure(), "idempotent");
+            $this->assertSame(3, $partitions->ensure(), 'January, February and March');
+            $this->assertSame(0, $partitions->ensure(), 'idempotent');
             $this->assertContains('p202703', $partitions->names());
         } finally {
             if ($partitions->enabled()) {
                 DB::statement('ALTER TABLE audits REMOVE PARTITIONING');
             }
-            \Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;   // DDL committed: rebuild for the next test
+            RefreshDatabaseState::$migrated = false;   // DDL committed: rebuild for the next test
         }
     }
 }

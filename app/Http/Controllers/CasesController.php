@@ -7,6 +7,11 @@ use App\Actions\Matters\DeleteMatters;
 use App\Actions\Matters\OpenMatter;
 use App\Actions\Matters\UpdateMatter;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Cases\DestroyManyRequest;
+use App\Http\Requests\Cases\StoreRequest;
+use App\Http\Requests\Cases\TransitionStatusRequest;
+use App\Http\Requests\Cases\UpdateRequest;
+use App\Http\Resources\V1\MatterResource;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Court;
@@ -56,7 +61,7 @@ class CasesController extends Controller
         $cases = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\MatterResource::make($row)->resolve(),
+            fn ($row) => MatterResource::make($row)->resolve(),
             25,
             ['case_number', 'start_date', 'case_type', 'opposing_party'],
             ['case_number', 'opposing_party', 'police_station']
@@ -70,7 +75,7 @@ class CasesController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Cases\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_CASES)) {
             abort(403);
@@ -80,7 +85,7 @@ class CasesController extends Controller
         $case = app(OpenMatter::class)->handle($this->matterData($request), Auth::user(), $request->integer('conflict_check_id') ?: null);
 
         // ENG-4: return the created resource, not a full re-fetch of every case in the system.
-        return $this->response(true, 'success', \App\Http\Resources\V1\MatterResource::make($case->load(['client', 'attorney', 'court']))->resolve(), 201);
+        return $this->response(true, 'success', MatterResource::make($case->load(['client', 'attorney', 'court']))->resolve(), 201);
     }
 
     /**
@@ -154,7 +159,7 @@ class CasesController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\Cases\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_CASES)) {
             abort(403);
@@ -162,13 +167,13 @@ class CasesController extends Controller
 
         $case = app(UpdateMatter::class)->handle(Cases::findOrFail($id), $this->matterData($request), Auth::user());   // ENG-9
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\MatterResource::make($case->fresh(['client', 'attorney', 'court']))->resolve(), 200);
+        return $this->response(true, 'success', MatterResource::make($case->fresh(['client', 'attorney', 'court']))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
@@ -190,7 +195,7 @@ class CasesController extends Controller
      * bulk action bar's own confirm dialog); this endpoint trusts the
      * ids it's given but still re-checks permission server-side.
      */
-    public function destroyMany(\App\Http\Requests\Cases\DestroyManyRequest $request)
+    public function destroyMany(DestroyManyRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_CASES)) {
             abort(403);
@@ -224,7 +229,7 @@ class CasesController extends Controller
      * transition graph defined on the model rather than letting the client
      * set any arbitrary status.
      */
-    public function transitionStatus(\App\Http\Requests\Cases\TransitionStatusRequest $request, $id): Response|JsonResponse
+    public function transitionStatus(TransitionStatusRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_CASES)) {
             abort(403);
@@ -233,7 +238,7 @@ class CasesController extends Controller
         // ENG-9: only the transitions in Cases::transitions() (a refused one answers 422 with the reason)
         $case = app(ChangeMatterStatus::class)->handle(Cases::findOrFail($id), (string) $request->lifecycle_status, Auth::user());
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\MatterResource::make($case->fresh(['client', 'attorney', 'court']))->resolve(), 200);
+        return $this->response(true, 'success', MatterResource::make($case->fresh(['client', 'attorney', 'court']))->resolve(), 200);
     }
 
     public function dropDown(Request $request): JsonResponse

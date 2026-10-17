@@ -62,6 +62,7 @@ class ReleaseLog
     /**
      * Is running `$code` against a schema last upgraded by `$recorded` safe? Expand/contract (docs/MIGRATION_POLICY.md)
      * guarantees the PREVIOUS minor release works on the newer schema, so that window is a supported rollback.
+     *
      * @return 'none'|'warn'|'block'
      */
     public static function downgradeRisk(string $recorded, string $code): string

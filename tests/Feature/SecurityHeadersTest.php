@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 /** SEC-14: browser hardening headers and the CSP violation report endpoint. */
@@ -32,7 +33,7 @@ class SecurityHeadersTest extends TestCase
         $r->assertHeaderMissing('Content-Security-Policy-Report-Only')->assertHeaderMissing('Strict-Transport-Security');
 
         // a page that sets its own policy (the status page, the nonce-based standalone pages) keeps it, with no second one
-        \Illuminate\Support\Facades\Route::post('/own-policy', fn () => response('ok', 200, ['Content-Security-Policy' => "default-src 'none'"]));
+        Route::post('/own-policy', fn () => response('ok', 200, ['Content-Security-Policy' => "default-src 'none'"]));
         foreach (['enforce', 'report-only'] as $mode) {
             config(['security_headers.csp_mode' => $mode]);
             $this->post('/own-policy')->assertHeader('Content-Security-Policy', "default-src 'none'")

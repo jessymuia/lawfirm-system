@@ -3,6 +3,7 @@
 namespace App\Tenancy;
 
 use App\Catalog\SystemCatalog;
+use App\Jobs\ExportOffboardedTenant;
 use App\Models\User;
 use App\Tenancy\Models\Identity;
 use App\Tenancy\Models\Tenant;
@@ -11,7 +12,6 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -26,8 +26,7 @@ class TenantLifecycle
     public function __construct(
         private TenantManager $tenants,
         private TenantMigrator $migrator,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{slug:string,name:string,admin_email:string,admin_name?:string,admin_phone?:string,admin_password?:string,admin_password_hash?:string,domain?:string,database?:string,region?:string,plan?:string,cell?:?string}  $spec
@@ -118,7 +117,7 @@ class TenantLifecycle
         ]);
 
         // TEN-9: deletion starts with an export of everything, kept through the retention window
-        \App\Jobs\ExportOffboardedTenant::dispatch($tenant->slug);
+        ExportOffboardedTenant::dispatch($tenant->slug);
     }
 
     public function setLegalHold(Tenant $tenant, bool $hold): void

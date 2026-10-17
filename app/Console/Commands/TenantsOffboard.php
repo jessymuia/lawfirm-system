@@ -8,6 +8,7 @@ use App\Tenancy\TenantLifecycle;
 class TenantsOffboard extends TenantsLifecycleCommand
 {
     protected $signature = 'tenants:offboard {slug} {--retention-days= : Days before permanent deletion}';
+
     protected $description = 'Stop service and schedule permanent deletion after the retention window';
 
     protected function apply(TenantLifecycle $l, Tenant $t): string

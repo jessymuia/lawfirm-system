@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Constants\ModulePermissions as P;
 use App\Enums\MatterStatus;
 use App\Enums\PaymentStatus;
+use App\Http\Resources\V1\MatterResource;
 use App\Jobs\BackfillCaseTypes;
+use App\Matters\CaseTypes;
 use App\Models\Cases;
 use App\Models\CaseType;
 use App\Models\Client;
@@ -14,6 +16,7 @@ use App\Models\Payment;
 use App\Models\Task;
 use App\Models\TrustTransaction;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -88,7 +91,7 @@ class EnumsAndCaseTypesTest extends TestCase
         $this->assertSame(['Civil', 'Land and Environment'], array_column($this->getJson('/api/v1/case-types/options')->assertOk()->json('data'), 'name'));
         CaseType::where('name', 'Civil')->update(['archived_at' => now()]);
         $this->assertSame(['Land and Environment'], array_column($this->getJson('/api/v1/case-types/options')->json('data'), 'name'), 'archived types are not offered');
-        $shape = (new \App\Http\Resources\V1\MatterResource($d->fresh()))->toArray(request());
+        $shape = (new MatterResource($d->fresh()))->toArray(request());
         $this->assertSame([$d->case_type_id, 'Land and Environment'], [$shape['case_type_id'], $shape['case_type']]);
     }
 
@@ -100,10 +103,10 @@ class EnumsAndCaseTypesTest extends TestCase
         DB::table('cases')->insert(array_merge((array) DB::table('cases')->where('id', $matter->id)->first(['client_id', 'assigned_to', 'court_id', 'description', 'police_station', 'opposing_party', 'start_date']),
             ['case_number' => 'OLD/2', 'case_type' => 'Family', 'case_type_id' => null, 'lifecycle_status' => 'open', 'created_at' => now(), 'updated_at' => now()]));
 
-        $this->assertSame(2, (new BackfillCaseTypes)->handle(app(\App\Matters\CaseTypes::class)));
+        $this->assertSame(2, (new BackfillCaseTypes)->handle(app(CaseTypes::class)));
         $this->assertSame($matter->case_type_id, (int) DB::table('cases')->where('case_number', 'OLD/1')->value('case_type_id'), 'joins the existing type');
         $this->assertSame(['Criminal', 'Family'], CaseType::orderBy('name')->pluck('name')->all());
-        $this->assertSame(0, (new BackfillCaseTypes)->handle(app(\App\Matters\CaseTypes::class)), 'nothing left to fill');
+        $this->assertSame(0, (new BackfillCaseTypes)->handle(app(CaseTypes::class)), 'nothing left to fill');
     }
 
     public function test_the_database_refuses_an_unknown_priority_on_mysql(): void
@@ -111,7 +114,7 @@ class EnumsAndCaseTypesTest extends TestCase
         if (! in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
             $this->markTestSkipped('The priority CHECK constraint is added on MySQL/MariaDB; SQLite relies on the model guard.');
         }
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         DB::table('tasks')->insert(['title' => 'x', 'description' => 'x', 'assigned_to' => User::factory()->create()->id, 'due_date' => '2026-10-10',
             'priority' => 'urgent', 'task_status' => 'pending', 'created_at' => now(), 'updated_at' => now()]);
     }

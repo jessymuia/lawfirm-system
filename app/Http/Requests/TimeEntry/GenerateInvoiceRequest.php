@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TimeEntry;
 
-use App\Models\TimeEntry;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for TimeEntryController::generateInvoice(). Authorization is declared on the route (authz:*), not here. */

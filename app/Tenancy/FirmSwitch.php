@@ -10,6 +10,7 @@ use App\Sso\SsoService;
 use App\Tenancy\Models\Identity;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\Models\TenantMembership;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -109,7 +110,7 @@ class FirmSwitch
         return $user->global_identity_id ? Identity::find($user->global_identity_id) : null;
     }
 
-    private function control(): \Illuminate\Database\Connection
+    private function control(): Connection
     {
         return DB::connection((string) config('tenancy.control_connection'));
     }

@@ -12,6 +12,7 @@ use App\Models\MatterParty;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Testing\TestResponse;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -26,13 +27,13 @@ class ConflictCheckTest extends TestCase
         return $this->userWithPermissions([P::RUN_CONFLICT_CHECKS, P::CREATE_CLIENTS, P::LIST_CLIENTS, P::CREATE_CASES, P::LIST_CASES, P::UPDATE_CASES]);
     }
 
-    private function check(array $names, array $extra = []): \Illuminate\Testing\TestResponse
+    private function check(array $names, array $extra = []): TestResponse
     {
         return $this->postJson('/api/v1/conflicts/check', ['purpose' => 'client', 'names' => $names] + $extra);
     }
 
     /** A matter for $client, against $adverse (through the API so the dual write runs). */
-    private function matter(User $u, Client $client, string $adverse, string $number = null): Cases
+    private function matter(User $u, Client $client, string $adverse, ?string $number = null): Cases
     {
         $id = $this->actingAs($u)->postJson('/api/v1/cases', [
             'case_number' => $number ?? 'HC-'.uniqid(), 'description' => 'Dispute', 'client_id' => $client->id, 'assigned_to' => $u->id,

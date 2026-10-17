@@ -4,6 +4,7 @@ namespace App\EBilling;
 
 use App\Models\Invoice;
 use App\Support\FirmSettings;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -147,7 +148,7 @@ class Ledes1998B
 
     private function date($d): string
     {
-        return $d ? \Carbon\Carbon::parse($d)->format('Ymd') : '';
+        return $d ? Carbon::parse($d)->format('Ymd') : '';
     }
 
     private function money(float $v): string

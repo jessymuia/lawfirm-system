@@ -2,6 +2,10 @@
 
 namespace App\Backup;
 
+use App\Models\Cases;
+use App\Models\Invoice;
+use App\Models\User;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -91,9 +95,9 @@ class InstallRestoreDrill
                 $checks['pending_migrations'] = count(array_diff($shipped, $ran));   // a backup older than the code: allowed, upgrade applies them
                 $unknown && $problems[] = 'the restore has migrations this code does not know (a newer backup?): '.implode(', ', array_slice($unknown, 0, 5));
                 try {
-                    \App\Models\User::on('restore_drill')->first();
-                    \App\Models\Cases::on('restore_drill')->with('client')->latest('id')->first();
-                    \App\Models\Invoice::on('restore_drill')->with('items')->latest('id')->first();
+                    User::on('restore_drill')->first();
+                    Cases::on('restore_drill')->with('client')->latest('id')->first();
+                    Invoice::on('restore_drill')->with('items')->latest('id')->first();
                     $checks['app_reads_data'] = true;
                 } catch (\Throwable $e) {
                     $checks['app_reads_data'] = false;
@@ -165,7 +169,7 @@ class InstallRestoreDrill
         }
     }
 
-    private function server(array $conn): \Illuminate\Database\Connection
+    private function server(array $conn): Connection
     {
         config(['database.connections.restore_drill_server' => array_merge($conn, ['database' => 'information_schema'])]);
 

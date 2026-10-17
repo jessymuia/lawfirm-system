@@ -2,15 +2,17 @@
 
 namespace App\Portability;
 
+use App\Models\User;
+use App\Tenancy\IdentityService;
+use App\Tenancy\Models\Identity;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantManager;
+use Illuminate\Support\Str;
 
 /** PLAT-9: runs an export/import against the single install, or inside one tenant (multi mode). */
 class PortabilityRunner
 {
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     /** Run $fn against the active DB for a single install, or inside tenant $slug in multi mode. */
     public function within(?string $slug, \Closure $fn): mixed
@@ -53,14 +55,14 @@ class PortabilityRunner
     {
         return (int) $this->within($slug, function () use ($slug) {
             $tenant = Tenant::where('slug', $slug)->firstOrFail();
-            $svc = app(\App\Tenancy\IdentityService::class);
+            $svc = app(IdentityService::class);
             $n = 0;
-            foreach (\App\Models\User::query()->whereNull('platform_staff_id')->get() as $user) {
+            foreach (User::query()->whereNull('platform_staff_id')->get() as $user) {
                 if (! $user->email || ! $user->password) {
                     continue;
                 }
                 $identity = $svc->findByEmail($user->email)
-                    ?? \App\Tenancy\Models\Identity::create(['email' => \Illuminate\Support\Str::lower(trim($user->email)), 'password' => $user->password]);
+                    ?? Identity::create(['email' => Str::lower(trim($user->email)), 'password' => $user->password]);
                 $svc->link($identity, $tenant, $user);
                 $n++;
             }

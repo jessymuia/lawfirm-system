@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Catalog\HandlesCatalogRows;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\CourtType\StoreRequest;
+use App\Http\Requests\CourtType\UpdateRequest;
+use App\Http\Resources\V1\CourtTypeResource;
 use App\Models\CourtType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,7 +32,7 @@ class CourtTypeController extends Controller
         $types = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\CourtTypeResource::make($row)->resolve(),
+            fn ($row) => CourtTypeResource::make($row)->resolve(),
             25,
             ['name'],
             ['name', 'alias']
@@ -39,7 +42,7 @@ class CourtTypeController extends Controller
     }
 
     /** ENG-16: dropdown options (id + name), capped; see Controller::optionsResponse(). */
-    public function options(\Illuminate\Http\Request $request): JsonResponse
+    public function options(Request $request): JsonResponse
     {
         return $this->optionsResponse($request, CourtType::query(), fn ($r) => $r->displayName());
     }
@@ -49,7 +52,7 @@ class CourtTypeController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\CourtType\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_COURTS)) {
             abort(403);
@@ -59,7 +62,7 @@ class CourtTypeController extends Controller
             'name' => $request->name,
         ]);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\CourtTypeResource::make($type)->resolve(), 201);
+        return $this->response(true, 'success', CourtTypeResource::make($type)->resolve(), 201);
     }
 
     /**
@@ -67,7 +70,7 @@ class CourtTypeController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\CourtType\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_COURTS)) {
             abort(403);
@@ -76,20 +79,20 @@ class CourtTypeController extends Controller
         $type = CourtType::findOrFail($id);
         if ($type->is_system) {
             // TEN-11: a firm can only give a system row a local name.
-            return $this->response(true, 'success', \App\Http\Resources\V1\CourtTypeResource::make($this->updateCatalogAlias($request, $type))->resolve(), 200);
+            return $this->response(true, 'success', CourtTypeResource::make($this->updateCatalogAlias($request, $type))->resolve(), 200);
         }
 
         $type->name = $request->name;
         $type->updated_by = auth()->user()->id;
         $type->save();
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\CourtTypeResource::make($type)->resolve(), 200);
+        return $this->response(true, 'success', CourtTypeResource::make($type)->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

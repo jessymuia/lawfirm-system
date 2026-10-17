@@ -3,18 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
+use App\Exports\FirmExportBuilder;
+use App\Jobs\BuildFirmExport;
+use App\Matters\MatterAccess;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Expense;
-use App\Models\Hearing;
+use App\Models\FirmExport;
 use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\Task;
-use App\Models\TimeEntry;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
@@ -150,14 +155,14 @@ class ExportController extends Controller
         }
 
         // dompdf writes its font cache here; without the directory the text is silently dropped and the PDF comes out blank
-        \Illuminate\Support\Facades\File::ensureDirectoryExists(storage_path('fonts'));
+        File::ensureDirectoryExists(storage_path('fonts'));
 
         $pdf = Pdf::loadView('exports.invoice', ['invoice' => $invoice]);
         $bytes = $pdf->output();
 
         // a real PDF starts with %PDF and is never a few hundred bytes; say so rather than hand over an empty file
         if (strncmp($bytes, '%PDF', 4) !== 0 || strlen($bytes) < 1500) {
-            \Illuminate\Support\Facades\Log::error('invoice.pdf empty output', ['invoice' => $invoice->id, 'bytes' => strlen($bytes)]);
+            Log::error('invoice.pdf empty output', ['invoice' => $invoice->id, 'bytes' => strlen($bytes)]);
 
             return response()->json(['success' => false, 'message' => 'The PDF could not be generated. Please try again or contact support.', 'data' => null], 500);
         }
@@ -182,18 +187,18 @@ class ExportController extends Controller
      * regardless of creator) because its purpose is a complete backup/
      * extraction of the firm's data, not a personal work view.
      */
-    public function fullFirmExport(): StreamedResponse|JsonResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function fullFirmExport(): StreamedResponse|JsonResponse|BinaryFileResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::EXPORT_FIRM_DATA)) {
             abort(403);
         }
         // SEC-10: a complete extraction would hand a restricted user matters they cannot otherwise see.
-        if (\App\Matters\MatterAccess::subject()) {
+        if (MatterAccess::subject()) {
             abort(403, 'The full-firm export requires access to all matters.');
         }
 
         // ENG-21: prefer POST /export/firm-data (queued, emailed link). This synchronous form stays for existing callers.
-        $zipPath = (new \App\Exports\FirmExportBuilder)->build();
+        $zipPath = (new FirmExportBuilder)->build();
 
         return response()->download($zipPath)->deleteFileAfterSend(true);
     }
@@ -203,18 +208,18 @@ class ExportController extends Controller
     /** Queue a firm-wide export. 202 with the request; poll firmExportStatus for the download link. */
     public function requestFirmExport(): JsonResponse
     {
-        if (\App\Matters\MatterAccess::subject()) {
+        if (MatterAccess::subject()) {
             abort(403, 'The full-firm export requires access to all matters.');
         }
-        $export = \App\Models\FirmExport::create(['requested_by' => Auth::id(), 'status' => 'queued']);
-        \App\Jobs\BuildFirmExport::dispatch($export->id);
+        $export = FirmExport::create(['requested_by' => Auth::id(), 'status' => 'queued']);
+        BuildFirmExport::dispatch($export->id);
 
         return response()->json(['success' => true, 'message' => 'Export queued. You will get an email when it is ready.', 'data' => $this->exportView($export->fresh())], 202);
     }
 
     public function firmExportStatus(int $id): JsonResponse
     {
-        $export = \App\Models\FirmExport::findOrFail($id);
+        $export = FirmExport::findOrFail($id);
         abort_unless($export->requested_by === Auth::id(), 404);   // your own exports only
 
         return response()->json(['success' => true, 'data' => $this->exportView($export)]);
@@ -223,21 +228,21 @@ class ExportController extends Controller
     /** Signed, expiring URL (route middleware `signed`) AND the requester's own session: a leaked link alone opens nothing. */
     public function downloadFirmExport(int $id)
     {
-        $export = \App\Models\FirmExport::findOrFail($id);
+        $export = FirmExport::findOrFail($id);
         abort_unless($export->requested_by === Auth::id(), 404);
         abort_unless($export->isDownloadable(), 410, 'This export has expired. Request a new one.');
 
-        return \Illuminate\Support\Facades\Storage::disk('local')->download((string) $export->path, 'firm-export-'.$export->ready_at?->format('Y-m-d').'.zip');
+        return Storage::disk('local')->download((string) $export->path, 'firm-export-'.$export->ready_at?->format('Y-m-d').'.zip');
     }
 
-    private function exportView(\App\Models\FirmExport $e): array
+    private function exportView(FirmExport $e): array
     {
         return [
             'id' => $e->id, 'status' => $e->isDownloadable() || $e->status !== 'ready' ? $e->status : 'expired',
             'size' => $e->size, 'requested_at' => $e->created_at?->toIso8601String(), 'ready_at' => $e->ready_at?->toIso8601String(),
             'expires_at' => $e->expires_at?->toIso8601String(), 'error' => $e->status === 'failed' ? 'The export could not be built. Try again or contact support.' : null,
             'download_url' => $e->isDownloadable()
-                ? \Illuminate\Support\Facades\URL::temporarySignedRoute('exports.firm.download', now()->addMinutes((int) config('exports.signed_url_minutes', 15)), ['id' => $e->id], absolute: false)
+                ? URL::temporarySignedRoute('exports.firm.download', now()->addMinutes((int) config('exports.signed_url_minutes', 15)), ['id' => $e->id], absolute: false)
                 : null,
         ];
     }

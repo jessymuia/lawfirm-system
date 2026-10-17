@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * ENG-21: one queued firm-wide export.
@@ -14,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $path
  * @property int|null $size
  * @property string|null $error
- * @property \Illuminate\Support\Carbon|null $ready_at
- * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property Carbon|null $ready_at
+ * @property Carbon|null $expires_at
  */
 class FirmExport extends Model
 {

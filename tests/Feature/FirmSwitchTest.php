@@ -11,10 +11,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** UI-16: someone in several firms moves between them without signing in again, under each firm's own rules. */
-class FirmSwitchTest extends TestCase implements \Tests\OwnsTenancy
+class FirmSwitchTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Observability\UsageMetrics;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
 use App\Tenancy\TenantManager;
@@ -10,10 +9,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** ENG-24: per-tenant usage metrics (API calls counter, users/matters/storage gauges). */
-class TenantUsageMetricsTest extends TestCase implements \Tests\OwnsTenancy
+class TenantUsageMetricsTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 

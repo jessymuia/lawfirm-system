@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ExtractDocumentText;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Document;
@@ -13,6 +14,7 @@ use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
 use App\Warehouse\WarehousePurgeStep;
 use App\Warehouse\WarehouseSchema;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Bus;
@@ -32,7 +34,7 @@ class WarehouseTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Bus::fake([\App\Jobs\ExtractDocumentText::class]);
+        Bus::fake([ExtractDocumentText::class]);
         Storage::fake('warehouse-test');
         $this->whFile = sys_get_temp_dir().'/warehouse-'.uniqid().'.sqlite';
         touch($this->whFile);
@@ -42,7 +44,7 @@ class WarehouseTest extends TestCase
             'warehouse.connection' => 'warehouse_test',
         ]);
         $this->firm = app(TenantContext::class)->key();
-        $this->travelTo(\Carbon\Carbon::parse('2026-10-05 08:00'));
+        $this->travelTo(Carbon::parse('2026-10-05 08:00'));
     }
 
     protected function tearDown(): void

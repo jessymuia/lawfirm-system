@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Tenancy\FirmStorage;
 use App\Tenancy\TenantContext;
 use Aws\S3\PostObjectV4;
+use Illuminate\Filesystem\AwsS3V3Adapter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -61,7 +62,7 @@ class DirectUploads
         ]);
 
         // A POST policy, not a pre-signed PUT: S3 itself refuses a different key, type or a larger file.
-        /** @var \Illuminate\Filesystem\AwsS3V3Adapter $s3 */
+        /** @var AwsS3V3Adapter $s3 */
         $s3 = Storage::build((array) config("filesystems.disks.{$disk}"));   // the disk as configured, never a test double
         $key = $s3->path($path);
         $bucket = (string) config("filesystems.disks.{$disk}.bucket");

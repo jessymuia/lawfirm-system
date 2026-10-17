@@ -17,8 +17,7 @@ final class EntitlementSet
         public readonly ?string $notice = null,
         // Why it is read-only, as the API reports it (default license_expired; PLAT-13: trial_expired).
         public readonly ?string $code = null,
-    ) {
-    }
+    ) {}
 
     /** The same plan with a banner, optionally read-only (PLAT-13: a trial about to end, or ended). */
     public function withState(bool $readOnly, ?string $notice, ?string $code = null): self

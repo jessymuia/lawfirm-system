@@ -3,7 +3,6 @@
 namespace App\Http\Requests\TrustTransaction;
 
 use App\Enums\TrustEntryType;
-use App\Models\TrustTransaction;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for TrustTransactionController::store(). Authorization is declared on the route (authz:*), not here. */

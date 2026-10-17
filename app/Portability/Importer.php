@@ -2,6 +2,7 @@
 
 namespace App\Portability;
 
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -85,7 +86,7 @@ class Importer
     /** Where a document stored at $path lands here: under THIS tenant's object-store prefix (TEN-12), not the source's. */
     private function targetPath(Bundle $bundle, string $path): string
     {
-        $to = 'tenants/'.app(\App\Tenancy\TenantContext::class)->key().'/';
+        $to = 'tenants/'.app(TenantContext::class)->key().'/';
         if (str_starts_with($path, $to)) {
             return $path;
         }

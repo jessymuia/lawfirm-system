@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
-use App\Entitlements\Entitlements;
 use App\Entitlements\EntitlementException;
+use App\Entitlements\Entitlements;
 use App\Http\Middleware\ScimTokenAuth;
 use App\Http\Requests\Scim\CreateTokenRequest;
 use App\Http\Requests\Scim\ScimPatchRequest;
 use App\Http\Requests\Scim\ScimUserRequest;
 use App\Models\User;
 use App\Security\SecurityPolicy;
+use App\Tenancy\IdentityService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -29,8 +32,8 @@ class ScimController extends Controller
 {
     private const USER = 'urn:ietf:params:scim:schemas:core:2.0:User';
 
-    /** @return \Illuminate\Database\Eloquent\Builder<User> */
-    private function base(): \Illuminate\Database\Eloquent\Builder
+    /** @return Builder<User> */
+    private function base(): Builder
     {
         return User::withTrashed()->whereNull('platform_staff_id');
     }
@@ -148,7 +151,7 @@ class ScimController extends Controller
                 'name' => $this->nameFrom($d, $email), 'email' => $email, 'password' => Hash::make($temporary),
                 'phone_number' => '', 'department' => '', 'hire_date' => now()->toDateString(),
             ]);
-            app(\App\Tenancy\IdentityService::class)->enrol($user, $temporary);
+            app(IdentityService::class)->enrol($user, $temporary);
             $roleId = $r->attributes->get('scim_token')->default_role_id ?? null;
             if ($roleId && ($role = Role::find($roleId))) {
                 $user->assignRole($role);
@@ -265,7 +268,7 @@ class ScimController extends Controller
     }
 
     /** DELETE deactivates (never erases): the same soft delete the app uses. */
-    public function destroy(Request $r, int $id): JsonResponse|\Illuminate\Http\Response
+    public function destroy(Request $r, int $id): JsonResponse|Response
     {
         $u = $this->base()->whereKey($id)->first();
         if (! $u) {

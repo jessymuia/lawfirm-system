@@ -2,6 +2,8 @@
 
 namespace App\Platform;
 
+use App\Security\MfaCore;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -13,7 +15,7 @@ class PlatformAuth
 
     public const LOCK_MINUTES = 15;
 
-    /** @return array{token: string, staff: PlatformStaff, expires_at: \Illuminate\Support\Carbon}|array{mfa_required: true, challenge: string, staff: PlatformStaff}|null null = bad credentials (one answer for unknown/locked/disabled/wrong) */
+    /** @return array{token: string, staff: PlatformStaff, expires_at: Carbon}|array{mfa_required: true, challenge: string, staff: PlatformStaff}|null null = bad credentials (one answer for unknown/locked/disabled/wrong) */
     public function login(string $email, string $password, ?string $ip = null): ?array
     {
         $staff = PlatformStaff::where('email', mb_strtolower($email))->first();
@@ -85,9 +87,9 @@ class PlatformAuth
         return ['token' => $token, 'staff' => $staff, 'expires_at' => $expires, 'enroll_only' => $enrollOnly];
     }
 
-    public function mfa(): \App\Security\MfaCore
+    public function mfa(): MfaCore
     {
-        return new \App\Security\MfaCore(config('tenancy.control_connection'), 'platform_staff_mfa', 'platform_mfa_challenges', 'staff_id');
+        return new MfaCore(config('tenancy.control_connection'), 'platform_staff_mfa', 'platform_mfa_challenges', 'staff_id');
     }
 
     /** Set after authenticate(): did the presented token come from a login that must still enrol two-factor? */

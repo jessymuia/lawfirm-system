@@ -12,11 +12,15 @@ use App\Actions\Payments\RecordPayment;
 use App\Actions\Time\RecordTime;
 use App\Branding\Branding;
 use App\Models\Cases;
+use App\Models\Client;
 use App\Models\Court;
 use App\Models\CourtType;
+use App\Models\Hearing;
 use App\Models\HearingType;
-use App\Models\TaxRate;
+use App\Models\Invoice;
 use App\Models\Task;
+use App\Models\TaxRate;
+use App\Models\TrustTransaction;
 use App\Models\User;
 use App\Tenancy\IdentityService;
 use Carbon\CarbonImmutable;
@@ -38,7 +42,7 @@ class KenyaFirmSeeder
     /** @var array<string, int> client key => client id */
     private array $clientIds = [];
 
-    /** @var array<string, \App\Models\Cases> matter key => matter */
+    /** @var array<string, Cases> matter key => matter */
     private array $matters = [];
 
     private CarbonImmutable $today;
@@ -118,7 +122,7 @@ class KenyaFirmSeeder
     {
         $register = app(RegisterClient::class);
         foreach ($this->firm['clients'] as $key => $c) {
-            $existing = \App\Models\Client::withoutGlobalScopes()->where('phone_number', $c['phone'])->first();
+            $existing = Client::withoutGlobalScopes()->where('phone_number', $c['phone'])->first();
             if ($existing) {
                 $this->clientIds[$key] = (int) $existing->id;
 
@@ -154,7 +158,7 @@ class KenyaFirmSeeder
         $schedule = app(ScheduleHearing::class);
         foreach ($this->firm['matters'] as $m) {
             $case = $this->matters[$m['key']];
-            if (\App\Models\Hearing::where('case_id', $case->id)->exists()) {
+            if (Hearing::where('case_id', $case->id)->exists()) {
                 continue;
             }
             foreach ($m['hearings'] as $h) {
@@ -211,7 +215,7 @@ class KenyaFirmSeeder
 
         foreach ($this->firm['invoices'] as [$key, $ago, $terms, $items, $paid]) {
             $case = $this->matters[$key];
-            if (\App\Models\Invoice::where('case_id', $case->id)->where('invoice_date', $this->day($ago)->toDateString())->exists()) {
+            if (Invoice::where('case_id', $case->id)->where('invoice_date', $this->day($ago)->toDateString())->exists()) {
                 continue;
             }
             $invoice = $draft->handle([
@@ -233,7 +237,7 @@ class KenyaFirmSeeder
 
     private function trust(): void
     {
-        if (\App\Models\TrustTransaction::query()->exists()) {
+        if (TrustTransaction::query()->exists()) {
             return;
         }
         $by = $this->userIds[array_key_first($this->userIds)] ?? null;
@@ -243,8 +247,8 @@ class KenyaFirmSeeder
         $n = 0;
         foreach (array_slice($this->matters, 0, 3, true) as $case) {
             $n++;
-            \App\Models\TrustTransaction::post($case->client_id, $case->id, 'deposit', 150000 * $n, 'Client deposit held on account', 'DEP-'.(4100 + $n), $by);
-            \App\Models\TrustTransaction::post($case->client_id, $case->id, 'disbursement', 25000 * $n, 'Court filing fees paid from trust', 'DIS-'.(4200 + $n), $by);
+            TrustTransaction::post($case->client_id, $case->id, 'deposit', 150000 * $n, 'Client deposit held on account', 'DEP-'.(4100 + $n), $by);
+            TrustTransaction::post($case->client_id, $case->id, 'disbursement', 25000 * $n, 'Court filing fees paid from trust', 'DIS-'.(4200 + $n), $by);
         }
     }
 

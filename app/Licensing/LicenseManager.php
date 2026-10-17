@@ -9,9 +9,7 @@ class LicenseManager
 {
     private ?LicenseStatus $memo = null;
 
-    public function __construct(private LicenseVerifier $verifier)
-    {
-    }
+    public function __construct(private LicenseVerifier $verifier) {}
 
     public function path(): string
     {

@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * DATA-12: one of the firm's matter types (App\Matters\CaseTypes).
  *
  * @property int $id
  * @property string $name
- * @property \Illuminate\Support\Carbon|null $archived_at
+ * @property Carbon|null $archived_at
  */
 class CaseType extends Model
 {

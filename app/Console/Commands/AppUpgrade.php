@@ -3,6 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Catalog\SystemCatalog;
+use App\Jobs\BackfillCaseTypes;
+use App\Jobs\BackfillDocumentText;
+use App\Jobs\BackfillInvoiceFx;
+use App\Jobs\BackfillMatterParties;
+use App\Jobs\BackfillPublicIds;
+use App\Releases\ReleaseNotes;
+use App\Services\Migration\LegacyMapping;
 use App\Support\ReleaseLog;
 use App\Support\RoleCatalog;
 use App\Tenancy\Models\Tenant;
@@ -62,7 +69,7 @@ class AppUpgrade extends Command
 
         $pending = $this->pendingMigrations($multi);
         $this->line('Release: '.($recorded ?? 'none recorded')." -> {$version}");
-        foreach (\App\Releases\ReleaseNotes::fromApp()->summaryLines($recorded, $version) as $l) {   // PLAT-10
+        foreach (ReleaseNotes::fromApp()->summaryLines($recorded, $version) as $l) {   // PLAT-10
             $this->line($l);
         }
         $this->line($pending === [] ? 'Pending migrations: none' : 'Pending migrations: '.count($pending));
@@ -109,11 +116,11 @@ class AppUpgrade extends Command
                 $this->info('Permissions and roles are up to date.');
                 SystemCatalog::sync();
                 $this->info('System reference data is up to date.');
-                \App\Jobs\BackfillPublicIds::dispatch();   // DATA-9: queued backfill of public ids
-                \App\Jobs\BackfillMatterParties::dispatch();   // FUN-9: past opposing parties into the conflicts register
-                \App\Jobs\BackfillDocumentText::dispatch();     // FUN-8: make earlier documents searchable
-                \App\Jobs\BackfillCaseTypes::dispatch();        // DATA-12: matters' free-text types into the case_types list
-                \App\Jobs\BackfillInvoiceFx::dispatch();       // DATA-14: issued invoices in the base currency get rate 1
+                BackfillPublicIds::dispatch();   // DATA-9: queued backfill of public ids
+                BackfillMatterParties::dispatch();   // FUN-9: past opposing parties into the conflicts register
+                BackfillDocumentText::dispatch();     // FUN-8: make earlier documents searchable
+                BackfillCaseTypes::dispatch();        // DATA-12: matters' free-text types into the case_types list
+                BackfillInvoiceFx::dispatch();       // DATA-14: issued invoices in the base currency get rate 1
             }
 
             if (! $this->option('skip-cache')) {
@@ -192,8 +199,8 @@ class AppUpgrade extends Command
         }
         // CARRY-4: upgrading a legacy database turns its coded values into named states; a value nobody has mapped would
         // silently become the wrong state (an unknown invoice status becomes a draft), so it stops the upgrade instead.
-        if (config('tenancy.mode') !== 'multi' && ! $this->option('accept-legacy-values') && \App\Services\Migration\LegacyMapping::isLegacy(DB::connection())) {
-            foreach (app(\App\Services\Migration\LegacyMapping::class)->unmapped(DB::connection()) as $u) {
+        if (config('tenancy.mode') !== 'multi' && ! $this->option('accept-legacy-values') && LegacyMapping::isLegacy(DB::connection())) {
+            foreach (app(LegacyMapping::class)->unmapped(DB::connection()) as $u) {
                 $problems[] = "legacy value not in config/legacy_mapping.php: {$u['column']} = {$u['value']} ({$u['count']} rows); see php artisan migration:status-report";
             }
         }

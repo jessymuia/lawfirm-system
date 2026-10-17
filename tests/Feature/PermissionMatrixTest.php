@@ -2,8 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\AuthorizeRoute;
 use App\Models\Cases;
+use App\Models\FirmExport;
+use App\Models\Hearing;
+use App\Models\Invoice;
+use App\Policies\ModulePolicy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Spatie\Permission\Models\Permission;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -129,14 +139,14 @@ class PermissionMatrixTest extends TestCase
 
     // ---- ENG-11: deny by default -----------------------------------------------------------------------------------
 
-    /** @return array<class-string, \App\Policies\ModulePolicy> every model with its policy */
+    /** @return array<class-string, ModulePolicy> every model with its policy */
     private function policies(): array
     {
         $out = [];
         foreach (glob(app_path('Models/*.php')) as $file) {
             $class = 'App\\Models\\'.basename($file, '.php');
-            $policy = \Illuminate\Support\Facades\Gate::getPolicyFor($class);
-            $this->assertInstanceOf(\App\Policies\ModulePolicy::class, $policy, "{$class} has no policy (add app/Policies/".class_basename($class).'Policy.php).');
+            $policy = Gate::getPolicyFor($class);
+            $this->assertInstanceOf(ModulePolicy::class, $policy, "{$class} has no policy (add app/Policies/".class_basename($class).'Policy.php).');
             $out[$class] = $policy;
         }
 
@@ -146,7 +156,7 @@ class PermissionMatrixTest extends TestCase
     public function test_every_model_has_a_policy_that_denies_a_user_without_permissions(): void
     {
         $nobody = $this->userWithPermissions([]);
-        $gate = \Illuminate\Support\Facades\Gate::forUser($nobody);
+        $gate = Gate::forUser($nobody);
 
         foreach ($this->policies() as $class => $policy) {
             foreach (['viewAny', 'create'] as $ability) {
@@ -168,30 +178,30 @@ class PermissionMatrixTest extends TestCase
                 $target = in_array($ability, ['viewAny', 'create'], true) ? $class : new $class;
                 $permission = $policy->permissionFor($ability);
                 $holder = $permission !== null ? $this->userWithPermissions([$permission]) : null;
-                if ($target instanceof \App\Models\FirmExport) {
+                if ($target instanceof FirmExport) {
                     $target->forceFill(['requested_by' => $holder?->id]);   // an export belongs to whoever asked for it
                 }
                 if ($permission === null) {
-                    if ($class === \App\Models\Invoice::class && $ability === 'delete') {
+                    if ($class === Invoice::class && $ability === 'delete') {
                         continue;   // own-draft rule, covered below
                     }
-                    $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($admin)->allows($ability, $target), "{$class}: unmapped {$ability} allowed");
+                    $this->assertFalse(Gate::forUser($admin)->allows($ability, $target), "{$class}: unmapped {$ability} allowed");
 
                     continue;
                 }
-                $this->assertTrue(\Spatie\Permission\Models\Permission::where('name', $permission)->exists(), "{$class}: {$ability} maps to unknown permission {$permission}");
-                $this->assertTrue(\Illuminate\Support\Facades\Gate::forUser($holder)->allows($ability, $target), "{$class}: {$ability} refused to a holder of {$permission}");
+                $this->assertTrue(Permission::where('name', $permission)->exists(), "{$class}: {$ability} maps to unknown permission {$permission}");
+                $this->assertTrue(Gate::forUser($holder)->allows($ability, $target), "{$class}: {$ability} refused to a holder of {$permission}");
             }
-            $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($admin)->allows('forceDelete', new $class), "{$class}: forceDelete allowed");
-            $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($admin)->allows('somethingNobodyDefined', $class), "{$class}: an undefined ability was allowed");
+            $this->assertFalse(Gate::forUser($admin)->allows('forceDelete', new $class), "{$class}: forceDelete allowed");
+            $this->assertFalse(Gate::forUser($admin)->allows('somethingNobodyDefined', $class), "{$class}: an undefined ability was allowed");
         }
     }
 
     public function test_a_model_without_a_policy_is_refused(): void
     {
-        $orphan = new class extends \Illuminate\Database\Eloquent\Model {};
+        $orphan = new class extends Model {};
 
-        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($this->adminUser())->allows('view', $orphan));
+        $this->assertFalse(Gate::forUser($this->adminUser())->allows('view', $orphan));
     }
 
     public function test_record_abilities_follow_matter_access_and_ethical_walls(): void
@@ -200,13 +210,13 @@ class PermissionMatrixTest extends TestCase
         $user = $this->userWithPermissions(['list-cases', 'update-cases', 'list-hearings']);
         $mine = Cases::factory()->create(['assigned_to' => $user->id]);
         $theirs = Cases::factory()->create();
-        $gate = \Illuminate\Support\Facades\Gate::forUser($user);
+        $gate = Gate::forUser($user);
 
         $this->assertTrue($gate->allows('view', $mine));
         $this->assertTrue($gate->allows('update', $mine));
         $this->assertFalse($gate->allows('view', $theirs), 'a matter outside the access rule');
-        $this->assertFalse($gate->allows('view', new \App\Models\Hearing(['case_id' => $theirs->id])), 'records follow their matter');
-        $this->assertTrue($gate->allows('view', new \App\Models\Hearing(['case_id' => $mine->id])));
+        $this->assertFalse($gate->allows('view', new Hearing(['case_id' => $theirs->id])), 'records follow their matter');
+        $this->assertTrue($gate->allows('view', new Hearing(['case_id' => $mine->id])));
     }
 
     public function test_invoice_delete_is_any_invoice_with_the_permission_otherwise_only_ones_own_draft_and_a_refusal_is_a_404(): void
@@ -216,22 +226,22 @@ class PermissionMatrixTest extends TestCase
         $draft = function ($user) {
             $case = Cases::factory()->create();
 
-            return \App\Models\Invoice::findOrFail($this->actingAs($user)->postJson('/api/v1/invoices', [
+            return Invoice::findOrFail($this->actingAs($user)->postJson('/api/v1/invoices', [
                 'case_id' => $case->id, 'client_id' => $case->client_id, 'invoice_date' => '01/10/2026', 'invoice_due_date' => '31/10/2026',
             ])->assertCreated()->json('data.id'));
         };
         $own = $draft($clerk);
         $ownSent = $draft($clerk);
-        \Illuminate\Support\Facades\DB::table('invoices')->where('id', $ownSent->id)->update(['workflow_status' => 'submitted']);
+        DB::table('invoices')->where('id', $ownSent->id)->update(['workflow_status' => 'submitted']);
         $ownSent->refresh();
         $other = $draft($colleague);
 
-        $gate = \Illuminate\Support\Facades\Gate::forUser($clerk);
+        $gate = Gate::forUser($clerk);
         $this->assertTrue($gate->allows('delete', $own));
         $this->assertFalse($gate->allows('delete', $ownSent));
         $this->assertSame(404, $gate->inspect('delete', $other)->status());
-        $this->assertTrue(\Illuminate\Support\Facades\Gate::forUser($this->userWithPermissions(['delete-invoice']))->allows('delete', $other));
-        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($this->userWithPermissions([]))->allows('deleteAny', \App\Models\Invoice::class));
+        $this->assertTrue(Gate::forUser($this->userWithPermissions(['delete-invoice']))->allows('delete', $other));
+        $this->assertFalse(Gate::forUser($this->userWithPermissions([]))->allows('deleteAny', Invoice::class));
 
         $this->actingAs($clerk)->deleteJson("/api/v1/invoices/{$other->id}")->assertNotFound();
         $this->actingAs($clerk)->deleteJson("/api/v1/invoices/{$own->id}")->assertOk();
@@ -240,10 +250,10 @@ class PermissionMatrixTest extends TestCase
 
     public function test_a_policy_route_naming_no_model_fails_closed(): void
     {
-        $request = \Illuminate\Http\Request::create('/x');
+        $request = Request::create('/x');
         $request->setUserResolver(fn () => $this->adminUser());
 
         $this->expectException(\LogicException::class);
-        (new \App\Http\Middleware\AuthorizeRoute)->handle($request, fn () => response('should not run'), 'policy', 'view', 'NoSuchModel');
+        (new AuthorizeRoute)->handle($request, fn () => response('should not run'), 'policy', 'view', 'NoSuchModel');
     }
 }

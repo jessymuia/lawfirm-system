@@ -3,16 +3,18 @@
 namespace Tests\Feature;
 
 use App\Entitlements\Entitlements;
+use App\Entitlements\EntitlementSource;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
 use App\Tenancy\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-1 (SaaS source): the tenant's plan + overrides, isolated per tenant, fail-closed. */
-class TenantEntitlementsTest extends TestCase implements \Tests\OwnsTenancy
+class TenantEntitlementsTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -37,7 +39,7 @@ class TenantEntitlementsTest extends TestCase implements \Tests\OwnsTenancy
             'tenancy.mode' => 'multi',
         ]);
         // The source is chosen at boot from the mode, so rebuild it now that the mode is multi.
-        $this->app->forgetInstance(\App\Entitlements\EntitlementSource::class);
+        $this->app->forgetInstance(EntitlementSource::class);
         $this->app->forgetInstance(Entitlements::class);
         Artisan::call('migrate', ['--database' => 'control', '--path' => 'database/migrations/control', '--force' => true]);
     }

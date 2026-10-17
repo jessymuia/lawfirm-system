@@ -16,9 +16,7 @@ use Carbon\CarbonImmutable;
 class LicenseVerifier
 {
     /** @param list<string> $publicKeys base64 Ed25519 public keys; any one may have signed (key rotation) */
-    public function __construct(private array $publicKeys, private int $defaultGraceDays = 30)
-    {
-    }
+    public function __construct(private array $publicKeys, private int $defaultGraceDays = 30) {}
 
     public function verify(string $fileContents, CarbonImmutable $now): LicenseStatus
     {

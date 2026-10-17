@@ -2,15 +2,17 @@
 
 namespace App\Http\Requests\Expense;
 
+use App\EBilling\Utbms;
+use App\Http\Requests\Concerns\RouteRecord;
 use App\Models\Expense;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for ExpenseController::update(). Authorization is declared on the route (authz:*), not here. */
 class UpdateRequest extends FormRequest
 {
-    use \App\Http\Requests\Concerns\RouteRecord;
+    use RouteRecord;
 
-    protected string $recordModel = \App\Models\Expense::class;
+    protected string $recordModel = Expense::class;
 
     protected string $recordParameter = 'expense';
 
@@ -23,7 +25,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'utbms_expense_code' => 'nullable|string|in:'.implode(',', array_keys(\App\EBilling\Utbms::EXPENSES)),   // FUN-13
+            'utbms_expense_code' => 'nullable|string|in:'.implode(',', array_keys(Utbms::EXPENSES)),   // FUN-13
             'case_id' => 'required|integer|exists:cases,id',
             'expense_date' => 'required|date_format:d/m/Y',
             'amount' => 'required|numeric|min:0',

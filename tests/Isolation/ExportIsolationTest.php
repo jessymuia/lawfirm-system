@@ -2,8 +2,12 @@
 
 namespace Tests\Isolation;
 
+use App\Entitlements\Entitlements;
 use App\Tenancy\Models\Tenant;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Testing\TestResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** TEN-10: exports: what leaves a firm contains that firm only. */
 class ExportIsolationTest extends IsolationTestCase
@@ -29,7 +33,7 @@ class ExportIsolationTest extends IsolationTestCase
     private function enableExport(): void
     {
         Tenant::query()->update(['plan' => 'professional']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
     }
 
     public function test_the_full_firm_export_contains_only_that_firm(): void
@@ -49,14 +53,14 @@ class ExportIsolationTest extends IsolationTestCase
     public function test_two_firms_exporting_in_the_same_second_get_their_own_zip(): void
     {
         $this->enableExport();
-        \Illuminate\Support\Carbon::setTestNow(now()->startOfSecond());
+        Carbon::setTestNow(now()->startOfSecond());
         try {
             $ra = $this->api('a', 'GET', '/export/firm-data')->assertOk();
             $fa = $ra->baseResponse->getFile()->getPathname();
             $rb = $this->api('b', 'GET', '/export/firm-data')->assertOk();
             $fb = $rb->baseResponse->getFile()->getPathname();
         } finally {
-            \Illuminate\Support\Carbon::setTestNow();
+            Carbon::setTestNow();
         }
         $this->assertNotSame($fa, $fb, 'two firms must never be given the same scratch file');
         $this->assertStringContainsString('/tmp-exports/a/', $fa);
@@ -68,7 +72,7 @@ class ExportIsolationTest extends IsolationTestCase
         foreach (['a' => 'b', 'b' => 'a'] as $mine => $other) {
             foreach (['/export/cases', '/export/invoices', '/export/expenses'] as $uri) {
                 $r = $this->api($mine, 'GET', $uri)->assertOk();
-                $body = $r instanceof \Illuminate\Testing\TestResponse && $r->baseResponse instanceof \Symfony\Component\HttpFoundation\StreamedResponse
+                $body = $r instanceof TestResponse && $r->baseResponse instanceof StreamedResponse
                     ? $r->streamedContent() : $r->getContent();
                 $this->assertStringNotContainsString(strtolower($this->canary($other)), strtolower($body), "{$uri}: {$mine}'s export contains {$other}'s data");
             }

@@ -5,15 +5,21 @@ namespace App\Http\Controllers;
 use App\Compliance\Dsar;
 use App\Compliance\LegalHolds;
 use App\Compliance\Retention;
+use App\Http\Requests\Compliance\CreateDsarRequest;
+use App\Http\Requests\Compliance\EraseDsarRequest;
+use App\Http\Requests\Compliance\PlaceHoldRequest;
+use App\Http\Requests\Compliance\RejectDsarRequest;
+use App\Http\Requests\Compliance\ReleaseHoldRequest;
+use App\Http\Requests\Compliance\SetRetentionRequest;
+use App\Http\Requests\Compliance\VerifyDsarRequest;
+use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /** SEC-13: legal holds, retention and data-subject requests. All routes need `manage-compliance`. */
 class ComplianceController extends Controller
 {
-    public function __construct(private LegalHolds $holds, private Retention $retention, private Dsar $dsar)
-    {
-    }
+    public function __construct(private LegalHolds $holds, private Retention $retention, private Dsar $dsar) {}
 
     // ---- legal holds ---------------------------------------------------------------------------------------------
 
@@ -32,14 +38,14 @@ class ComplianceController extends Controller
             ? ($clients[$h->scope_id] ?? "Client #{$h->scope_id}") : ($cases[$h->scope_id] ?? "Matter #{$h->scope_id}")])->values()]);
     }
 
-    public function placeHold(\App\Http\Requests\Compliance\PlaceHoldRequest $r)
+    public function placeHold(PlaceHoldRequest $r)
     {
         $d = $r->validated();
 
         return response()->json(['data' => $this->holds->place($d['scope_type'], (int) $d['scope_id'], $d['reason'], $r->user()->id)], 201);
     }
 
-    public function releaseHold(\App\Http\Requests\Compliance\ReleaseHoldRequest $r, int $id)
+    public function releaseHold(ReleaseHoldRequest $r, int $id)
     {
         $d = $r->validated();
 
@@ -53,7 +59,7 @@ class ComplianceController extends Controller
         return response()->json(['data' => ['classes' => $this->retention->policies(), 'minimum_years' => (int) config('compliance.minimum_retention_years')]]);
     }
 
-    public function setRetention(\App\Http\Requests\Compliance\SetRetentionRequest $r, string $class)
+    public function setRetention(SetRetentionRequest $r, string $class)
     {
         $d = $r->validated();
 
@@ -78,14 +84,14 @@ class ComplianceController extends Controller
 
     public function dsars()
     {
-        $visible = \App\Models\Client::query()->select('id');
+        $visible = Client::query()->select('id');
 
         return response()->json(['data' => DB::table('dsar_requests')->leftJoin('clients', 'clients.id', '=', 'dsar_requests.client_id')
             ->whereIn('dsar_requests.client_id', $visible)->orderByDesc('dsar_requests.id')->limit(500)
             ->get(['dsar_requests.*', 'clients.name as client_name'])]);
     }
 
-    public function createDsar(\App\Http\Requests\Compliance\CreateDsarRequest $r)
+    public function createDsar(CreateDsarRequest $r)
     {
         $d = $r->validated();
 
@@ -97,14 +103,14 @@ class ComplianceController extends Controller
         return response()->json(['data' => $this->dsar->find($id)]);
     }
 
-    public function verifyDsar(\App\Http\Requests\Compliance\VerifyDsarRequest $r, int $id)
+    public function verifyDsar(VerifyDsarRequest $r, int $id)
     {
         $d = $r->validated();
 
         return response()->json(['data' => $this->dsar->verify($id, $d['method'], $d['note'], $r->user()->id)]);
     }
 
-    public function rejectDsar(\App\Http\Requests\Compliance\RejectDsarRequest $r, int $id)
+    public function rejectDsar(RejectDsarRequest $r, int $id)
     {
         $d = $r->validated();
 
@@ -118,7 +124,7 @@ class ComplianceController extends Controller
         return response($this->dsar->read($id), 200, ['Content-Type' => 'application/json', 'Content-Disposition' => 'attachment; filename="dsar-'.$id.'.json"']);
     }
 
-    public function eraseDsar(\App\Http\Requests\Compliance\EraseDsarRequest $r, int $id)
+    public function eraseDsar(EraseDsarRequest $r, int $id)
     {
         $res = $this->dsar->erase($id, $r->user()->id);
 

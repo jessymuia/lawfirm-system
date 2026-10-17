@@ -6,6 +6,10 @@ use App\Actions\Clients\DeleteClients;
 use App\Actions\Clients\RegisterClient;
 use App\Actions\Clients\UpdateClient;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Client\DestroyManyRequest;
+use App\Http\Requests\Client\StoreRequest;
+use App\Http\Requests\Client\UpdateRequest;
+use App\Http\Resources\V1\ClientResource;
 use App\Models\Cases;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
@@ -31,7 +35,7 @@ class ClientController extends Controller
         $clients = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\ClientResource::make($row)->resolve(),
+            fn ($row) => ClientResource::make($row)->resolve(),
             25,
             ['name', 'phone_number', 'address'],
             ['name', 'phone_number', 'address']
@@ -45,7 +49,7 @@ class ClientController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Client\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_CLIENTS)) {
             abort(403);
@@ -61,13 +65,13 @@ class ClientController extends Controller
             'ebilling_client_id' => $request->input('ebilling_client_id'),   // FUN-13
         ], Auth::user(), $request->integer('conflict_check_id') ?: null);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\ClientResource::make($client->load('advocate'))->resolve(), 201);
+        return $this->response(true, 'success', ClientResource::make($client->load('advocate'))->resolve(), 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show($id)
     {
@@ -110,9 +114,9 @@ class ClientController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function update(\App\Http\Requests\Client\UpdateRequest $request, $id)
+    public function update(UpdateRequest $request, $id)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_CLIENTS)) {
             abort(403);
@@ -126,13 +130,13 @@ class ClientController extends Controller
             'advocate_id' => $request->advocate,
         ] + ($request->exists('ebilling_client_id') ? $request->only('ebilling_client_id') : []), Auth::user());   // FUN-13: only when sent
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\ClientResource::make($client->fresh('advocate'))->resolve(), 200);
+        return $this->response(true, 'success', ClientResource::make($client->fresh('advocate'))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
@@ -149,7 +153,7 @@ class ClientController extends Controller
      * UI-20: bulk delete — see CasesController::destroyMany for the
      * general pattern this mirrors.
      */
-    public function destroyMany(\App\Http\Requests\Client\DestroyManyRequest $request)
+    public function destroyMany(DestroyManyRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_CLIENTS)) {
             abort(403);

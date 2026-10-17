@@ -2,6 +2,7 @@
 
 namespace App\Portability;
 
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,7 +47,7 @@ class Exporter
                 'exported_at' => now()->utc()->toIso8601String(),
                 'source' => [
                     'driver' => DB::connection()->getDriverName(),
-                    'tenant' => app(\App\Tenancy\TenantContext::class)->key(),
+                    'tenant' => app(TenantContext::class)->key(),
                 ],
                 'migrations' => DB::table('migrations')->orderBy('id')->pluck('migration')->all(),
                 'tables' => $tables,

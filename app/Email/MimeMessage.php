@@ -2,6 +2,8 @@
 
 namespace App\Email;
 
+use Carbon\CarbonImmutable;
+
 /**
  * FUN-15: a parsed email (RFC 5322 + MIME): headers, the readable text, and the attachments. Enough of the standards for
  * filing mail: folded headers, encoded words (RFC 2047), nested multiparts, base64 / quoted-printable, charsets, and
@@ -61,10 +63,10 @@ class MimeMessage
         return hash('sha256', $m[1][0] ?? ($this->messageId() ?? $this->subject()));
     }
 
-    public function date(): ?\Carbon\CarbonImmutable
+    public function date(): ?CarbonImmutable
     {
         try {
-            return $this->header('date') ? \Carbon\CarbonImmutable::parse((string) $this->header('date')) : null;
+            return $this->header('date') ? CarbonImmutable::parse((string) $this->header('date')) : null;
         } catch (\Throwable) {
             return null;
         }

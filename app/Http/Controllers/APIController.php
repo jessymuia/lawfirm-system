@@ -3,8 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
+use App\Http\Middleware\EnforceMfaPolicy;
+use App\Http\Middleware\RejectRevokedSession;
+use App\Http\Requests\Api\LoginMfaRequest;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\PasswordRecoveryRequest;
+use App\Http\Requests\Api\ResetPasswordRequest;
 use App\Mail\ForgetPassword;
 use App\Models\User;
+use App\Security\Mfa;
+use App\Sso\SsoService;
+use App\Tenancy\IdentityService;
+use App\Tenancy\TenantManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -44,7 +54,7 @@ class APIController extends Controller
     }
 
     // custom login
-    public function login(\App\Http\Requests\Api\LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
 
         $throttleKey = Str::lower($request->input('email')).'|'.$request->ip();
@@ -60,7 +70,7 @@ class APIController extends Controller
             RateLimiter::clear($throttleKey);
 
             // SEC-12: when the firm enforces SSO, passwords work only for security administrators (the way back in if the IdP is down).
-            $sso = app(\App\Sso\SsoService::class);
+            $sso = app(SsoService::class);
             if ($sso->available() && $sso->provider()->enforce && ! Auth::user()->checkPermissionTo(ModulePermissions::MANAGE_SECURITY_SETTINGS)) {
                 Auth::guard('web')->logout();
 
@@ -68,8 +78,8 @@ class APIController extends Controller
             }
 
             // SEC-12: a correct password is only the first step for a user with two-factor on. No session yet.
-            if (\App\Security\Mfa::enabled(Auth::user())) {
-                $challenge = app(\App\Security\Mfa::class)->challenge(Auth::user());
+            if (Mfa::enabled(Auth::user())) {
+                $challenge = app(Mfa::class)->challenge(Auth::user());
                 Auth::guard('web')->logout();
 
                 return $this->sendResponse(['mfa_required' => true, 'challenge' => $challenge], 'mfa_required');
@@ -86,9 +96,9 @@ class APIController extends Controller
     }
 
     /** SEC-12: the second step. Any failure is one answer; five wrong tries kill the challenge. */
-    public function loginMfa(\App\Http\Requests\Api\LoginMfaRequest $request): JsonResponse
+    public function loginMfa(LoginMfaRequest $request): JsonResponse
     {
-        $user = app(\App\Security\Mfa::class)->redeem($request->input('challenge'), $request->input('code'));
+        $user = app(Mfa::class)->redeem($request->input('challenge'), $request->input('code'));
         if (! $user) {
             return $this->sendError('That code is not right, or the sign-in expired. Start again.', [], 401);
         }
@@ -119,7 +129,7 @@ class APIController extends Controller
             $user->checkPermissionTo(ModulePermissions::VIEW_DASHBOARD),
             $user->getRoleNames(),
             $user->getAllPermissions()->pluck('name'),
-            \App\Http\Middleware\EnforceMfaPolicy::blocks($request, $user),
+            EnforceMfaPolicy::blocks($request, $user),
         ];
     }
 
@@ -130,7 +140,7 @@ class APIController extends Controller
      */
     private function attemptLogin(array $credentials): bool
     {
-        $tenants = app(\App\Tenancy\TenantManager::class);
+        $tenants = app(TenantManager::class);
 
         if (! $tenants->isMulti()) {
             return Auth::attempt($credentials);
@@ -141,7 +151,7 @@ class APIController extends Controller
             return false; // fail closed: no resolved firm, no login
         }
 
-        $user = app(\App\Tenancy\IdentityService::class)
+        $user = app(IdentityService::class)
             ->attempt($credentials['email'], $credentials['password'], $tenant);
 
         if (! $user) {
@@ -161,7 +171,7 @@ class APIController extends Controller
         // end the session-based (cookie) authentication used by the SPA.
         $user?->tokens()->delete();
         // SEC-4: a request still in flight must not write this session back and sign the person in again
-        \App\Http\Middleware\RejectRevokedSession::revoke($request->session()->getId());
+        RejectRevokedSession::revoke($request->session()->getId());
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -170,9 +180,9 @@ class APIController extends Controller
     }
 
     // reset password (validation errors keep the {success, message, errors} shape: Api\ResetPasswordRequest, UI-6)
-    public function reset_pass(\App\Http\Requests\Api\ResetPasswordRequest $request)
+    public function reset_pass(ResetPasswordRequest $request)
     {
-        if (app(\App\Tenancy\TenantManager::class)->isMulti()) {
+        if (app(TenantManager::class)->isMulti()) {
             return $this->multiTenantReset($request);
         }
 
@@ -204,10 +214,10 @@ class APIController extends Controller
         }
     }
 
-    public function passwordRecovery(\App\Http\Requests\Api\PasswordRecoveryRequest $request)
+    public function passwordRecovery(PasswordRecoveryRequest $request)
     {
 
-        if (app(\App\Tenancy\TenantManager::class)->isMulti()) {
+        if (app(TenantManager::class)->isMulti()) {
             return $this->multiTenantRecovery($request);
         }
 
@@ -246,8 +256,8 @@ class APIController extends Controller
         }
         RateLimiter::hit($throttleKey, 3600);
 
-        $tenant = app(\App\Tenancy\TenantManager::class)->current();
-        $ids = app(\App\Tenancy\IdentityService::class);
+        $tenant = app(TenantManager::class)->current();
+        $ids = app(IdentityService::class);
         $identity = $tenant ? $ids->isMemberOf($request->email, $tenant) : null;
 
         if ($identity) {
@@ -263,9 +273,9 @@ class APIController extends Controller
 
     private function multiTenantReset(Request $request): JsonResponse
     {
-        $tenant = app(\App\Tenancy\TenantManager::class)->current();
+        $tenant = app(TenantManager::class)->current();
 
-        $ok = $tenant && app(\App\Tenancy\IdentityService::class)
+        $ok = $tenant && app(IdentityService::class)
             ->redeemResetToken($request->email, $request->token, $request->password, $tenant);
 
         return $ok ? $this->sendResponse(null, 'success') : $this->sendError('Invalid or expired token.', [], 400);

@@ -3,6 +3,7 @@
 namespace App\Backup;
 
 use App\Models\Client;
+use App\Tenancy\CellRegistry;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantManager;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class RestoreDrill
         $target = null;
         try {
             $manifest = $this->snapshots->latest($tenant) ?? throw new \RuntimeException('No snapshot to restore from.');
-            $live = app(\App\Tenancy\CellRegistry::class)->connectionConfig($tenant);
+            $live = app(CellRegistry::class)->connectionConfig($tenant);
             $pitr = ! empty($manifest['binlog']) && $manifest['database'] === basename((string) $live['database'])
                 && $this->snapshots->engine($live)->supportsPointInTime($live);
             $target = $pitr ? now()->toDateTimeString() : null;

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Entitlements\Entitlements;
+use App\Tenancy\TenantManager;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -18,15 +19,13 @@ class ReadOnlyWhenUnlicensed
     // Signing in (both steps), out, recovering a password, installing a license and (PLAT-13) choosing a plan stay open.
     private const EXEMPT = '#^api/(v\d+/)?(login|login/mfa|logout|password-recovery|password-reset|license|subscription/plan|portal/(login|verify|logout)|pay/callback/(mpesa/[A-Za-z0-9]+|stripe))$#';
 
-    public function __construct(private Entitlements $entitlements)
-    {
-    }
+    public function __construct(private Entitlements $entitlements) {}
 
     public function handle(Request $request, Closure $next)
     {
         if ($request->is('api/*') && ! $request->isMethodSafe() && ! preg_match(self::EXEMPT, $request->path())) {
             // TEN-16: a firm being moved to another cell is briefly read-only. Reads keep working.
-            $tenant = app(\App\Tenancy\TenantManager::class)->current();
+            $tenant = app(TenantManager::class)->current();
             if ($tenant?->read_only_reason) {
                 return response()->json(['message' => $tenant->read_only_reason.' Changes are paused for a few minutes; please try again shortly.', 'code' => 'maintenance_read_only'], 503, ['Retry-After' => '60']);
             }

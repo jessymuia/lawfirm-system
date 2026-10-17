@@ -2,15 +2,16 @@
 
 namespace App\Secrets;
 
-use App\Tenancy\Keys\FirmCrypt;
+use App\Payments\Credentials;
 use App\Security\SecurityPolicy;
+use App\Tenancy\Keys\FirmCrypt;
 use Illuminate\Support\Facades\DB;
 
 /**
  * SEC-15: per-firm credentials for third-party services. A firm's own value wins; otherwise the deployment's (env/secret file).
  * Values are encrypted at rest, write-only through the API, and never written to the audit trail.
  */
-class IntegrationCredentials implements \App\Payments\Credentials
+class IntegrationCredentials implements Credentials
 {
     /** provider => [field => config key holding the deployment default] */
     public const PROVIDERS = [
@@ -122,4 +123,3 @@ class IntegrationCredentials implements \App\Payments\Credentials
         SecurityPolicy::audit('integration_credentials_changed', 'integration', 0, [], ['provider' => $provider, 'fields' => $changed]);
     }
 }
-

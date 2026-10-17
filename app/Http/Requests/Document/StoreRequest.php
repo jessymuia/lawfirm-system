@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Document;
 
-use App\Models\Document;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for DocumentController::store(). Authorization is declared on the route (authz:*), not here. */

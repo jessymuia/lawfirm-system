@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Billing\Billing;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\PlatformJob;
 use App\Tenancy\TenantLifecycle;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  * PLAT-13: create the firm a verified signup asked for: database, schema, catalog, its first administrator and a free
  * trial. Provisioning is resumable (TEN-9), so a failed run is retried by opening the link again.
  */
-class ProvisionSignup implements \App\Tenancy\PlatformJob, ShouldQueue
+class ProvisionSignup implements PlatformJob, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 

@@ -2,6 +2,7 @@
 
 namespace App\Billing;
 
+use App\Tenancy\Models\Tenant;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -24,9 +25,7 @@ class Autopay
 {
     private const API = 'https://api.stripe.com/v1';
 
-    public function __construct(private Billing $billing, private Collection $collection)
-    {
-    }
+    public function __construct(private Billing $billing, private Collection $collection) {}
 
     private function db()
     {
@@ -173,7 +172,7 @@ class Autopay
 
     private function createCustomer(object $sub): string
     {
-        $slug = (string) \App\Tenancy\Models\Tenant::find($sub->tenant_id)?->slug;
+        $slug = (string) Tenant::find($sub->tenant_id)?->slug;
         $r = $this->http()->withHeaders(['Idempotency-Key' => "customer-{$sub->id}"])->post(self::API.'/customers', array_filter([
             'email' => $sub->billing_email, 'description' => $slug !== '' ? "Firm {$slug}" : null,
             'metadata' => ['subscription' => (string) $sub->id, 'tenant' => $slug],

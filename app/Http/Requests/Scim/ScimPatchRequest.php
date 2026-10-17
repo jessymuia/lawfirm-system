@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Scim;
 
+use App\Http\Middleware\ScimTokenAuth;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /** SEC-12: a SCIM PATCH (RFC 7644 3.5.2): a list of add/replace/remove operations. */
 class ScimPatchRequest extends FormRequest
@@ -23,10 +26,10 @@ class ScimPatchRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator): void
+    protected function failedValidation(Validator $validator): void
     {
-        throw new \Illuminate\Http\Exceptions\HttpResponseException(
-            \App\Http\Middleware\ScimTokenAuth::error(400, $validator->errors()->first(), 'invalidSyntax')
+        throw new HttpResponseException(
+            ScimTokenAuth::error(400, $validator->errors()->first(), 'invalidSyntax')
         );
     }
 }

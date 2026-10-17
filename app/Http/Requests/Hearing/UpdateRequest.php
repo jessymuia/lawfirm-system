@@ -2,15 +2,16 @@
 
 namespace App\Http\Requests\Hearing;
 
+use App\Http\Requests\Concerns\RouteRecord;
 use App\Models\Hearing;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for HearingController::update(). Authorization is declared on the route (authz:*), not here. */
 class UpdateRequest extends FormRequest
 {
-    use \App\Http\Requests\Concerns\RouteRecord;
+    use RouteRecord;
 
-    protected string $recordModel = \App\Models\Hearing::class;
+    protected string $recordModel = Hearing::class;
 
     protected string $recordParameter = 'hearing';
 

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PlatformStatus\OpenRequest;
+use App\Http\Requests\PlatformStatus\SlaRequest;
+use App\Http\Requests\PlatformStatus\UpdateRequest;
 use App\Platform\PlatformAudit;
 use App\Status\Health;
 use App\Status\Incidents;
@@ -9,13 +12,12 @@ use App\Status\StatusException;
 use App\Tenancy\Models\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 /** PLAT-12: platform-console view of this cell's health (with detail), measured availability and incident management. */
 class PlatformStatusController extends Controller
 {
-    public function __construct(private Health $health, private Incidents $incidents)
-    {
-    }
+    public function __construct(private Health $health, private Incidents $incidents) {}
 
     /** Detail the public page withholds: latencies, fixed-phrase reasons, and which firms' databases are unreachable (staff only). */
     public function health(): JsonResponse
@@ -32,7 +34,7 @@ class PlatformStatusController extends Controller
         ]]);
     }
 
-    public function sla(\App\Http\Requests\PlatformStatus\SlaRequest $r): JsonResponse
+    public function sla(SlaRequest $r): JsonResponse
     {
         $d = $r->validated();
         $days = (int) ($d['days'] ?? 30);
@@ -45,14 +47,14 @@ class PlatformStatusController extends Controller
         return response()->json(['data' => $this->incidents->recent(365)]);
     }
 
-    public function open(\App\Http\Requests\PlatformStatus\OpenRequest $r): JsonResponse
+    public function open(OpenRequest $r): JsonResponse
     {
         $d = $r->validated();
 
         return $this->act($r, 'status.incident.open', $d, fn ($staff) => $this->incidents->open($d, $staff?->id), 201);
     }
 
-    public function update(\App\Http\Requests\PlatformStatus\UpdateRequest $r, int $id): JsonResponse
+    public function update(UpdateRequest $r, int $id): JsonResponse
     {
         $d = $r->validated();
 
@@ -70,7 +72,7 @@ class PlatformStatusController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode() >= 400 ? $e->getCode() : 422);
         }
         PlatformAudit::record($staff, $action, null, ['title' => $params['title'] ?? null, 'incident_id' => $out->id, 'status' => $out->status], 'ok', null, $r->ip());
-        \Illuminate\Support\Facades\Cache::forget('status:availability:30');
+        Cache::forget('status:availability:30');
 
         return response()->json(['data' => $out], $ok);
     }

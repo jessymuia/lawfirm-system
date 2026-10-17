@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Scim;
 
+use App\Http\Middleware\ScimTokenAuth;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /** SEC-12: the SCIM 2.0 user payload (create and replace). PATCH uses ScimPatchRequest. Authorization is the SCIM bearer token (scim.token). */
 class ScimUserRequest extends FormRequest
@@ -30,10 +33,10 @@ class ScimUserRequest extends FormRequest
     }
 
     /** SCIM clients expect the SCIM error body, not Laravel's. */
-    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator): void
+    protected function failedValidation(Validator $validator): void
     {
-        throw new \Illuminate\Http\Exceptions\HttpResponseException(
-            \App\Http\Middleware\ScimTokenAuth::error(400, $validator->errors()->first(), 'invalidValue')
+        throw new HttpResponseException(
+            ScimTokenAuth::error(400, $validator->errors()->first(), 'invalidValue')
         );
     }
 }

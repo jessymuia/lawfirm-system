@@ -2,12 +2,16 @@
 
 namespace App\Webhooks;
 
-use App\Tenancy\Keys\FirmCrypt;
 use App\Entitlements\Entitlements;
+use App\Models\Cases;
+use App\Models\Client;
+use App\Models\Hearing;
 use App\PublicApi\Resources;
 use App\Security\SecurityPolicy;
 use App\Sso\SsoException;
 use App\Sso\SsrfGuard;
+use App\Tenancy\Keys\FirmCrypt;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -21,9 +25,7 @@ use Illuminate\Support\Str;
  */
 class WebhookService
 {
-    public function __construct(private Entitlements $entitlements)
-    {
-    }
+    public function __construct(private Entitlements $entitlements) {}
 
     // ---- endpoints -------------------------------------------------------------------------------------------------
 
@@ -182,7 +184,7 @@ class WebhookService
     }
 
     /** @return array{sent:int,delivered:int,retry:int,dead:int} */
-    public function runDue(int $limit = 100, ?\Carbon\CarbonInterface $now = null): array
+    public function runDue(int $limit = 100, ?CarbonInterface $now = null): array
     {
         $now ??= now();
         $r = ['sent' => 0, 'delivered' => 0, 'retry' => 0, 'dead' => 0];
@@ -208,7 +210,7 @@ class WebhookService
     }
 
     /** @return string delivered | retry | dead */
-    private function attempt(object $d, \Carbon\CarbonInterface $now): string
+    private function attempt(object $d, CarbonInterface $now): string
     {
         $e = DB::table('webhook_endpoints')->where('id', $d->endpoint_id)->first();
         $attempts = (int) $d->attempts + 1;
@@ -239,7 +241,7 @@ class WebhookService
         return $this->fail($d, $attempts, $code, $error, $now);
     }
 
-    private function fail(object $d, int $attempts, ?int $code, string $error, \Carbon\CarbonInterface $now, bool $final = false): string
+    private function fail(object $d, int $attempts, ?int $code, string $error, CarbonInterface $now, bool $final = false): string
     {
         $max = (int) config('public_api.webhooks.max_attempts');
         $dead = $final || $attempts >= $max;
@@ -270,9 +272,9 @@ class WebhookService
     public static function register(): void
     {
         $map = [
-            \App\Models\Client::class => ['client', fn ($m) => Resources::client($m)],
-            \App\Models\Cases::class => ['case', fn ($m) => Resources::matter($m)],
-            \App\Models\Hearing::class => ['hearing', fn ($m) => Resources::hearing($m)],
+            Client::class => ['client', fn ($m) => Resources::client($m)],
+            Cases::class => ['case', fn ($m) => Resources::matter($m)],
+            Hearing::class => ['hearing', fn ($m) => Resources::hearing($m)],
         ];
         foreach ($map as $class => [$name, $render]) {
             foreach (['created', 'updated', 'deleted'] as $when) {

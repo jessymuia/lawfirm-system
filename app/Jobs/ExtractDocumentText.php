@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Documents\TextExtractor;
 use App\Models\Document;
 use App\Queue\BulkWork;
+use App\Search\SearchIndex;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -64,6 +65,6 @@ class ExtractDocumentText implements ShouldQueue
             'chars' => $result['content'] !== null ? mb_strlen($result['content']) : 0, 'error' => $result['error'],
             'extracted_at' => now(), 'updated_at' => now(), 'created_at' => now(),
         ]);
-        \App\Search\SearchIndex::queue('documents', [(int) $doc->id]);   // ENG-19: its words are searchable now
+        SearchIndex::queue('documents', [(int) $doc->id]);   // ENG-19: its words are searchable now
     }
 }

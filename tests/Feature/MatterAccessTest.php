@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Matters\MatterAccess;
 use App\Models\Cases;
 use App\Models\Hearing;
+use App\Models\HearingType;
+use App\Models\Invoice;
 use App\Models\MatterAccessGrant;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -150,8 +153,8 @@ class MatterAccessTest extends TestCase
         $this->actingAs($this->alice);
 
         $this->assertSame([$h1->id], Hearing::pluck('id')->all());
-        $this->assertSame(0, \App\Models\Invoice::count());
-        $this->assertSame(0, \App\Models\Payment::count(), 'payments are hidden through their invoice');
+        $this->assertSame(0, Invoice::count());
+        $this->assertSame(0, Payment::count(), 'payments are hidden through their invoice');
         $before = Hearing::withoutGlobalScopes()->find($h2->id)->notes;
         $put = $this->putJson("/api/v1/hearings/{$h2->id}", ['notes' => 'tampered', 'case_id' => $this->theirs->id, 'court_id' => $court, 'hearing_date' => now()->addDay()->format('d/m/Y H:i'), 'hearing_type' => $h2->hearing_type]);
         $this->assertContains($put->status(), [403, 404, 422], $put->getContent());
@@ -187,7 +190,7 @@ class MatterAccessTest extends TestCase
         $this->restrict();
         $r = $this->actingAs($this->alice)->postJson('/api/v1/hearings', [
             'case_id' => $this->theirs->id, 'court_id' => $this->mine->court_id,
-            'hearing_date' => now()->addDay()->format('d/m/Y H:i'), 'hearing_type' => \App\Models\HearingType::factory()->create()->id,
+            'hearing_date' => now()->addDay()->format('d/m/Y H:i'), 'hearing_type' => HearingType::factory()->create()->id,
         ]);
 
         $this->assertContains($r->status(), [403, 422], 'must not succeed: '.$r->getContent());

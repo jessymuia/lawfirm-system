@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\IntegrationCredentials\UpdateRequest;
+use App\Secrets\FirmMail;
 use App\Secrets\IntegrationCredentials;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 /** SEC-15: the firm's own third-party credentials. Write-only: values are never returned. */
 class IntegrationCredentialsController extends Controller
 {
-    public function __construct(private IntegrationCredentials $creds)
-    {
-    }
+    public function __construct(private IntegrationCredentials $creds) {}
 
     public function show(string $provider)
     {
@@ -33,25 +35,25 @@ class IntegrationCredentialsController extends Controller
     /** Sends a test message through the firm's mail settings to the signed-in user. */
     public function testMail(Request $r)
     {
-        \App\Secrets\FirmMail::apply();
+        FirmMail::apply();
         try {
-            \Illuminate\Support\Facades\Mail::raw('This is a test message from your firm\'s '.config('app.name').' account. If you can read it, your outgoing email settings work.', function ($m) use ($r) {
+            Mail::raw('This is a test message from your firm\'s '.config('app.name').' account. If you can read it, your outgoing email settings work.', function ($m) use ($r) {
                 $m->to($r->user()->email)->subject('Test email from '.config('app.name'));
             });
         } catch (\Throwable $e) {
-            return response()->json(['message' => 'The test email could not be sent: '.\Illuminate\Support\Str::limit($e->getMessage(), 200)], 422);
+            return response()->json(['message' => 'The test email could not be sent: '.Str::limit($e->getMessage(), 200)], 422);
         }
 
         return response()->json(['message' => 'Test email sent to '.$r->user()->email.'.']);
     }
 
-    public function update(\App\Http\Requests\IntegrationCredentials\UpdateRequest $r, string $provider)
+    public function update(UpdateRequest $r, string $provider)
     {
         abort_unless(isset(IntegrationCredentials::PROVIDERS[$provider]), 404);
         $d = $r->validated();
         $this->creds->set($provider, $d, $r->user()->id);
 
-        \App\Secrets\FirmMail::apply();
+        FirmMail::apply();
 
         return response()->json(['data' => ['provider' => $provider, 'fields' => $this->creds->status($provider)] + $this->creds->readiness($provider)]);
     }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\ResolveTenant;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
 use App\Tenancy\TenantManager;
@@ -16,10 +17,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 use RuntimeException;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-2 / TEN-3 / TEN-10: registry, fail-closed resolution, isolation. */
-class TenantResolutionTest extends TestCase implements \Tests\OwnsTenancy
+class TenantResolutionTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -80,7 +82,7 @@ class TenantResolutionTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_host_resolves_to_its_own_tenant_and_database(): void
     {
-        $probe = fn (string $host) => app(\App\Http\Middleware\ResolveTenant::class)->handle(
+        $probe = fn (string $host) => app(ResolveTenant::class)->handle(
             Request::create("http://{$host}/x"),
             fn () => response()->json([
                 'tenant' => app(TenantContext::class)->key(),

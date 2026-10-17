@@ -2,6 +2,7 @@
 
 namespace App\Warehouse;
 
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -29,7 +30,7 @@ class FileSink implements WarehouseSink
         return count($gone);
     }
 
-    private function disk(): \Illuminate\Contracts\Filesystem\Filesystem
+    private function disk(): Filesystem
     {
         return Storage::disk((string) config('warehouse.disk'));
     }

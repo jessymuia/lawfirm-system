@@ -2,8 +2,22 @@
 
 namespace Tests;
 
+use App\Entitlements\Entitlements;
+use App\Models\User;
+use App\Tenancy\Models\Identity;
+use App\Tenancy\Models\Tenant;
+use App\Tenancy\Models\TenantMembership;
+use App\Tenancy\TenantContext;
+use App\Tenancy\TenantManager;
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -30,9 +44,9 @@ abstract class TestCase extends BaseTestCase
             return parent::setUpTraits();
         }
         $uses = array_flip(class_uses_recursive(static::class));
-        if (isset($uses[\Illuminate\Foundation\Testing\RefreshDatabase::class])) {
+        if (isset($uses[RefreshDatabase::class])) {
             $this->refreshMultiTenantDatabases();
-            unset($uses[\Illuminate\Foundation\Testing\RefreshDatabase::class]);
+            unset($uses[RefreshDatabase::class]);
         }
         $this->traitsUsedByTest = $uses;
 
@@ -46,43 +60,43 @@ abstract class TestCase extends BaseTestCase
             copy($p[$db], "{$p['dir']}/{$db}.sqlite");
         }
         $this->configureMultiTenant($p['dir']);
-        $manager = app(\App\Tenancy\TenantManager::class);
+        $manager = app(TenantManager::class);
         $tenant = $manager->findBySlug('testfirm');
         $manager->activate($tenant);
-        $connection = config('database.connections.'.\App\Tenancy\TenantManager::TENANT_CONNECTION);
+        $connection = config('database.connections.'.TenantManager::TENANT_CONNECTION);
 
         // Fleet commands and firm-less requests (health, platform console) leave the process fail-closed, as they must.
         // The test then carries on in its firm, as the next request in production would. Restored without a query, so
         // tests that count queries (e.g. "liveness touches nothing") see only the request's own.
         $back = function () use ($manager, $tenant, $connection) {
-            if (\Illuminate\Support\Facades\DB::getDefaultConnection() !== \App\Tenancy\TenantManager::UNRESOLVED) {
+            if (DB::getDefaultConnection() !== TenantManager::UNRESOLVED) {
                 return;
             }
-            app(\App\Tenancy\TenantContext::class)->activate($tenant->slug);
-            config(['database.connections.'.\App\Tenancy\TenantManager::TENANT_CONNECTION => $connection]);
-            \Illuminate\Support\Facades\DB::setDefaultConnection(\App\Tenancy\TenantManager::TENANT_CONNECTION);
+            app(TenantContext::class)->activate($tenant->slug);
+            config(['database.connections.'.TenantManager::TENANT_CONNECTION => $connection]);
+            DB::setDefaultConnection(TenantManager::TENANT_CONNECTION);
             (fn () => $this->current = $tenant)->call($manager);
         };
-        $console = app(\Illuminate\Contracts\Console\Kernel::class);
+        $console = app(Kernel::class);
         $console->rerouteSymfonyCommandEvents();   // CommandFinished also for Artisan::call() ...
         $console->setArtisan(null);                // ... on an Artisan instance built after it
-        \Illuminate\Support\Facades\Event::listen(\Illuminate\Console\Events\CommandFinished::class, $back);
-        \Illuminate\Support\Facades\Event::listen(\Illuminate\Foundation\Http\Events\RequestHandled::class, $back);
+        Event::listen(CommandFinished::class, $back);
+        Event::listen(RequestHandled::class, $back);
 
         // In a SaaS firm every person signs in through a control-plane identity; factory-made users get one too.
-        \App\Models\User::created(function (\App\Models\User $user) use ($manager) {
+        User::created(function (User $user) use ($manager) {
             $tenant = $manager->current();
             if (! $tenant || ! $user->email || $user->global_identity_id) {
                 return;
             }
-            $identity = \App\Tenancy\Models\Identity::firstOrCreate(['email' => strtolower(trim($user->email))], ['password' => $user->password]);
-            \App\Tenancy\Models\TenantMembership::updateOrCreate(['identity_id' => $identity->id, 'tenant_id' => $tenant->id], ['tenant_user_id' => $user->id]);
+            $identity = Identity::firstOrCreate(['email' => strtolower(trim($user->email))], ['password' => $user->password]);
+            TenantMembership::updateOrCreate(['identity_id' => $identity->id, 'tenant_id' => $tenant->id], ['tenant_user_id' => $user->id]);
             $user->forceFill(['global_identity_id' => $identity->id])->saveQuietly();
         });
         // a test that sets a password on the user row means "this person's password"; in SaaS that lives on the identity
-        \App\Models\User::updated(function (\App\Models\User $user) {
+        User::updated(function (User $user) {
             if ($user->global_identity_id && $user->wasChanged(['password', 'email'])) {
-                \App\Tenancy\Models\Identity::whereKey($user->global_identity_id)->update(['password' => $user->password, 'email' => strtolower(trim((string) $user->email))]);
+                Identity::whereKey($user->global_identity_id)->update(['password' => $user->password, 'email' => strtolower(trim((string) $user->email))]);
             }
         });
     }
@@ -94,7 +108,7 @@ abstract class TestCase extends BaseTestCase
             'database.connections.control' => ['driver' => 'sqlite', 'database' => "{$dir}/control.sqlite", 'prefix' => '', 'foreign_key_constraints' => true],
             'tenancy.tenant_connection_template' => 'sqlite',
         ]);
-        \Illuminate\Support\Facades\DB::purge('control');
+        DB::purge('control');
     }
 
     /** @return array{dir:string, control:string, tenant:string} */
@@ -109,15 +123,15 @@ abstract class TestCase extends BaseTestCase
         Artisan::call('migrate', ['--database' => 'control', '--path' => 'database/migrations/control', '--force' => true]);
         config(['database.connections.firm_setup' => ['driver' => 'sqlite', 'database' => "{$dir}/tenant.sqlite", 'prefix' => '', 'foreign_key_constraints' => true]]);
         Artisan::call('migrate', ['--database' => 'firm_setup', '--force' => true]);
-        \Illuminate\Support\Facades\DB::purge('firm_setup');
+        DB::purge('firm_setup');
 
-        $tenant = \App\Tenancy\Models\Tenant::create(['slug' => 'testfirm', 'name' => 'Test Firm', 'status' => 'active', 'plan' => 'self_hosted',
+        $tenant = Tenant::create(['slug' => 'testfirm', 'name' => 'Test Firm', 'status' => 'active', 'plan' => 'self_hosted',
             'database' => "{$dir}/tenant.sqlite", 'migration_status' => 'ok']);
         // the hosts tests send requests to (firm.example.com: TrustedProxiesTest's forwarded host)
         foreach (['localhost', '127.0.0.1', 'firm.example.com'] as $host) {
             $tenant->domains()->create(['domain' => $host]);
         }
-        \Illuminate\Support\Facades\DB::purge('control');
+        DB::purge('control');
 
         copy("{$dir}/control.sqlite", "{$dir}/pristine/control.sqlite");
         copy("{$dir}/tenant.sqlite", "{$dir}/pristine/tenant.sqlite");
@@ -147,7 +161,7 @@ abstract class TestCase extends BaseTestCase
         // reaching the intended 401/403/200 assertion.
         // Tests that never migrate (no RefreshDatabase: pure command or HTTP smoke tests) have no
         // permissions table to seed, so skip it there instead of failing in setUp.
-        if (\Illuminate\Support\Facades\Schema::hasTable('permissions')) {
+        if (Schema::hasTable('permissions')) {
             Artisan::call('law:setup-permissions');
         }
     }
@@ -162,11 +176,11 @@ abstract class TestCase extends BaseTestCase
     protected function usePlan(string $plan): void
     {
         config(['entitlements.single_tenant_plan' => $plan]);
-        $tenant = app(\App\Tenancy\TenantManager::class)->current();
+        $tenant = app(TenantManager::class)->current();
         if (self::multiMode() && $tenant) {
             $tenant->update(['plan' => $plan]);
         }
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
     }
 
     /**
@@ -176,7 +190,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function actingAsOnHost($user, string $host)
     {
-        $tenants = app(\App\Tenancy\TenantManager::class);
+        $tenants = app(TenantManager::class);
         $tenant = $tenants->findByHost(parse_url($host, PHP_URL_HOST) ?: $host);
         $this->assertNotNull($tenant, "no firm owns {$host}");
         $tenants->activate($tenant);

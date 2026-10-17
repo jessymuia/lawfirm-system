@@ -4,13 +4,17 @@ namespace Tests\Feature;
 
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
+use App\Tenancy\TenantManager;
+use App\Tenancy\TenantMigrator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-7: resumable, per-tenant, failure-isolated migration runner. */
-class TenantMigratorTest extends TestCase implements \Tests\OwnsTenancy
+class TenantMigratorTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -56,7 +60,7 @@ class TenantMigratorTest extends TestCase implements \Tests\OwnsTenancy
         config(['database.connections.probe' => ['driver' => 'sqlite', 'database' => $dbFile, 'prefix' => '']]);
         DB::purge('probe');
 
-        return \Illuminate\Support\Facades\Schema::connection('probe')->hasTable($table);
+        return Schema::connection('probe')->hasTable($table);
     }
 
     public function test_migrates_every_tenant_and_records_schema_version(): void
@@ -135,8 +139,8 @@ class TenantMigratorTest extends TestCase implements \Tests\OwnsTenancy
     {
         config(['tenancy.mode' => 'multi']);
 
-        $this->assertTrue(app(\App\Tenancy\TenantMigrator::class)->migrate(Tenant::where('slug', 'firm-a')->first()));
+        $this->assertTrue(app(TenantMigrator::class)->migrate(Tenant::where('slug', 'firm-a')->first()));
 
-        $this->assertSame(\App\Tenancy\TenantManager::UNRESOLVED, DB::getDefaultConnection());
+        $this->assertSame(TenantManager::UNRESOLVED, DB::getDefaultConnection());
     }
 }

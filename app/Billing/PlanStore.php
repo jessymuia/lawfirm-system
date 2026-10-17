@@ -2,6 +2,8 @@
 
 namespace App\Billing;
 
+use App\Tenancy\TenantManager;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -17,7 +19,7 @@ class PlanStore
     /** Plans the platform itself relies on (free trials): they can be edited, never archived or deleted. */
     public const SYSTEM = ['trial'];
 
-    private static function db(): \Illuminate\Database\Connection
+    private static function db(): Connection
     {
         return DB::connection(config('tenancy.control_connection'));
     }
@@ -25,7 +27,7 @@ class PlanStore
     /** Overlay the table onto config. Safe to call anywhere, any number of times. */
     public static function sync(bool $force = false): void
     {
-        if (! app(\App\Tenancy\TenantManager::class)->hasControlPlane()) {
+        if (! app(TenantManager::class)->hasControlPlane()) {
             return;
         }
         $at = (int) config('billing.plans_synced_at', 0);
@@ -142,7 +144,7 @@ class PlanStore
     }
 
     /**
-     * @param array<string, mixed> $d validated input: name, description, prices, features, limits
+     * @param  array<string, mixed>  $d  validated input: name, description, prices, features, limits
      * @return array<string, string> the JSON columns
      */
     public static function columns(array $d): array

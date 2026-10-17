@@ -8,6 +8,7 @@ use App\Models\EthicalScreen;
 use App\Models\Hearing;
 use App\Models\User;
 use App\Webhooks\WebhookService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as HttpRequest;
@@ -17,6 +18,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\Yaml\Yaml;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
@@ -178,7 +182,7 @@ class PublicApiTest extends TestCase
         [$token] = $this->key(['clients:read']);
         $this->pub('/clients', $token)->assertOk();
         $this->reader->roles()->detach();
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
         $this->pub('/clients', $token)->assertForbidden();
     }
 
@@ -304,7 +308,7 @@ class PublicApiTest extends TestCase
             }
         }
         foreach (config('public_api.scopes') as $scope => $perm) {
-            $this->assertNotNull(\Spatie\Permission\Models\Permission::where('name', $perm)->first() ?? \Spatie\Permission\Models\Permission::findOrCreate($perm, 'web'));
+            $this->assertNotNull(Permission::where('name', $perm)->first() ?? Permission::findOrCreate($perm, 'web'));
         }
     }
 
@@ -410,7 +414,7 @@ class PublicApiTest extends TestCase
         $this->assertCount(0, $this->deliveries($id));
 
         $this->plan('self_hosted');
-        \Illuminate\Support\Facades\Schema::drop('webhook_deliveries');
+        Schema::drop('webhook_deliveries');
         $c = Client::factory()->create();                                   // the integration is broken; the firm's work is not
         $this->assertNotNull(Client::find($c->id));
     }
@@ -473,13 +477,13 @@ class PublicApiTest extends TestCase
 
         $this->assertSame(0, $this->svc()->runDue(100, $t->copy()->addSeconds(59))['sent']);        // not due yet
         foreach ([[5, 2], [30, 3], [120, 4], [360, 5]] as [$minutes, $attempts]) {
-            $at = \Carbon\Carbon::parse($this->deliveries($id)[0]->next_attempt_at)->addSecond();
+            $at = Carbon::parse($this->deliveries($id)[0]->next_attempt_at)->addSecond();
             $this->assertSame(1, $this->svc()->runDue(100, $at)['retry']);
             $d = $this->deliveries($id)[0];
             $this->assertSame($attempts, (int) $d->attempts);
             $this->assertSame($at->copy()->addMinutes($minutes)->toDateTimeString(), (string) $d->next_attempt_at);
         }
-        $at = \Carbon\Carbon::parse($this->deliveries($id)[0]->next_attempt_at)->addSecond();
+        $at = Carbon::parse($this->deliveries($id)[0]->next_attempt_at)->addSecond();
         $this->assertSame(1, $this->svc()->runDue(100, $at)['dead']);                              // 6th attempt
         $d = $this->deliveries($id)[0];
         $this->assertSame(['dead', 6], [$d->status, (int) $d->attempts]);

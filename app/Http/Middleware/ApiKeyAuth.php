@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 /**
  * PLAT-11: `api.key:<scope>` authenticates `Authorization: Bearer lfk_<prefix>_<secret>`.
@@ -19,14 +20,12 @@ use Illuminate\Support\Facades\RateLimiter;
  */
 class ApiKeyAuth
 {
-    public function __construct(private Entitlements $entitlements)
-    {
-    }
+    public function __construct(private Entitlements $entitlements) {}
 
     public static function generate(): array
     {
         $prefix = bin2hex(random_bytes(4));
-        $secret = \Illuminate\Support\Str::random(32);
+        $secret = Str::random(32);
 
         return ['prefix' => $prefix, 'secret' => $secret, 'token' => "lfk_{$prefix}_{$secret}", 'hash' => hash('sha256', $secret)];
     }

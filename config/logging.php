@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -77,15 +78,15 @@ return [
             'path' => storage_path('logs/laravel.json.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
-            'formatter' => \Monolog\Formatter\JsonFormatter::class,
-            'formatter_with' => ['batchMode' => \Monolog\Formatter\JsonFormatter::BATCH_MODE_NEWLINES, 'appendNewline' => true],
+            'formatter' => JsonFormatter::class,
+            'formatter_with' => ['batchMode' => JsonFormatter::BATCH_MODE_NEWLINES, 'appendNewline' => true],
         ],
 
         'stderr_json' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => \Monolog\Handler\StreamHandler::class,
-            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+            'handler' => StreamHandler::class,
+            'formatter' => JsonFormatter::class,
             'with' => ['stream' => 'php://stderr'],
         ],
 

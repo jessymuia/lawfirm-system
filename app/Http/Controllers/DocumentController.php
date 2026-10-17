@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Documents\DeleteDocumentVersion;
 use App\Actions\Documents\StoreDocument;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Document\StoreRequest;
 use App\Models\Document;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -25,7 +26,7 @@ class DocumentController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Document\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_DOCUMENTS)) {
             abort(403);
@@ -42,7 +43,6 @@ class DocumentController extends Controller
      *
      * Returns only the current version of each document for the case by
      * default; pass `?all_versions=1` to include every version.
-     *
      */
     public function show($id): JsonResponse
     {

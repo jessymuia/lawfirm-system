@@ -33,7 +33,7 @@ class MigrationLinterTest extends TestCase
             'each backfill' => ['data-rewrite', "DB::table('t')->pluck('id')->each(fn (\$id) => null);"],
             'model update' => ['data-rewrite', "\\App\\Models\\User::query()->update(['a' => 1]);"],
             'raw update' => ['data-rewrite', "DB::statement('UPDATE t SET a = 1');"],
-            'raw delete' => ['data-rewrite', "DB::unprepared(\"DELETE FROM t WHERE a = 1\");"],
+            'raw delete' => ['data-rewrite', 'DB::unprepared("DELETE FROM t WHERE a = 1");'],
             'raw alter drop' => ['raw-alter', "DB::statement('ALTER TABLE t DROP COLUMN a');"],
             'raw alter modify' => ['raw-alter', "DB::statement('ALTER TABLE t MODIFY a BIGINT');"],
         ];

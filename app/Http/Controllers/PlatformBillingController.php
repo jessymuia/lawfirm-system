@@ -2,10 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\Autopay;
 use App\Billing\Billing;
 use App\Billing\BillingException;
+use App\Billing\Collection;
+use App\Billing\PlanStore;
+use App\Http\Requests\Platform\ChargeRequest;
+use App\Http\Requests\Platform\RunBillingRequest;
+use App\Http\Requests\PlatformBilling\CancelRequest;
+use App\Http\Requests\PlatformBilling\ChangePlanRequest;
+use App\Http\Requests\PlatformBilling\MpesaRequest;
+use App\Http\Requests\PlatformBilling\PayRequest;
+use App\Http\Requests\PlatformBilling\ReasonRequest;
+use App\Http\Requests\PlatformBilling\SubscribeRequest;
 use App\Platform\PlatformAudit;
+use App\Platform\PlatformStaff;
 use App\Tenancy\Models\Tenant;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,9 +26,7 @@ use Illuminate\Support\Facades\DB;
 /** PLAT-4: billing in the platform console. Staff act on a firm's subscription; every change is audited with its reason. */
 class PlatformBillingController extends Controller
 {
-    public function __construct(private Billing $billing)
-    {
-    }
+    public function __construct(private Billing $billing) {}
 
     private function db()
     {
@@ -32,7 +43,7 @@ class PlatformBillingController extends Controller
         // A signed card-setup URL is a short-lived payment capability, not ordinary read data.
         // Only staff who can operate billing may retrieve it.
         if ($includeAutopayUrl) {
-            $result['autopay_url'] = $sub && ! $sub->autopay ? app(\App\Billing\Autopay::class)->setupUrl((int) $sub->id) : null;
+            $result['autopay_url'] = $sub && ! $sub->autopay ? app(Autopay::class)->setupUrl((int) $sub->id) : null;
         }
 
         return $result;
@@ -42,13 +53,13 @@ class PlatformBillingController extends Controller
     {
         $staff = $r->attributes->get('platform_staff');
 
-        return response()->json(['data' => $this->view(Tenant::where('slug', $slug)->firstOrFail(), $staff instanceof \App\Platform\PlatformStaff && $staff->can('operate'))]);
+        return response()->json(['data' => $this->view(Tenant::where('slug', $slug)->firstOrFail(), $staff instanceof PlatformStaff && $staff->can('operate'))]);
     }
 
     /** Every firm's subscription, with what the plan list adds up to each month. ?status= narrows it. */
     public function subscriptions(Request $r): JsonResponse
     {
-        \App\Billing\PlanStore::sync();
+        PlanStore::sync();
         $q = $this->db()->table('subscriptions as s')->join('tenants as t', 't.id', '=', 's.tenant_id')
             ->select('s.id', 's.plan', 's.currency', 's.provider', 's.status', 's.period_end', 's.trial_ends_at', 's.cancel_at_period_end', 's.autopay', 's.credit_balance', 't.slug', 't.name as firm', 't.status as firm_status')
             ->orderBy('t.name');
@@ -108,7 +119,7 @@ class PlatformBillingController extends Controller
         return response()->json(['data' => ['invoice' => $inv,
             'lines' => $this->db()->table('billing_invoice_lines')->where('invoice_id', $inv->id)->get(),
             'payments' => $this->db()->table('billing_payments')->where('invoice_id', $inv->id)->get(),
-            'pay_url' => $inv->status === 'open' ? app(\App\Billing\Collection::class)->payUrl($number) : null]]);   // PLAT-4: to send to the firm
+            'pay_url' => $inv->status === 'open' ? app(Collection::class)->payUrl($number) : null]]);   // PLAT-4: to send to the firm
     }
 
     /**
@@ -125,7 +136,7 @@ class PlatformBillingController extends Controller
 
         $converted = (clone $trials)->whereNotNull('converted_at')->get(['created_at', 'converted_at']);
         $lapsed = (clone $trials)->whereNull('converted_at')->where('status', 'expired')->count();
-        $toConvert = $converted->map(fn ($s) => \Carbon\CarbonImmutable::parse($s->created_at)->diffInHours(\Carbon\CarbonImmutable::parse($s->converted_at)) / 24)->sort()->values();
+        $toConvert = $converted->map(fn ($s) => CarbonImmutable::parse($s->created_at)->diffInHours(CarbonImmutable::parse($s->converted_at)) / 24)->sort()->values();
         $decided = $converted->count() + $lapsed;
 
         return response()->json(['data' => [
@@ -147,7 +158,7 @@ class PlatformBillingController extends Controller
         ]]);
     }
 
-    public function subscribe(\App\Http\Requests\PlatformBilling\SubscribeRequest $r, string $slug): JsonResponse
+    public function subscribe(SubscribeRequest $r, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $d = $r->validated();
@@ -155,7 +166,7 @@ class PlatformBillingController extends Controller
         return $this->act($r, 'billing.subscribe', $slug, $d, fn () => $this->billing->subscribe($t, $d['plan'], $d['currency'], $d['provider'] ?? 'manual', $d['billing_email'] ?? null, (int) ($d['trial_days'] ?? 0)), 201, $t);
     }
 
-    public function changePlan(\App\Http\Requests\PlatformBilling\ChangePlanRequest $r, string $slug): JsonResponse
+    public function changePlan(ChangePlanRequest $r, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $d = $r->validated();
@@ -163,7 +174,7 @@ class PlatformBillingController extends Controller
         return $this->act($r, 'billing.change_plan', $slug, $d, fn () => $this->billing->changePlan($t, $d['plan']), 200, $t);
     }
 
-    public function cancel(\App\Http\Requests\PlatformBilling\CancelRequest $r, string $slug): JsonResponse
+    public function cancel(CancelRequest $r, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $d = $r->validated();
@@ -172,7 +183,7 @@ class PlatformBillingController extends Controller
     }
 
     /** Issue a one-off invoice to a firm (setup fee, training, anything outside the monthly cycle). `amount` is in minor units. */
-    public function charge(\App\Http\Requests\Platform\ChargeRequest $r, string $slug): JsonResponse
+    public function charge(ChargeRequest $r, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $d = $r->validated();
@@ -182,12 +193,12 @@ class PlatformBillingController extends Controller
 
     /** Issue every invoice that has fallen due now (the same job the nightly `billing:run` does). */
     /** Invoice every period that ends on or before `through` (default today). A later date invoices upcoming months ahead of time. */
-    public function runNow(\App\Http\Requests\Platform\RunBillingRequest $r): JsonResponse
+    public function runNow(RunBillingRequest $r): JsonResponse
     {
         $staff = $r->attributes->get('platform_staff');
         $d = $r->validated();
         $today = $this->billing->now()->startOfDay();
-        $through = isset($d['through']) ? \Carbon\CarbonImmutable::parse($d['through'])->endOfDay() : $today->endOfDay();
+        $through = isset($d['through']) ? CarbonImmutable::parse($d['through'])->endOfDay() : $today->endOfDay();
         $ahead = $through->gt($today->endOfDay());
         $made = $ahead ? $this->billing->runDue($through, true) : $this->billing->runDue();
         PlatformAudit::record($staff, 'billing.run', null, ['through' => $through->toDateString()], 'ok', (string) $made, $r->ip());
@@ -196,7 +207,7 @@ class PlatformBillingController extends Controller
     }
 
     /** Record a payment received outside a provider (bank transfer, cash). `reference` makes it idempotent. */
-    public function pay(\App\Http\Requests\PlatformBilling\PayRequest $r, string $number): JsonResponse
+    public function pay(PayRequest $r, string $number): JsonResponse
     {
         $d = $r->validated();
         $inv = $this->db()->table('billing_invoices')->where('number', $number)->first() ?? abort(404);
@@ -215,7 +226,7 @@ class PlatformBillingController extends Controller
     }
 
     /** PLAT-4: ask the firm's phone for an M-Pesa payment of an open KES invoice (the result arrives at the STK callback). */
-    public function mpesa(\App\Http\Requests\PlatformBilling\MpesaRequest $r, \App\Billing\Collection $collection, string $number): JsonResponse
+    public function mpesa(MpesaRequest $r, Collection $collection, string $number): JsonResponse
     {
         $d = $r->validated();
         $inv = $this->db()->table('billing_invoices')->where('number', $number)->first() ?? abort(404);
@@ -235,7 +246,7 @@ class PlatformBillingController extends Controller
     }
 
     /** PLAT-4: stop automatic payment for a firm and remove its saved card (audited). */
-    public function disableAutopay(\App\Http\Requests\PlatformBilling\ReasonRequest $r, \App\Billing\Autopay $autopay, string $slug): JsonResponse
+    public function disableAutopay(ReasonRequest $r, Autopay $autopay, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $sub = $this->billing->subscription($t) ?? abort(404);

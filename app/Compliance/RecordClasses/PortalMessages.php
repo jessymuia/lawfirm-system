@@ -2,8 +2,8 @@
 
 namespace App\Compliance\RecordClasses;
 
-use App\Compliance\LegalHolds;
 use App\Compliance\LegalHoldException;
+use App\Compliance\LegalHolds;
 use Illuminate\Support\Facades\DB;
 
 /** SEC-13: client-portal messages (FUN-10) of closed or settled matters. Disposal deletes the message. */

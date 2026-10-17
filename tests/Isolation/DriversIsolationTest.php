@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Document;
 use App\Tenancy\TenantContext;
 use Illuminate\Bus\Queueable;
+use Illuminate\Cache\RedisStore;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\UploadedFile;
@@ -13,7 +14,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * TEN-10: the suite on the production drivers (MySQL, Redis, S3), where firms share one server, one Redis and one
@@ -29,7 +32,7 @@ class DriversIsolationTest extends IsolationTestCase
         $this->assertNotSame($this->inFirm('a', fn () => DB::getDatabaseName()), $this->inFirm('b', fn () => DB::getDatabaseName()));
         $this->assertSame(static::driver('redis') ? 'redis' : 'file', config('session.driver'));
         if (static::driver('redis')) {
-            $this->assertInstanceOf(\Illuminate\Cache\RedisStore::class, Cache::getStore());
+            $this->assertInstanceOf(RedisStore::class, Cache::getStore());
             $this->assertSame('PONG', strtoupper((string) (app('redis')->connection()->ping() === true ? 'PONG' : app('redis')->connection()->ping())));
         }
         if (static::driver('s3')) {
@@ -73,7 +76,7 @@ class DriversIsolationTest extends IsolationTestCase
         config(['queue.connections.iso_redis' => ['driver' => 'redis', 'connection' => 'default', 'queue' => 'default', 'retry_after' => 90], 'queue.default' => 'iso_redis', 'queue.failed.driver' => 'null']);
         $this->app->forgetInstance('queue');
         $this->app->forgetInstance('queue.connection');
-        \Illuminate\Support\Facades\Queue::clearResolvedInstances();
+        Queue::clearResolvedInstances();
         DriverProbeJob::$ran = [];
 
         $this->inFirm('a', function () {
@@ -132,7 +135,7 @@ class DriversIsolationTest extends IsolationTestCase
         $this->api('a', 'DELETE', "/documents/{$idB5}")->assertNotFound();
         $this->assertTrue($disk->exists($this->inFirm('b', fn () => Document::find($idB5)->filepath)));
         $own = $this->api('a', 'GET', '/preview?id='.$idA)->assertOk();
-        $body = $own->baseResponse instanceof \Symfony\Component\HttpFoundation\StreamedResponse ? $own->streamedContent() : (string) $own->getContent();
+        $body = $own->baseResponse instanceof StreamedResponse ? $own->streamedContent() : (string) $own->getContent();
         $this->assertStringContainsString($this->canary('a'), $body);
         $this->assertStringNotContainsString($this->canary('b'), $body);
     }
@@ -155,9 +158,7 @@ class DriverProbeJob implements ShouldQueue
     /** @var list<array<string, mixed>> */
     public static array $ran = [];
 
-    public function __construct(public string $label)
-    {
-    }
+    public function __construct(public string $label) {}
 
     public function handle(): void
     {

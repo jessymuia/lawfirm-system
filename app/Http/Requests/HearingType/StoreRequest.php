@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\HearingType;
 
-use App\Models\HearingType;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for HearingTypeController::store(). Authorization is declared on the route (authz:*), not here. */

@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Cases;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\User;
 use App\Services\SequenceService;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +42,7 @@ class NumberingTest extends TestCase
         try {
             Invoice::create($bad);
             $this->fail('the insert should have failed');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // expected
         }
 
@@ -52,7 +54,7 @@ class NumberingTest extends TestCase
     public function test_a_failed_insert_does_not_burn_a_receipt_number(): void
     {
         $invoice = Invoice::create($this->invoiceAttrs());
-        $userId = \App\Models\User::factory()->create()->id;
+        $userId = User::factory()->create()->id;
         $ok = fn () => Payment::create(['invoice_id' => $invoice->id, 'amount' => 1, 'payment_date' => now()->format('Y-m-d'), 'method' => 'cash', 'received_by' => $userId]);
 
         $this->assertSame('RCT-000001', $ok()->receipt_number);
@@ -60,7 +62,7 @@ class NumberingTest extends TestCase
         try {
             Payment::create(['invoice_id' => 999999, 'amount' => 1, 'payment_date' => now()->format('Y-m-d'), 'method' => 'cash', 'received_by' => $userId]);
             $this->fail('the insert should have failed');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // expected
         }
 

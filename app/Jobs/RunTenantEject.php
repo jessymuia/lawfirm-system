@@ -3,14 +3,16 @@
 namespace App\Jobs;
 
 use App\Platform\PlatformAudit;
+use App\Platform\PlatformStaff;
 use App\Portability\PortabilityRunner;
+use App\Tenancy\PlatformJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 
 /** PLAT-9: eject one firm to a checksummed bundle, requested by platform staff. Outcome (path, sha256) goes to the platform audit log. */
-class RunTenantEject implements \App\Tenancy\PlatformJob, ShouldQueue
+class RunTenantEject implements PlatformJob, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
@@ -36,8 +38,8 @@ class RunTenantEject implements \App\Tenancy\PlatformJob, ShouldQueue
         PlatformAudit::record($this->staff(), 'tenant.eject.finished', $this->slug, [], 'failed', $e->getMessage(), 'queue', $this->staffEmail);
     }
 
-    private function staff(): ?\App\Platform\PlatformStaff
+    private function staff(): ?PlatformStaff
     {
-        return $this->staffId ? \App\Platform\PlatformStaff::find($this->staffId) : null;
+        return $this->staffId ? PlatformStaff::find($this->staffId) : null;
     }
 }

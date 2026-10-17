@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\Autopay;
+use App\Billing\BillingException;
+use App\Billing\Collection;
 use App\Billing\Webhooks;
+use App\Payments\PaymentGatewayException;
 use Illuminate\Http\Request;
 
 /** PLAT-4: provider callbacks (no session, no bearer: authenticity comes from the signature / secret URL). */
@@ -35,7 +39,7 @@ class BillingWebhookController extends Controller
     }
 
     /** PLAT-4: the result of an STK push for invoice {number}; the secret token authenticates (Safaricom does not sign). */
-    public function mpesaStk(Request $r, \App\Billing\Collection $c, string $token, string $number)
+    public function mpesaStk(Request $r, Collection $c, string $token, string $number)
     {
         $expected = (string) config('billing.mpesa.callback_token');
         if ($expected === '' || ! hash_equals($expected, $token)) {
@@ -50,29 +54,29 @@ class BillingWebhookController extends Controller
      * PLAT-4: the pay link in billing emails. Signed per invoice; each visit opens a fresh Stripe Checkout for what is
      * still owed, so an old email never charges a stale amount.
      */
-    public function pay(Request $r, \App\Billing\Collection $c, string $number)
+    public function pay(Request $r, Collection $c, string $number)
     {
-        if (! hash_equals(\App\Billing\Collection::signature($number), (string) $r->query('sig')) || ! $c->stripeEnabled()) {
+        if (! hash_equals(Collection::signature($number), (string) $r->query('sig')) || ! $c->stripeEnabled()) {
             return response('Not found.', 404);
         }
         try {
             return redirect()->away($c->checkout($number)['url'], 303);
-        } catch (\App\Billing\BillingException $e) {
+        } catch (BillingException $e) {
             return response(e($e->getMessage()).' Nothing is owed on it.', 200)->header('Content-Type', 'text/plain; charset=utf-8');
-        } catch (\App\Payments\PaymentGatewayException $e) {
+        } catch (PaymentGatewayException $e) {
             return response('Card payment is not available right now. Please try again shortly.', 503)->header('Content-Type', 'text/plain; charset=utf-8');
         }
     }
 
     /** PLAT-4: the signed link a firm follows to save a card for automatic payment (Stripe Checkout, setup mode). */
-    public function autopay(Request $r, \App\Billing\Autopay $autopay, int $subscription)
+    public function autopay(Request $r, Autopay $autopay, int $subscription)
     {
-        if (! hash_equals(\App\Billing\Autopay::signature($subscription), (string) $r->query('sig')) || ! $autopay->enabled()) {
+        if (! hash_equals(Autopay::signature($subscription), (string) $r->query('sig')) || ! $autopay->enabled()) {
             return response('Not found.', 404);
         }
         try {
             return redirect()->away($autopay->checkout($subscription), 303);
-        } catch (\App\Billing\BillingException $e) {
+        } catch (BillingException $e) {
             return response($e->getMessage(), 422)->header('Content-Type', 'text/plain; charset=utf-8');
         }
     }

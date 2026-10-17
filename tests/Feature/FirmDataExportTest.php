@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
@@ -19,7 +20,7 @@ class FirmDataExportTest extends TestCase
     public function test_full_firm_export_returns_a_zip_of_the_data(): void
     {
         $user = $this->userWithPermissions(['export-firm-data']);
-        \App\Models\Client::factory()->create(['name' => 'Wanjiku & Sons']);
+        Client::factory()->create(['name' => 'Wanjiku & Sons']);
 
         $response = $this->actingAs($user)->get('/api/v1/export/firm-data');
 

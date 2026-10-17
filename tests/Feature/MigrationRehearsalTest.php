@@ -9,10 +9,11 @@ use App\Tenancy\TenantLifecycle;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** DATA-13: migrations are timed against volume before they ship, and one over its budget fails. */
-class MigrationRehearsalTest extends TestCase implements \Tests\OwnsTenancy
+class MigrationRehearsalTest extends TestCase implements OwnsTenancy
 {
     public function test_the_newest_migrations_run_against_synthetic_volume_and_are_timed(): void
     {

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Invoice;
 
-use App\Models\Invoice;
+use App\Rules\FirmCurrency;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for InvoiceController::store(). Authorization is declared on the route (authz:*), not here. */
@@ -22,7 +22,7 @@ class StoreRequest extends FormRequest
             'invoice_due_date' => 'required|date_format:d/m/Y|after_or_equal:invoice_date',
             'client_id' => 'required|integer|exists:clients,id',
             // DATA-14: one of the firm's currencies; the base currency when not given
-            'currency' => ['nullable', 'string', 'size:3', new \App\Rules\FirmCurrency],
+            'currency' => ['nullable', 'string', 'size:3', new FirmCurrency],
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Isolation;
 
+use App\Entitlements\Entitlements;
 use App\Models\Client;
 use App\Tenancy\Models\Tenant;
 use Illuminate\Support\Facades\Artisan;
@@ -42,12 +43,12 @@ class CommandIsolationTest extends IsolationTestCase
     {
         config(['sso.block_private_hosts' => false]);   // the sandbox has no DNS; the URL guard itself is tested in PublicApiTest
         Tenant::query()->update(['plan' => 'professional']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $this->api('a', 'POST', '/integrations/webhooks', ['url' => 'https://hook-a.example.test/in', 'events' => ['*']])->assertCreated();
         $this->api('b', 'POST', '/integrations/webhooks', ['url' => 'https://hook-b.example.test/in', 'events' => ['*']])->assertCreated();
         // an event in each firm, carrying its canary
         foreach (['a', 'b'] as $slug) {
-            $this->inFirm($slug, fn () => \App\Models\Client::factory()->create(['name' => $this->canary($slug).' hooked']));
+            $this->inFirm($slug, fn () => Client::factory()->create(['name' => $this->canary($slug).' hooked']));
         }
         $this->assertSame(1, $this->inFirm('a', fn () => DB::table('webhook_deliveries')->count()), 'the event must have been queued in A');
         $this->assertSame(1, $this->inFirm('b', fn () => DB::table('webhook_deliveries')->count()), 'and in B');

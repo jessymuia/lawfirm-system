@@ -3,19 +3,23 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Enums\PaymentMethod;
+use App\Matters\MatterScoped;
+use App\Models\Concerns\ConstrainedToEnums;
+use App\Models\Concerns\HasPublicId;
+use App\Models\Concerns\InsertsInsideTransaction;
+use App\Services\SequenceService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 class Payment extends DefaultAppModel
 {
-    use \App\Models\Concerns\ConstrainedToEnums;
+    use ConstrainedToEnums;
 
     /** DATA-12: columns that only ever hold one of their enum's values */
-    public const ENUM_COLUMNS = ['method' => \App\Enums\PaymentMethod::class];
+    public const ENUM_COLUMNS = ['method' => PaymentMethod::class];
 
-    use \App\Matters\MatterScoped;
-    use \App\Models\Concerns\HasPublicId;
-
+    use HasPublicId;
+    use MatterScoped;
 
     public static function matterColumn(): string
     {
@@ -27,7 +31,7 @@ class Payment extends DefaultAppModel
         return 'invoices';
     }
 
-    use \App\Models\Concerns\InsertsInsideTransaction;
+    use InsertsInsideTransaction;
 
     protected $fillable = [
         'invoice_id',
@@ -76,7 +80,7 @@ class Payment extends DefaultAppModel
     /** DATA-8: same locked, gap-free, per-tenant sequence as invoices (RCT-000123). */
     public static function nextReceiptNumber(): string
     {
-        return app(\App\Services\SequenceService::class)->nextFormatted('receipt', 'RCT', 'payments', 'receipt_number');
+        return app(SequenceService::class)->nextFormatted('receipt', 'RCT', 'payments', 'receipt_number');
     }
 
     /** @return BelongsTo<Invoice, $this> */

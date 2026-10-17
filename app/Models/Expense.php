@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Matters\MatterScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends DefaultAppModel
 {
-    use \App\Matters\MatterScoped;
+    use MatterScoped;
 
     protected $fillable = [
         'utbms_expense_code',   // FUN-13

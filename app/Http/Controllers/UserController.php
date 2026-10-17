@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
+use App\Http\Requests\User\StoreRequest;
+use App\Http\Requests\User\UpdateRequest;
+use App\Http\Resources\V1\UserResource;
 use App\Models\User;
+use App\Tenancy\IdentityService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -35,7 +39,7 @@ class UserController extends Controller
         $usersWithRoles = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\UserResource::make($row)->resolve(),
+            fn ($row) => UserResource::make($row)->resolve(),
             25,
             ['name', 'email', 'phone_number', 'department', 'hire_date'],
             ['name', 'email', 'phone_number', 'department']
@@ -49,7 +53,7 @@ class UserController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\User\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_USERS)) {
             abort(403);
@@ -73,7 +77,7 @@ class UserController extends Controller
         ]);
 
         // TEN-5: in a multi-tenant deployment the sign-in is a control-plane identity (no-op on a single-firm install)
-        app(\App\Tenancy\IdentityService::class)->enrol($user, $temporaryPassword);
+        app(IdentityService::class)->enrol($user, $temporaryPassword);
 
         // TODO: email $temporaryPassword to the user via a proper invite/reset
         // flow instead of a fixed known string, once ENG-3's mail queue is in place.
@@ -92,7 +96,7 @@ class UserController extends Controller
             }
         }
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\UserResource::make($user->load('roles'))->resolve(), 201);
+        return $this->response(true, 'success', UserResource::make($user->load('roles'))->resolve(), 201);
     }
 
     /**
@@ -101,7 +105,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(\App\Http\Requests\User\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_USERS)) {
             abort(403);
@@ -136,7 +140,7 @@ class UserController extends Controller
             }
         }
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\UserResource::make($user->fresh('roles'))->resolve(), 200);
+        return $this->response(true, 'success', UserResource::make($user->fresh('roles'))->resolve(), 200);
     }
 
     /**
@@ -150,7 +154,7 @@ class UserController extends Controller
      * remains intact and attributable.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

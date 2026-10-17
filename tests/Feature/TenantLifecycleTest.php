@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\CourtType;
+use App\Models\ExpenseCategory;
+use App\Models\HearingType;
 use App\Models\User;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
@@ -15,10 +17,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use RuntimeException;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-9: provisioning and lifecycle, exercised against real SQLite tenant databases. */
-class TenantLifecycleTest extends TestCase implements \Tests\OwnsTenancy
+class TenantLifecycleTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -89,8 +92,8 @@ class TenantLifecycleTest extends TestCase implements \Tests\OwnsTenancy
             $this->assertTrue($admin->hasRole('admin'));
             $this->assertTrue(Hash::check($r['admin_password'], $admin->password));
             $this->assertSame(1, CourtType::where('name', 'High Court')->count());
-            $this->assertGreaterThan(0, \App\Models\HearingType::count());
-            $this->assertGreaterThan(0, \App\Models\ExpenseCategory::count());
+            $this->assertGreaterThan(0, HearingType::count());
+            $this->assertGreaterThan(0, ExpenseCategory::count());
         });
     }
 

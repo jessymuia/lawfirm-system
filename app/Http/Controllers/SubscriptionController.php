@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Billing\Billing;
 use App\Billing\BillingException;
+use App\Billing\Collection;
+use App\Billing\PlanStore;
+use App\Entitlements\Entitlements;
 use App\Entitlements\PlanCatalog;
+use App\Http\Requests\Subscription\ChooseRequest;
 use App\Security\SecurityPolicy;
 use App\Tenancy\TenantManager;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +28,7 @@ class SubscriptionController extends Controller
         return $this->response(true, 'success', $this->view(), 200);
     }
 
-    public function choose(\App\Http\Requests\Subscription\ChooseRequest $r): JsonResponse
+    public function choose(ChooseRequest $r): JsonResponse
     {
         $tenant = $this->tenants->current() ?? abort(404);
         $before = $tenant->plan;
@@ -36,7 +40,7 @@ class SubscriptionController extends Controller
             return $this->response(false, $e->getMessage(), null, 422);
         }
         SecurityPolicy::audit('subscription_plan_chosen', 'subscription', 0, ['plan' => $before], ['plan' => $tenant->fresh()->plan]);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
 
         return $this->response(true, 'Your plan is now '.$r->validated('plan').'.', $this->view(), 200);
     }
@@ -78,7 +82,7 @@ class SubscriptionController extends Controller
                 ->map(function ($invoice) {
                     $invoice->amount_due = max(0, (int) $invoice->total - (int) $invoice->amount_paid);
                     $invoice->pay_url = $invoice->status === 'open' && $invoice->amount_due > 0
-                        ? app(\App\Billing\Collection::class)->payUrl($invoice->number)
+                        ? app(Collection::class)->payUrl($invoice->number)
                         : null;
 
                     return $invoice;
@@ -86,7 +90,7 @@ class SubscriptionController extends Controller
         }
 
         $plans = [];
-        \App\Billing\PlanStore::sync();
+        PlanStore::sync();
         foreach ((array) config('billing.plans') as $plan => $prices) {
             if ($plan === 'trial' || ! isset($prices[$currency]) || in_array($plan, (array) config('billing.archived_plans', []), true)) {
                 continue;

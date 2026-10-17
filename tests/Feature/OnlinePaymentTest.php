@@ -7,6 +7,7 @@ use App\Jobs\SendSmsJob;
 use App\Models\Cases;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Payments\MpesaGateway;
 use App\Secrets\IntegrationCredentials;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -215,7 +216,7 @@ class OnlinePaymentTest extends TestCase
 
     public function test_mpesa_numbers_are_normalised(): void
     {
-        $n = fn ($p) => \App\Payments\MpesaGateway::msisdn($p);
+        $n = fn ($p) => MpesaGateway::msisdn($p);
         $this->assertSame('254712345678', $n('0712 345 678'));
         $this->assertSame('254712345678', $n('+254-712-345-678'));
         $this->assertSame('254112345678', $n('0112345678'));

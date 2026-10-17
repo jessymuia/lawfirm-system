@@ -88,6 +88,7 @@ class ReleaseSwitchTest extends TestCase
     private function currentVersion(): string
     {
         clearstatcache(true); // PHP caches the resolved symlink path between reads
+
         return trim(file_get_contents($this->base.'/current/VERSION'));
     }
 

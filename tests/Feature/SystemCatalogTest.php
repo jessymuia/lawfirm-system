@@ -19,10 +19,11 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\CreatesTestUsers;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-11: platform-owned reference catalog vs the firm's own rows. */
-class SystemCatalogTest extends TestCase implements \Tests\OwnsTenancy
+class SystemCatalogTest extends TestCase implements OwnsTenancy
 {
     use CreatesTestUsers, RefreshDatabase;
 

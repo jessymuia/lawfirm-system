@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppController;
 use App\Http\Controllers\PlatformConsoleController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 | middleware independently enforces the configured host as well.
 */
 // "/" is the console only on the platform host; anywhere else it is the firm app's own front page.
-Route::get('/', [\App\Http\Controllers\AppController::class, 'home'])->name('platform.home');
+Route::get('/', [AppController::class, 'home'])->name('platform.home');
 
 Route::middleware('platform.host')->get('/console', [PlatformConsoleController::class, 'console'])
     ->name('platform.console');

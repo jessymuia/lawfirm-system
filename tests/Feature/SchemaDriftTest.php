@@ -9,13 +9,15 @@ use App\Tenancy\TenantLifecycle;
 use App\Tenancy\TenantManager;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-8: schema drift is found, described and recorded. */
-class SchemaDriftTest extends TestCase implements \Tests\OwnsTenancy
+class SchemaDriftTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -23,7 +25,7 @@ class SchemaDriftTest extends TestCase implements \Tests\OwnsTenancy
     {
         // These tests change the schema. On MySQL, DDL commits immediately and survives RefreshDatabase's rollback,
         // so make the next test start from a freshly migrated database (SQLite in-memory is rebuilt anyway).
-        \Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
+        RefreshDatabaseState::$migrated = false;
         parent::tearDown();
     }
 

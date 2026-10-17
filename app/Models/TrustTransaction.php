@@ -3,17 +3,21 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Enums\TrustEntryType;
+use App\Matters\MatterScoped;
+use App\Models\Concerns\ConstrainedToEnums;
+use App\Services\SequenceService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 class TrustTransaction extends DefaultAppModel
 {
-    use \App\Models\Concerns\ConstrainedToEnums;
+    use ConstrainedToEnums;
 
     /** DATA-12: columns that only ever hold one of their enum's values */
-    public const ENUM_COLUMNS = ['type' => \App\Enums\TrustEntryType::class];
+    public const ENUM_COLUMNS = ['type' => TrustEntryType::class];
 
-    use \App\Matters\MatterScoped;
+    use MatterScoped;
 
     protected $fillable = [
         'client_id',
@@ -94,7 +98,7 @@ class TrustTransaction extends DefaultAppModel
                 'balance_after' => $newBalance,
                 'description' => $description,
                 'reference_number' => $referenceNumber,
-                'ledger_number' => app(\App\Services\SequenceService::class)->nextFormatted('trust', 'TRT', 'trust_transactions', 'ledger_number'),
+                'ledger_number' => app(SequenceService::class)->nextFormatted('trust', 'TRT', 'trust_transactions', 'ledger_number'),
                 'recorded_by' => $recordedBy,
                 'created_by' => $recordedBy,
             ]);

@@ -108,7 +108,7 @@ MD;
 
     public function test_the_changelog_is_parsed_into_releases(): void
     {
-        $c = new Changelog();
+        $c = new Changelog;
         $r = $c->parse(self::LOG);
         $this->assertSame([], $c->errors);
         $this->assertSame(['Unreleased', '1.2.0', '1.1.1', '1.1.0', '1.0.0'], array_column($r, 'version'));
@@ -123,13 +123,13 @@ MD;
 
     public function test_breaking_is_detected_by_section_or_prefix(): void
     {
-        $r = (new Changelog())->parse("## [Unreleased]\n### Changed\n- BREAKING: the format changed\n- **Breaking** the other thing\n- Not breaking at all\n- Unbreakable thing\n");
+        $r = (new Changelog)->parse("## [Unreleased]\n### Changed\n- BREAKING: the format changed\n- **Breaking** the other thing\n- Not breaking at all\n- Unbreakable thing\n");
         $this->assertSame(['BREAKING: the format changed', '**Breaking** the other thing'], $r[0]['breaking']);
     }
 
     public function test_changelog_problems_are_reported(): void
     {
-        $c = new Changelog();
+        $c = new Changelog;
         $c->parse("## [Unreleased] - 2026-01-01\n- x\n## [1.0] - 2026-01-01\n- x\n## [1.0.1]\n- x\n## [1.0.2] - 2026-13-45\n- x\n## [1.0.3] - 2026-01-01\n- x\n## [1.0.3] - 2026-01-02\n- x\n## [1.0.4] - 2026-01-01\n");
         $e = implode("\n", $c->errors);
         $this->assertStringContainsString('[Unreleased] must not have a date', $e);
@@ -268,7 +268,7 @@ MD;
 
     public function test_conventional_commits_become_draft_entries(): void
     {
-        $d = (new ConventionalCommits())->draft(<<<'LOG'
+        $d = (new ConventionalCommits)->draft(<<<'LOG'
 feat(billing): add proration.
 fix: stop double invoices
 fix(security): reject forged tokens
@@ -289,12 +289,12 @@ LOG);
         $this->assertSame('major', $d['bump']);
         $this->assertSame(3, $d['skipped']);
         $this->assertSame(['updated stuff'], $d['unparsed']);
-        $this->assertStringContainsString("### Added\n- Add proration (billing)", (new ConventionalCommits())->markdown($d));
+        $this->assertStringContainsString("### Added\n- Add proration (billing)", (new ConventionalCommits)->markdown($d));
     }
 
     public function test_the_suggested_bump_follows_the_biggest_change(): void
     {
-        $cc = new ConventionalCommits();
+        $cc = new ConventionalCommits;
         $this->assertSame('minor', $cc->draft("fix: a\nfeat: b")['bump']);
         $this->assertSame('patch', $cc->draft("fix: a\nrefactor: b")['bump']);
         $this->assertSame('none', $cc->draft("chore: a\ndocs: b")['bump']);
@@ -312,17 +312,17 @@ LOG);
 
     public function test_strict_mode_is_the_commit_message_check(): void
     {
-        file_put_contents($this->dir.'/ok.txt', "feat(billing)!: pay links
+        file_put_contents($this->dir.'/ok.txt', 'feat(billing)!: pay links
 fix: a bug
 ci(security): scan
 Merge pull request #3 from x/y
-");
+');
         $this->assertSame(0, Artisan::call('release:draft', ['file' => $this->dir.'/ok.txt', '--strict' => true]));
 
-        file_put_contents($this->dir.'/bad.txt', "feat: fine
+        file_put_contents($this->dir.'/bad.txt', 'feat: fine
 initial commit
 Update stuff
-");
+');
         $this->assertSame(1, Artisan::call('release:draft', ['file' => $this->dir.'/bad.txt', '--strict' => true]));
         $out = Artisan::output();
         $this->assertStringContainsString('Not a conventional commit: initial commit', $out);

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\FirmSettings;
 use Closure;
 use Illuminate\Support\Facades\DB;
 
@@ -21,11 +22,11 @@ use Illuminate\Support\Facades\DB;
 class SequenceService
 {
     /**
-     * @param  string        $name    Sequence name, e.g. 'invoice'.
-     * @param  string|int|null $scope Optional reset scope, e.g. the year.
-     * @param  Closure|null  $seed    Returns the starting last_value the first
-     *                                time this sequence is used (to continue
-     *                                from pre-existing data).
+     * @param  string  $name  Sequence name, e.g. 'invoice'.
+     * @param  string|int|null  $scope  Optional reset scope, e.g. the year.
+     * @param  Closure|null  $seed  Returns the starting last_value the first
+     *                              time this sequence is used (to continue
+     *                              from pre-existing data).
      */
     public function next(string $name, string|int|null $scope = null, ?Closure $seed = null): int
     {
@@ -71,8 +72,8 @@ class SequenceService
     public function nextFormatted(string $name, string $prefix, string $table, string $column): string
     {
         // The firm's own setting (Settings, Currencies and tax, Numbering) wins; the environment switch is the default for everyone else.
-        $perYear = (bool) \App\Support\FirmSettings::get('numbering.per_year', (bool) config('invoicing.number_per_year', false));
-        $custom = \App\Support\FirmSettings::get("numbering.prefix.{$name}");
+        $perYear = (bool) FirmSettings::get('numbering.per_year', (bool) config('invoicing.number_per_year', false));
+        $custom = FirmSettings::get("numbering.prefix.{$name}");
         if (is_string($custom) && preg_match('/^[A-Z0-9]{1,8}$/', $custom)) {
             $prefix = $custom;
         }
