@@ -1,0 +1,73 @@
+# TEN-10: no firm ever sees another firm's data (docs/ISOLATION_TESTING.md). Runs the Isolation suite twice: on the default
+# drivers, and on the production drivers (one MySQL server, one Redis, one S3 bucket) where only the firm prefix keeps firms apart.
+name: isolation
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: isolation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  isolation:
+    name: isolation (default drivers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test --testsuite=Isolation
+
+  isolation-drivers:
+    name: isolation (MySQL, Redis, S3)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -psecret" --health-interval=10s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=3s --health-retries=10
+      s3:
+        image: motoserver/moto:5.0.28
+        ports: ['5000:5000']
+    env:
+      ISOLATION_DB: mysql
+      ISOLATION_REDIS: '1'
+      ISOLATION_S3: '1'
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+      REDIS_HOST: 127.0.0.1
+      AWS_ACCESS_KEY_ID: testing
+      AWS_SECRET_ACCESS_KEY: testing
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_BUCKET: isolation
+      AWS_ENDPOINT: http://127.0.0.1:5000
+      AWS_USE_PATH_STYLE_ENDPOINT: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite, pdo_mysql, redis
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Create the bucket
+        run: |
+          for i in $(seq 1 30); do curl -sf "$AWS_ENDPOINT/moto-api/" >/dev/null && break; sleep 1; done
+          aws --endpoint-url "$AWS_ENDPOINT" s3 mb "s3://$AWS_BUCKET"
+      - run: php artisan test --testsuite=Isolation
