@@ -362,7 +362,7 @@ onMounted(() => {
 .dashboard-error {
     text-align: center;
     padding: 60px 20px;
-    color: #6b7280;
+    color: var(--text-tertiary);
 }
 
 .stat-cards {
@@ -454,7 +454,7 @@ a.stat-card.cross-link {
 
 .stat-label {
     font-size: 13px;
-    color: #6b7280;
+    color: var(--text-tertiary);
     margin-top: 4px;
 }
 
@@ -482,7 +482,7 @@ a.stat-card.cross-link {
 
     .muted {
         font-weight: 400;
-        color: #6b7280;
+        color: var(--text-tertiary);
         font-size: 12px;
     }
 }
@@ -490,7 +490,7 @@ a.stat-card.cross-link {
 .empty-state {
     padding: 20px 0;
     text-align: center;
-    color: #6b7280;
+    color: var(--text-tertiary);
     font-size: 13px;
 }
 
@@ -536,7 +536,7 @@ a.list-main.cross-link {
 
 .list-sub {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--text-tertiary);
 }
 
 .list-badge {
