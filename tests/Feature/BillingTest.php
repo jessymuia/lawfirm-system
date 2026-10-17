@@ -620,4 +620,66 @@ class BillingTest extends TestCase implements OwnsTenancy
         config(['tenancy.mode' => 'single']);
         $this->artisan('billing:run')->expectsOutputToContain('multi-tenant')->assertSuccessful();
     }
+
+    // ---- one-off charges and guards ----------------------------------------------------------------------------------
+
+    public function test_a_one_off_charge_is_an_adjustment_invoice_and_is_not_issued_twice_at_once(): void
+    {
+        $t = $this->tenant();
+        try {
+            $this->billing->charge($t, 'Training', 15000);
+            $this->fail('charged a firm without a subscription');
+        } catch (BillingException $e) {
+            $this->assertStringContainsString('no subscription', $e->getMessage());
+        }
+        $this->billing->subscribe($t, 'starter', 'KES', 'manual', null, 0, $this->t('2026-01-10 09:00'));
+        foreach ([[0, 1], [15000, 0]] as [$amount, $quantity]) {
+            try {
+                $this->billing->charge($t, 'Training', $amount, $quantity);
+                $this->fail("charged {$quantity} x {$amount}");
+            } catch (BillingException $e) {
+                $this->assertStringContainsString('above zero', $e->getMessage());
+            }
+        }
+
+        $at = $this->t('2026-01-15 10:00');
+        $inv = $this->billing->charge($t, 'Training', 15000, 2, $at);
+        $this->assertSame('adjustment', $inv->kind);
+        $this->assertSame(30000, (int) $inv->total);
+        $this->assertSame('open', $inv->status);
+        try {
+            $this->billing->charge($t, 'Training again', 15000, 1, $at);    // a double click in the console
+            $this->fail('issued two adjustments at the same moment');
+        } catch (BillingException $e) {
+            $this->assertStringContainsString('just issued', $e->getMessage());
+        }
+        $this->assertSame(1, $this->ctl()->table('billing_invoices')->where('kind', 'adjustment')->count());
+
+        $this->assertSame('adjustment', $this->billing->charge($t, 'Setup', 5000)->kind);    // dated now when no date is given
+    }
+
+    public function test_unknown_providers_canceled_plan_changes_and_nameless_mpesa_calls_are_refused(): void
+    {
+        $t = $this->tenant();
+        try {
+            $this->billing->subscribe($t, 'starter', 'KES', 'paypal');
+            $this->fail('subscribed through an unknown provider');
+        } catch (BillingException $e) {
+            $this->assertSame('Unknown provider.', $e->getMessage());
+        }
+
+        $this->billing->subscribe($t, 'starter', 'KES');
+        $this->ctl()->table('subscriptions')->where('tenant_id', $t->id)->update(['status' => 'canceled']);
+        try {
+            $this->billing->changePlan($t, 'professional');
+            $this->fail('changed the plan of a canceled subscription');
+        } catch (BillingException $e) {
+            $this->assertSame('The subscription is canceled.', $e->getMessage());
+        }
+
+        $this->assertSame(['outcome' => 'rejected', 'detail' => 'no TransID'], app(Webhooks::class)->mpesaC2B([]));
+
+        config(['billing.trial.offboard_after_days' => 0]);    // offboarding lapsed trials switched off
+        $this->assertSame([], $this->billing->offboardLapsedTrials());
+    }
 }
