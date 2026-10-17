@@ -46,10 +46,12 @@ if (! is_file($file)) {
 $xml = simplexml_load_file($file);
 $root = realpath(__DIR__.'/..').'/';
 $files = [];
+$missed = [];
 foreach ($xml->xpath('//file') as $f) {
     $path = str_replace($root, '', (string) $f['name']);
     $m = $f->metrics;
     $files[$path] = [(int) $m['statements'], (int) $m['coveredstatements']];
+    $missed[$path] = array_map(fn ($l) => (int) $l['num'], $f->xpath("line[@type='stmt'][@count='0']"));
 }
 
 $pct = fn (array $pairs) => ($t = array_sum(array_column($pairs, 0))) ? 100 * array_sum(array_column($pairs, 1)) / $t : null;
@@ -69,6 +71,12 @@ foreach ($floors as $pattern => $floor) {
     $ok = $p + 1e-9 >= $floor;
     $ok || $failed++;
     printf("%-55s %6.1f%%  floor %3d%%  %s\n", $pattern, $p, $floor, $ok ? 'ok' : 'BELOW FLOOR');
+    if (! $ok && $pattern !== 'overall') {
+        // say where: the lines no test runs, per file
+        foreach (array_keys($match) as $path) {
+            $missed[$path] && printf("    %s: lines %s\n", $path, implode(', ', $missed[$path]));
+        }
+    }
 }
 
 exit($failed ? 1 : 0);
