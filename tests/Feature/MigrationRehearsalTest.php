@@ -20,7 +20,7 @@ class MigrationRehearsalTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertSame(0, Artisan::call('migrations:rehearse', ['--synthetic' => 50, '--last' => 3, '--budget' => 60]));
         $out = Artisan::output();
         $this->assertStringContainsString('Rehearsing 3 migration(s) against', $out);
-        $this->assertStringContainsString('2026_10_23_100000_generalise_retention_disposals', $out);
+        $this->assertStringContainsString('2026_10_28_100000_add_saml_to_sso_providers', $out);
         $this->assertSame($before, glob(sys_get_temp_dir().'/rehearsal_*.sqlite'), 'the scratch database is dropped');
     }
 

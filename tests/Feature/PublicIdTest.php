@@ -53,12 +53,12 @@ class PublicIdTest extends TestCase
 
         $filled = (new BackfillPublicIds(chunk: 1))->handle();
 
-        $this->assertSame(['clients' => 2, 'cases' => 1, 'hearings' => 0], $filled);
+        $this->assertSame(['clients' => 2, 'cases' => 1, 'hearings' => 0, 'invoices' => 0, 'payments' => 0, 'documents' => 0], $filled);
         $this->assertSame(0, DB::table('clients')->whereNull('public_id')->count());
         $this->assertSame($kept, $clients[2]->fresh()->public_id, 'existing ids are never replaced');
         $this->assertSame('2020-01-01 00:00:00', (string) DB::table('clients')->where('id', $clients[0]->id)->value('updated_at'));
         $this->assertSame($audits, DB::table('audits')->count());
-        $this->assertSame(['clients' => 0, 'cases' => 0, 'hearings' => 0], (new BackfillPublicIds)->handle());
+        $this->assertSame(['clients' => 0, 'cases' => 0, 'hearings' => 0, 'invoices' => 0, 'payments' => 0, 'documents' => 0], (new BackfillPublicIds)->handle());
     }
 
     public function test_a_row_that_predates_the_backfill_gets_its_id_on_first_use_and_keeps_it(): void

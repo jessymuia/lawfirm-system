@@ -31,10 +31,12 @@ class SessionIsolationTest extends IsolationTestCase
 
     public function test_the_session_cookie_is_not_accepted_under_another_name(): void
     {
+        app(\App\Tenancy\TenantContext::class)->activate('default');
+        $base = config('session.cookie');   // follows APP_NAME, e.g. laravel_session
         $a = $this->firm['a']['cookies'];
-        $sessionA = $a['laravel_session_a'];
-        $this->assertNotSame('laravel_session', array_keys($a)[1] ?? '', 'cookie names are per firm');
-        foreach (['laravel_session', 'laravel_session_b'] as $name) {
+        $sessionA = $a["{$base}_a"];
+        $this->assertNotSame($base, array_keys($a)[1] ?? '', 'cookie names are per firm');
+        foreach ([$base, "{$base}_b"] as $name) {
             $this->http($this->firm['b']['host'], 'GET', '/user', [], [$name => $sessionA])->assertUnauthorized();
         }
     }

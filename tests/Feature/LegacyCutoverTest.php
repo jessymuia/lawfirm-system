@@ -123,7 +123,12 @@ class LegacyCutoverTest extends TestCase
         $this->assertSame($r['before']['passwords'], $r['after']['passwords']);
         $this->assertSame($r['before']['rows']['invoices'], $r['after']['rows']['invoices']);
         $this->assertGreaterThan(0, $r['migrations_seconds']);
-        $this->assertArrayHasKey('2026_08_19_090400_refactor_invoice_status_and_add_totals', $r['slowest_migrations_seconds'] + array_flip(array_keys($r['slowest_migrations_seconds'])));
+        // which migrations are slowest depends on the runner; the invoice refactor's effect is checked by invoice_states above
+        $this->assertNotEmpty($r['slowest_migrations_seconds']);
+        $this->assertLessThanOrEqual(8, count($r['slowest_migrations_seconds']));
+        foreach (array_keys($r['slowest_migrations_seconds']) as $migration) {
+            $this->assertFileExists(database_path("migrations/{$migration}.php"));
+        }
         $this->assertSame([], DB::select("SHOW DATABASES LIKE '".$r['scratch_database']."'"), 'the copy is dropped');
         $this->assertTrue(LegacyMapping::isLegacy(DB::connection('source')), 'the source is never changed');
     }
