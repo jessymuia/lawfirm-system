@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\ExpenseCategory;
 
-use App\Models\ExpenseCategory;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for ExpenseCategoryController::store(). Authorization is declared on the route (authz:*), not here. */

@@ -2,6 +2,7 @@
 
 use App\Exceptions\Handler;
 use App\Http\Kernel;
+use App\Support\SecretFiles;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 
@@ -18,7 +19,7 @@ use Illuminate\Foundation\Application;
 
 // SEC-15: FOO_FILE=/path fills FOO from a mounted secret (Docker/Kubernetes/Vault agent) before configuration is read.
 require_once __DIR__.'/../app/Support/SecretFiles.php';
-\App\Support\SecretFiles::load();
+SecretFiles::load();
 
 $app = new Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)

@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Tenancy\Keys\BackupCipher;
+use App\Tenancy\Keys\FirmKeys;
+use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantManager;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Command\Command as CommandAlias;
@@ -35,8 +39,8 @@ class RunBackup extends Command
     public function handle(): int
     {
         if ($slug = $this->option('tenant')) {
-            $tenants = app(\App\Tenancy\TenantManager::class);
-            $tenant = $tenants->isMulti() ? \App\Tenancy\Models\Tenant::where('slug', $slug)->first() : null;
+            $tenants = app(TenantManager::class);
+            $tenant = $tenants->isMulti() ? Tenant::where('slug', $slug)->first() : null;
             if (! $tenant) {
                 $this->error("--tenant needs multi-tenant mode and an existing tenant (got [{$slug}]).");
 
@@ -45,7 +49,7 @@ class RunBackup extends Command
 
             // TEN-13: a firm with its own data key gets its backups encrypted with it (so destroying the key shreds them).
             // A key that exists but cannot be used (a customer key revoked) stops the backup rather than writing it in the clear.
-            $key = app(\App\Tenancy\Keys\FirmKeys::class)->encrypter($tenant)?->getKey();
+            $key = app(FirmKeys::class)->encrypter($tenant)?->getKey();
 
             // Suspended tenants are still backed up; only the default connection (this tenant's database) is dumped.
             return $tenants->runIn($tenant, fn () => $this->backupCurrent('tenants/'.$tenant->slug.'/'.now()->format('Y/m/d'), [storage_path('app/tenants/'.$tenant->slug)], $key), allowInactive: true);
@@ -163,7 +167,7 @@ class RunBackup extends Command
     {
         if ($key !== null) {
             try {
-                \App\Tenancy\Keys\BackupCipher::encryptFile($tempFile, $tempFile.'.enc', $key);
+                BackupCipher::encryptFile($tempFile, $tempFile.'.enc', $key);
             } finally {
                 @unlink($tempFile);   // the clear copy never leaves this machine
             }

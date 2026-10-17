@@ -4,15 +4,16 @@ namespace App\Http\Requests\Task;
 
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
+use App\Http\Requests\Concerns\RouteRecord;
 use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for TaskController::update(). Authorization is declared on the route (authz:*), not here. */
 class UpdateRequest extends FormRequest
 {
-    use \App\Http\Requests\Concerns\RouteRecord;
+    use RouteRecord;
 
-    protected string $recordModel = \App\Models\Task::class;
+    protected string $recordModel = Task::class;
 
     protected string $recordParameter = 'task';
 

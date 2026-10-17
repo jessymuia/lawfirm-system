@@ -8,6 +8,7 @@ use App\Mail\SignatureRequested;
 use App\Models\Document;
 use App\Security\SecurityPolicy;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -64,7 +65,7 @@ class Signatures
         // sent once the surrounding transaction has committed: a link must never point at a request that was rolled back
         if ($s->email) {
             Mail::to($s->email)->queue((new SignatureRequested($firm, $s->name, $r->title, $r->message, $link,
-                \Carbon\CarbonImmutable::parse($r->expires_at)->format('j F Y')))->afterCommit());
+                CarbonImmutable::parse($r->expires_at)->format('j F Y')))->afterCommit());
         }
         if ($s->phone) {
             SendSmsJob::dispatch((string) $s->phone, "{$firm} asks you to sign \"".Str::limit($r->title, 60)."\": {$link}")->afterCommit();

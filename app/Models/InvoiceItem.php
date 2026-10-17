@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Matters\MatterScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InvoiceItem extends DefaultAppModel
 {
-    use \App\Matters\MatterScoped;
+    use MatterScoped;
 
     public static function matterColumn(): string
     {

@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Catalog\HandlesCatalogRows;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\HearingType\StoreRequest;
+use App\Http\Requests\HearingType\UpdateRequest;
+use App\Http\Resources\V1\HearingTypeResource;
 use App\Models\HearingType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class HearingTypeController extends Controller
@@ -27,7 +29,7 @@ class HearingTypeController extends Controller
         $types = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\HearingTypeResource::make($row)->resolve(),
+            fn ($row) => HearingTypeResource::make($row)->resolve(),
             25,
             ['name'],
             ['name', 'alias']
@@ -37,7 +39,7 @@ class HearingTypeController extends Controller
     }
 
     /** ENG-16: dropdown options (id + name), capped; see Controller::optionsResponse(). */
-    public function options(\Illuminate\Http\Request $request): JsonResponse
+    public function options(Request $request): JsonResponse
     {
         return $this->optionsResponse($request, HearingType::query(), fn ($r) => $r->displayName());
     }
@@ -45,7 +47,7 @@ class HearingTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(\App\Http\Requests\HearingType\StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_HEARINGS)) {
             abort(403);
@@ -55,14 +57,13 @@ class HearingTypeController extends Controller
             'name' => $request->name,
         ]);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\HearingTypeResource::make($type)->resolve(), 201);
+        return $this->response(true, 'success', HearingTypeResource::make($type)->resolve(), 201);
     }
 
     /**
      * Update the specified resource in storage.
-     *
      */
-    public function update(\App\Http\Requests\HearingType\UpdateRequest $request, $id): JsonResponse
+    public function update(UpdateRequest $request, $id): JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_HEARINGS)) {
             abort(403);
@@ -71,20 +72,20 @@ class HearingTypeController extends Controller
         $type = HearingType::findOrFail($id);
         if ($type->is_system) {
             // TEN-11: a firm can only give a system row a local name.
-            return $this->response(true, 'success', \App\Http\Resources\V1\HearingTypeResource::make($this->updateCatalogAlias($request, $type))->resolve(), 200);
+            return $this->response(true, 'success', HearingTypeResource::make($this->updateCatalogAlias($request, $type))->resolve(), 200);
         }
 
         $type->name = $request->name;
         $type->updated_by = auth()->user()->id;
         $type->save();
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\HearingTypeResource::make($type)->resolve(), 200);
+        return $this->response(true, 'success', HearingTypeResource::make($type)->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

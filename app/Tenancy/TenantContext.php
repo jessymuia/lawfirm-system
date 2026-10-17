@@ -2,6 +2,8 @@
 
 namespace App\Tenancy;
 
+use Illuminate\Cache\RateLimiter;
+use Illuminate\Support\Facades\Facade;
 use InvalidArgumentException;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -119,16 +121,16 @@ class TenantContext
     private function refreshProcessWideCacheBindings(): void
     {
         $limiters = [];
-        if (app()->resolved(\Illuminate\Cache\RateLimiter::class)) {
-            $old = app(\Illuminate\Cache\RateLimiter::class);
+        if (app()->resolved(RateLimiter::class)) {
+            $old = app(RateLimiter::class);
             $limiters = (new \ReflectionProperty($old, 'limiters'))->getValue($old);
         }
-        foreach (['cache.store', 'cache.psr6', \Illuminate\Cache\RateLimiter::class] as $abstract) {
+        foreach (['cache.store', 'cache.psr6', RateLimiter::class] as $abstract) {
             app()->forgetInstance($abstract);
         }
-        \Illuminate\Support\Facades\Facade::clearResolvedInstance(\Illuminate\Cache\RateLimiter::class);
+        Facade::clearResolvedInstance(RateLimiter::class);
         if ($limiters !== []) {
-            $new = app(\Illuminate\Cache\RateLimiter::class);
+            $new = app(RateLimiter::class);
             foreach ($limiters as $name => $callback) {
                 $new->for($name, $callback);
             }

@@ -4,7 +4,6 @@ namespace App\Http\Requests\Task;
 
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
-use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for TaskController::store(). Authorization is declared on the route (authz:*), not here. */

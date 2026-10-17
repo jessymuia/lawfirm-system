@@ -7,6 +7,7 @@ use App\SupportAccess\SupportAccessService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * PLAT-8: every request made by an ephemeral support principal is checked against its session and logged in the firm's own
@@ -52,7 +53,7 @@ class SupportSessionGuard
 
     private function log(SupportAccessSession $session, Request $request, int $status): void
     {
-        \Illuminate\Support\Facades\DB::table('support_access_log')->insert([
+        DB::table('support_access_log')->insert([
             'session_id' => $session->id, 'method' => $request->method(), 'path' => mb_substr($request->path(), 0, 255),
             'status' => $status, 'ip' => $request->ip(), 'created_at' => now(),
         ]);

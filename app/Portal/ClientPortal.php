@@ -6,6 +6,7 @@ use App\Actions\Documents\StoreDocument;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Payments\OnlinePayments;
+use App\Payments\PaymentGatewayException;
 use App\Security\SecurityPolicy;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -110,6 +111,7 @@ class ClientPortal
     public function upload(int $clientId, int $caseId, UploadedFile $file, string $title): array
     {
         $this->matterOf($clientId, $caseId);
+
         return DB::transaction(function () use ($caseId, $file, $title, $clientId) {
             $doc = app(StoreDocument::class)->handle($caseId, $file, ['title' => $title], null);
             $id = DB::table('portal_documents')->insertGetId([
@@ -156,7 +158,7 @@ class ClientPortal
     {
         $row = collect($this->invoices($clientId))->firstWhere('id', $invoiceId) ?? throw new NotFoundHttpException;
         if ($row['outstanding'] <= 0) {
-            throw new \App\Payments\PaymentGatewayException('This invoice is already paid.');
+            throw new PaymentGatewayException('This invoice is already paid.');
         }
 
         return $this->payments->createLink(Invoice::withoutGlobalScopes()->findOrFail($invoiceId), null, 1);

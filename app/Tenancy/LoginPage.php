@@ -12,9 +12,7 @@ use Illuminate\Http\Request;
  */
 class LoginPage
 {
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     /** @return array{signupUrl: ?string, operatorLogin: bool, platformLoginUrl: ?string} */
     public function context(Request $request): array

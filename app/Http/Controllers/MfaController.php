@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Mfa\ConfirmWithPasswordAndCodeRequest;
+use App\Http\Requests\Mfa\EnableRequest;
+use App\Http\Requests\Mfa\UpdatePolicyRequest;
 use App\Models\User;
 use App\Security\Mfa;
 use App\Security\SecurityPolicy;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /** SEC-12: self-service two-factor (any signed-in user) and the firm's policy / reset (manage-security-settings). */
@@ -34,7 +37,7 @@ class MfaController extends Controller
         }
     }
 
-    public function enable(\App\Http\Requests\Mfa\EnableRequest $r): JsonResponse
+    public function enable(EnableRequest $r): JsonResponse
     {
         $d = $r->validated();
         try {
@@ -48,7 +51,7 @@ class MfaController extends Controller
     }
 
     /** Needs the password AND a current code, so a hijacked session cannot switch the second factor off. */
-    public function disable(\App\Http\Requests\Mfa\ConfirmWithPasswordAndCodeRequest $r): JsonResponse
+    public function disable(ConfirmWithPasswordAndCodeRequest $r): JsonResponse
     {
         $u = Auth::user();
         if (Mfa::required()) {
@@ -63,7 +66,7 @@ class MfaController extends Controller
         return $this->response(true, 'Two-factor authentication is off.', null, 200);
     }
 
-    public function recoveryCodes(\App\Http\Requests\Mfa\ConfirmWithPasswordAndCodeRequest $r): JsonResponse
+    public function recoveryCodes(ConfirmWithPasswordAndCodeRequest $r): JsonResponse
     {
         $u = Auth::user();
         if (! Mfa::enabled($u) || ! $this->proves($r, $u)) {
@@ -74,7 +77,7 @@ class MfaController extends Controller
         return $this->response(true, 'New recovery codes. The old ones no longer work.', ['recovery_codes' => $this->mfa->regenerateRecoveryCodes($u)], 200);
     }
 
-    private function proves(\App\Http\Requests\Mfa\ConfirmWithPasswordAndCodeRequest $r, User $u): bool
+    private function proves(ConfirmWithPasswordAndCodeRequest $r, User $u): bool
     {
         $d = $r->validated();
 
@@ -85,10 +88,10 @@ class MfaController extends Controller
 
     public function policy(): JsonResponse
     {
-        return $this->response(true, 'success', SecurityPolicy::get() + ['users_without_mfa' => User::whereNull('platform_staff_id')->count() - \Illuminate\Support\Facades\DB::table('user_mfa')->whereNotNull('confirmed_at')->count()], 200);
+        return $this->response(true, 'success', SecurityPolicy::get() + ['users_without_mfa' => User::whereNull('platform_staff_id')->count() - DB::table('user_mfa')->whereNotNull('confirmed_at')->count()], 200);
     }
 
-    public function updatePolicy(\App\Http\Requests\Mfa\UpdatePolicyRequest $r): JsonResponse
+    public function updatePolicy(UpdatePolicyRequest $r): JsonResponse
     {
         $d = $r->validated();
         try {

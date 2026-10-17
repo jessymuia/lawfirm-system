@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Secrets\IntegrationCredentials;
 use Illuminate\Support\Facades\Log;
 
 function sendSMS(User $user, $message): void
@@ -53,7 +54,7 @@ function sendCustomSMS($phone_number, $message): void
 /** SEC-15: the firm's own TextSMS credentials win over the deployment's. */
 function textsmsPayload($phone_number, $message): array
 {
-    $c = app(\App\Secrets\IntegrationCredentials::class)->all('textsms');
+    $c = app(IntegrationCredentials::class)->all('textsms');
 
     return [
         'apikey' => $c['api_key'],

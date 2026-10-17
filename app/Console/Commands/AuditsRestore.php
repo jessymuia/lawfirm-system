@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Audit\AuditArchiver;
+use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantManager;
 use Illuminate\Console\Command;
 
 /** DATA-11: put an archived month of the audit trail back into the live table (verified by SHA-256 first). */
@@ -12,7 +14,7 @@ class AuditsRestore extends Command
 
     protected $description = 'Restore an archived month of the audit trail';
 
-    public function handle(AuditArchiver $archiver, \App\Tenancy\TenantManager $tenants): int
+    public function handle(AuditArchiver $archiver, TenantManager $tenants): int
     {
         $go = function () use ($archiver): int {
             try {
@@ -28,7 +30,7 @@ class AuditsRestore extends Command
         };
 
         if ($slug = $this->option('tenant')) {
-            return $tenants->runIn(\App\Tenancy\Models\Tenant::where('slug', $slug)->firstOrFail(), $go, allowInactive: true);
+            return $tenants->runIn(Tenant::where('slug', $slug)->firstOrFail(), $go, allowInactive: true);
         }
 
         return $go();

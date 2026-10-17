@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Actions\Payments\RecordPayment;
 use App\Actions\Payments\RemovePayment;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Payment\StoreRequest;
+use App\Http\Resources\V1\PaymentResource;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Carbon\Carbon;
@@ -26,12 +28,12 @@ class PaymentController extends Controller
             $query->where('invoice_id', request()->input('invoice_id'));
         }
 
-        $payments = $this->paginatedOrFull(request(), $query, fn ($row) => \App\Http\Resources\V1\PaymentResource::make($row)->resolve());
+        $payments = $this->paginatedOrFull(request(), $query, fn ($row) => PaymentResource::make($row)->resolve());
 
         return $this->response(true, 'success', $payments, 200);
     }
 
-    public function store(\App\Http\Requests\Payment\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_PAYMENTS)) {
             abort(403);

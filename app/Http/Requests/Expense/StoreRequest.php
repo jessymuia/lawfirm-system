@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Expense;
 
-use App\Models\Expense;
+use App\EBilling\Utbms;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for ExpenseController::store(). Authorization is declared on the route (authz:*), not here. */
@@ -17,7 +17,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'utbms_expense_code' => 'nullable|string|in:'.implode(',', array_keys(\App\EBilling\Utbms::EXPENSES)),   // FUN-13
+            'utbms_expense_code' => 'nullable|string|in:'.implode(',', array_keys(Utbms::EXPENSES)),   // FUN-13
             'case_id' => 'required|integer|exists:cases,id',
             'expense_date' => 'required|date_format:d/m/Y',
             'amount' => 'required|numeric|min:0',

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Observability\Tracer;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Context;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -14,9 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class TraceRequests
 {
-    public function __construct(private Tracer $tracer)
-    {
-    }
+    public function __construct(private Tracer $tracer) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -40,7 +39,7 @@ class TraceRequests
             return;
         }
         $route = $request->route();
-        $template = $route instanceof \Illuminate\Routing\Route ? '/'.ltrim($route->uri(), '/') : null;
+        $template = $route instanceof Route ? '/'.ltrim($route->uri(), '/') : null;
         $span->name = $request->method().' '.($template ?? 'unmatched');
         $span->set(['http.route' => $template, 'http.response.status_code' => $response->getStatusCode()]);
         if ($response->getStatusCode() >= 500) {

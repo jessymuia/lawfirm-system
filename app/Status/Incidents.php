@@ -15,9 +15,7 @@ class Incidents
 
     public const STATUSES = ['scheduled', 'investigating', 'identified', 'monitoring', 'resolved'];
 
-    public function __construct(private Health $health)
-    {
-    }
+    public function __construct(private Health $health) {}
 
     private function db()
     {

@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Constants\ModulePermissions as P;
+use App\EBilling\Ledes1998B;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\CreatesTestUsers;
@@ -79,7 +81,7 @@ class EBillingTest extends TestCase
         $this->assertSame('LEDES1998B[]', $rows[0]);
         $this->assertStringStartsWith('INVOICE_DATE|INVOICE_NUMBER|CLIENT_ID|', $rows[1]);
         $this->assertCount(6, $rows);
-        $lines = array_map(fn ($r) => array_combine(\App\EBilling\Ledes1998B::FIELDS, explode('|', substr($r, 0, -2))), array_slice($rows, 2));
+        $lines = array_map(fn ($r) => array_combine(Ledes1998B::FIELDS, explode('|', substr($r, 0, -2))), array_slice($rows, 2));
 
         [$fee, $attend, $expense, $tax] = $lines;
         $this->assertSame(['F', '2.5', '10000.00', '25000.00', '20260504', 'L210', 'A103', 'PT', 'Achieng Otieno', 'Draft plaint annexures (v2)'],
@@ -93,7 +95,7 @@ class EBillingTest extends TestCase
             $this->assertSame((string) ($i + 1), $l['LINE_ITEM_NUMBER']);
             $this->assertSame('37320.00', $l['INVOICE_TOTAL'], 'the sum of the line totals, and the invoice total');
             // the expense line is dated with the invoice, and every line date must fall inside the billing period
-            $this->assertSame(['ACME-77', 'HCCC 12/2026', 'CM-15', 'P051234567X', '20260504', \Carbon\Carbon::parse($inv->invoice_date)->format('Ymd')],
+            $this->assertSame(['ACME-77', 'HCCC 12/2026', 'CM-15', 'P051234567X', '20260504', Carbon::parse($inv->invoice_date)->format('Ymd')],
                 [$l['CLIENT_ID'], $l['LAW_FIRM_MATTER_ID'], $l['CLIENT_MATTER_ID'], $l['LAW_FIRM_ID'], $l['BILLING_START_DATE'], $l['BILLING_END_DATE']]);
         }
         $this->assertEquals(37320, (float) $inv->fresh()->total_amount);

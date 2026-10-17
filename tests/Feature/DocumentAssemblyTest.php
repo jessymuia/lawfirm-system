@@ -9,6 +9,7 @@ use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Document;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ class DocumentAssemblyTest extends TestCase
         parent::setUp();
         Storage::fake('local');
         config(['documents.text.enabled' => false]);
-        $this->travelTo(\Carbon\Carbon::parse('2026-10-05 10:00:00', 'Africa/Nairobi'));
+        $this->travelTo(Carbon::parse('2026-10-05 10:00:00', 'Africa/Nairobi'));
         $this->u = $this->userWithPermissions([P::MANAGE_DOCUMENT_TEMPLATES, P::LIST_DOCUMENTS, P::CREATE_DOCUMENTS, P::LIST_CASES, P::ACCESS_ALL_MATTERS]);
         $this->u->forceFill(['name' => 'Otieno Advocate'])->save();
         $client = Client::factory()->create(['name' => 'Mwangi & Sons Ltd', 'address' => 'P.O. Box 1, Nairobi']);

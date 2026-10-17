@@ -2,12 +2,14 @@
 
 namespace App\Entitlements;
 
+use App\Billing\PlanStore;
+
 /** Reads config/entitlements.php. An unknown plan name yields NOTHING (fail closed), never "everything". */
 class PlanCatalog
 {
     public function set(?string $plan): EntitlementSet
     {
-        \App\Billing\PlanStore::sync();
+        PlanStore::sync();
         $plans = (array) config('entitlements.plans');
 
         if ($plan === null || $plan === '' || ! isset($plans[$plan])) {

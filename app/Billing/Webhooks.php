@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\DB;
  */
 class Webhooks
 {
-    public function __construct(private Billing $billing)
-    {
-    }
+    public function __construct(private Billing $billing) {}
 
     private function db()
     {

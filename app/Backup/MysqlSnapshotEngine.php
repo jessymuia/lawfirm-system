@@ -2,6 +2,7 @@
 
 namespace App\Backup;
 
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Symfony\Component\Process\Process;
@@ -81,7 +82,7 @@ class MysqlSnapshotEngine implements SnapshotEngine
         return ['--host='.($conn['host'] ?? '127.0.0.1'), '--port='.($conn['port'] ?? 3306), '--user='.($conn['username'] ?? 'root')];
     }
 
-    private function server(array $conn): \Illuminate\Database\Connection
+    private function server(array $conn): Connection
     {
         $name = 'backup_server_'.md5(json_encode([$conn['host'] ?? null, $conn['port'] ?? null, $conn['username'] ?? null]));
         // CREATE/DROP of scratch databases run with information_schema as the default database (every account may use

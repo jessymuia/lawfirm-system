@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Organisation\AssignRequest;
+use App\Http\Requests\Organisation\OfficeRequest;
+use App\Http\Requests\Organisation\PracticeGroupRequest;
 use App\Models\Cases;
 use App\Models\Office;
 use App\Models\PracticeGroup;
@@ -40,7 +43,7 @@ class OrganisationController extends Controller
         ], 200);
     }
 
-    public function storeOffice(\App\Http\Requests\Organisation\OfficeRequest $r): JsonResponse
+    public function storeOffice(OfficeRequest $r): JsonResponse
     {
         $office = DB::transaction(function () use ($r) {
             $d = $r->validated();
@@ -54,7 +57,7 @@ class OrganisationController extends Controller
         return $this->response(true, 'success', $office, 201);
     }
 
-    public function updateOffice(\App\Http\Requests\Organisation\OfficeRequest $r, int $office): JsonResponse
+    public function updateOffice(OfficeRequest $r, int $office): JsonResponse
     {
         $o = Office::findOrFail($office);
         DB::transaction(function () use ($r, $o) {
@@ -73,12 +76,12 @@ class OrganisationController extends Controller
         return $this->remove(Office::findOrFail($office), 'office_id', 'office');
     }
 
-    public function storeGroup(\App\Http\Requests\Organisation\PracticeGroupRequest $r): JsonResponse
+    public function storeGroup(PracticeGroupRequest $r): JsonResponse
     {
         return $this->response(true, 'success', PracticeGroup::create($r->validated()), 201);
     }
 
-    public function updateGroup(\App\Http\Requests\Organisation\PracticeGroupRequest $r, int $group): JsonResponse
+    public function updateGroup(PracticeGroupRequest $r, int $group): JsonResponse
     {
         $g = PracticeGroup::findOrFail($group);
         $g->update($r->validated());
@@ -95,7 +98,7 @@ class OrganisationController extends Controller
      * Move people into an office and/or practice group (a field left out is left alone; null clears it). Optionally
      * their open matters follow them, so the reports stay right after a reorganisation.
      */
-    public function assign(\App\Http\Requests\Organisation\AssignRequest $r): JsonResponse
+    public function assign(AssignRequest $r): JsonResponse
     {
         $d = $r->validated();
         $set = array_intersect_key($d, array_flip(['office_id', 'practice_group_id']));

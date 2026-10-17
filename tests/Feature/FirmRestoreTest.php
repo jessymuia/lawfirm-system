@@ -17,10 +17,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-14: a firm restored on its own, its database and files as one consistent pair, and drills that prove it. */
-class FirmRestoreTest extends TestCase implements \Tests\OwnsTenancy
+class FirmRestoreTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 

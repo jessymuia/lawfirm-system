@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Conflicts\ConflictChecks;
 use App\Conflicts\ConflictException;
 use App\Constants\ModulePermissions as P;
+use App\Http\Requests\Conflict\CheckRequest;
+use App\Http\Requests\Conflict\DecideRequest;
+use App\Http\Requests\Conflict\PolicyRequest;
 use App\Security\SecurityPolicy;
 use App\Support\FirmSettings;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +23,7 @@ class ConflictController extends Controller
 {
     public function __construct(private ConflictChecks $checks) {}
 
-    public function check(\App\Http\Requests\Conflict\CheckRequest $r): JsonResponse
+    public function check(CheckRequest $r): JsonResponse
     {
         $d = $r->validated();
         $c = $this->checks->run($d['purpose'], array_values($d['names']), $d['phone'] ?? null, $d['identifier'] ?? null, Auth::user(), $d['exclude_case_id'] ?? null);
@@ -37,7 +40,7 @@ class ConflictController extends Controller
         return $this->response(true, 'success', $this->view($c), 200);
     }
 
-    public function decide(\App\Http\Requests\Conflict\DecideRequest $r, int $id): JsonResponse
+    public function decide(DecideRequest $r, int $id): JsonResponse
     {
         $d = $r->validated();
         try {
@@ -76,7 +79,7 @@ class ConflictController extends Controller
         return $this->response(true, 'success', ['required' => ConflictChecks::required()], 200);
     }
 
-    public function updatePolicy(\App\Http\Requests\Conflict\PolicyRequest $r): JsonResponse
+    public function updatePolicy(PolicyRequest $r): JsonResponse
     {
         $before = ConflictChecks::required();
         FirmSettings::set('conflicts.required', (bool) $r->validated('required'), Auth::id());

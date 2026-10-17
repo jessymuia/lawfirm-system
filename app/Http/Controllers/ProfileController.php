@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Profile\UpdatePasswordRequest;
+use App\Http\Requests\Profile\UpdateRequest;
+use App\Tenancy\IdentityService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -33,7 +34,7 @@ class ProfileController extends Controller
         ], 200);
     }
 
-    public function update(\App\Http\Requests\Profile\UpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -55,7 +56,7 @@ class ProfileController extends Controller
         ], 200);
     }
 
-    public function updatePassword(\App\Http\Requests\Profile\UpdatePasswordRequest $request): JsonResponse
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -72,7 +73,7 @@ class ProfileController extends Controller
 
         // TEN-5: the login password lives on the control-plane identity.
         if ($user->global_identity_id) {
-            app(\App\Tenancy\IdentityService::class)->changePassword($user->global_identity_id, $data['new_password']);
+            app(IdentityService::class)->changePassword($user->global_identity_id, $data['new_password']);
         }
 
         return $this->response(true, 'Password updated successfully.', null, 200);

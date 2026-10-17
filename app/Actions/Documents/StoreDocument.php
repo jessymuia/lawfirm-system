@@ -2,6 +2,7 @@
 
 namespace App\Actions\Documents;
 
+use App\Documents\MalwareScanner;
 use App\Models\Document;
 use App\Models\User;
 use App\Tenancy\FirmStorage;
@@ -20,15 +21,15 @@ use Illuminate\Support\Facades\Storage;
 class StoreDocument
 {
     /**
-     * @param UploadedFile|string $file an upload, or the file's bytes
-     * @param array{title: string, filename?: string, mimetype?: string, document_group_id?: ?int} $meta
+     * @param  UploadedFile|string  $file  an upload, or the file's bytes
+     * @param  array{title: string, filename?: string, mimetype?: string, document_group_id?: ?int}  $meta
      */
     public function handle(int $caseId, UploadedFile|string $file, array $meta, ?User $actor): Document
     {
         $upload = $file instanceof UploadedFile;
         $filename = $meta['filename'] ?? ($upload ? $file->getClientOriginalName() : 'document');
         // SEC-14: an infected file is refused before anything is stored
-        $scanner = app(\App\Documents\MalwareScanner::class);
+        $scanner = app(MalwareScanner::class);
         if ($scanner->enabled()) {
             $stream = $upload ? fopen($file->getRealPath(), 'rb') : null;
             try {
@@ -56,7 +57,7 @@ class StoreDocument
     /**
      * ENG-22: file a document whose bytes are already on the firm's disk (a direct upload, checked by its caller).
      *
-     * @param array{title: string, filename: string, mimetype: string, size: int, checksum: string, document_group_id?: ?int} $meta
+     * @param  array{title: string, filename: string, mimetype: string, size: int, checksum: string, document_group_id?: ?int}  $meta
      */
     public function adopt(int $caseId, string $disk, string $path, array $meta, ?User $actor): Document
     {

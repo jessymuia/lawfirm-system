@@ -2,12 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\APIController;
+use App\Http\Middleware\RejectRevokedSession;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use PHPUnit\Framework\Attributes\Group;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\CreatesTestUsers;
@@ -190,14 +195,14 @@ class AuthTest extends TestCase
         $this->app['auth']->guard('web')->login($user);   // (login moves the session to a new id)
         $oldId = $session->getId();
 
-        $request = \Illuminate\Http\Request::create('/api/v1/cases');
+        $request = Request::create('/api/v1/cases');
         $request->setLaravelSession($session);
-        $mw = new \App\Http\Middleware\RejectRevokedSession;
+        $mw = new RejectRevokedSession;
 
         $mw->handle($request, fn () => response('ok'));
         $this->assertSame($user->id, $this->app['auth']->guard('web')->id(), 'a session nobody revoked is left alone');
 
-        \App\Http\Middleware\RejectRevokedSession::revoke($oldId);
+        RejectRevokedSession::revoke($oldId);
         $mw->handle($request, fn () => response('ok'));
         $this->assertNull($this->app['auth']->guard('web')->user());
         $this->assertNotSame($oldId, $session->getId(), 'a fresh session replaces the revoked one');
@@ -211,12 +216,12 @@ class AuthTest extends TestCase
         $this->app['auth']->guard('web')->login($user);
         $ending = $session->getId();
 
-        $request = \Illuminate\Http\Request::create('/api/v1/logout', 'POST');
+        $request = Request::create('/api/v1/logout', 'POST');
         $request->setLaravelSession($session);
         $request->setUserResolver(fn () => $user);
-        app(\App\Http\Controllers\APIController::class)->logout($request);
+        app(APIController::class)->logout($request);
 
-        $this->assertTrue(\Illuminate\Support\Facades\Cache::has(\App\Http\Middleware\RejectRevokedSession::key($ending)));
+        $this->assertTrue(Cache::has(RejectRevokedSession::key($ending)));
         $this->assertNotSame($ending, $session->getId());
     }
 
@@ -243,7 +248,7 @@ class AuthTest extends TestCase
         $this->assertFalse(Hash::check('new-password-123', $user->fresh()->password));
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('single-mode')]   // multi mode: identity resets, TenantPasswordRecoveryTest
+    #[Group('single-mode')] // multi mode: identity resets, TenantPasswordRecoveryTest
     public function test_password_reset_succeeds_within_the_expiry_window(): void
     {
         $user = User::factory()->create();

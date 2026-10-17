@@ -3,11 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Routing\Registrar;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Http\Request;
 
 /**
  * SEC-12: the browser arrives at the sign-in callback (OIDC redirect, SAML form post) FROM the identity provider, so Sanctum does not
@@ -16,9 +16,7 @@ use Illuminate\Http\Request;
  */
 class StartSessionForSso
 {
-    public function __construct(private \Illuminate\Contracts\Container\Container $app)
-    {
-    }
+    public function __construct(private Container $app) {}
 
     public function handle(Request $request, Closure $next)
     {

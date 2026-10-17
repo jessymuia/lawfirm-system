@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Hearing;
 
-use App\Models\Hearing;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for HearingController::destroyMany(). Authorization is declared on the route (authz:*), not here. */

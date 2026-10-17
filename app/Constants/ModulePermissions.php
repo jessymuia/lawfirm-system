@@ -181,6 +181,7 @@ class ModulePermissions
      * Matter-level access (SEC-10)
      */
     public const ACCESS_ALL_MATTERS = 'access-all-matters';
+
     public const MANAGE_MATTER_ACCESS = 'manage-matter-access';
 
     /** Ethical walls (SEC-11) */
@@ -200,6 +201,7 @@ class ModulePermissions
 
     /** Conflicts of interest (FUN-9): run checks at intake; decide on possible conflicts, see the register, set the policy */
     public const RUN_CONFLICT_CHECKS = 'run-conflict-checks';
+
     public const MANAGE_CONFLICTS = 'manage-conflicts';
 
     /** Partner reports (FUN-17): utilisation, realisation, WIP, receivables, matter profitability */

@@ -1710,6 +1710,23 @@ export const scimReplace = (id: number, body: ScimReplaceBody, config?: AxiosReq
 export const searchIndex = (params?: Query, config?: AxiosRequestConfig): Promise<ApiResponse<unknown>> =>
     api.get<ApiResponse<unknown>>(`/api/v1/search`, { params, ...config }).then((r) => r.data);
 
+/** GET /api/v1/security/integrations · permission,manage-security-settings */
+export const integrationCredentialsIndex = (params?: Query, config?: AxiosRequestConfig): Promise<ApiResponse<unknown>> =>
+    api.get<ApiResponse<unknown>>(`/api/v1/security/integrations`, { params, ...config }).then((r) => r.data);
+
+/** POST /api/v1/security/integrations/mail/test · permission,manage-security-settings */
+export const integrationCredentialsTestMail = (config?: AxiosRequestConfig): Promise<ApiResponse<unknown>> =>
+    api.post<ApiResponse<unknown>>(`/api/v1/security/integrations/mail/test`, undefined, config).then((r) => r.data);
+
+/** GET /api/v1/security/integrations/{provider} · permission,manage-security-settings */
+export const integrationCredentialsShow = (provider: string | number, params?: Query, config?: AxiosRequestConfig): Promise<ApiResponse<unknown>> =>
+    api.get<ApiResponse<unknown>>(`/api/v1/security/integrations/${provider}`, { params, ...config }).then((r) => r.data);
+
+export type IntegrationCredentialsUpdateBody = Record<string, unknown>;
+/** PUT /api/v1/security/integrations/{provider} · permission,manage-security-settings */
+export const integrationCredentialsUpdate = (provider: string | number, body?: IntegrationCredentialsUpdateBody, config?: AxiosRequestConfig): Promise<ApiResponse<unknown>> =>
+    api.put<ApiResponse<unknown>>(`/api/v1/security/integrations/${provider}`, body, config).then((r) => r.data);
+
 /** GET /api/v1/security/policy · permission,manage-security-settings */
 export const mfaPolicy = (params?: Query, config?: AxiosRequestConfig): Promise<ApiResponse<unknown>> =>
     api.get<ApiResponse<unknown>>(`/api/v1/security/policy`, { params, ...config }).then((r) => r.data);

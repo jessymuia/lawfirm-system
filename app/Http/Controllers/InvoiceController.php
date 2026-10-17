@@ -7,6 +7,10 @@ use App\Actions\Invoices\ReviseDraftInvoice;
 use App\Actions\Invoices\SubmitInvoice;
 use App\Actions\Invoices\VoidInvoice;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Invoice\DestroyManyRequest;
+use App\Http\Requests\Invoice\StoreRequest;
+use App\Http\Requests\Invoice\UpdateRequest;
+use App\Http\Resources\V1\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Carbon\Carbon;
@@ -14,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class InvoiceController extends Controller
 {
@@ -71,7 +76,7 @@ class InvoiceController extends Controller
         $invoices = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\InvoiceResource::make($row)->resolve(),
+            fn ($row) => InvoiceResource::make($row)->resolve(),
             25,
             ['invoice_date', 'invoice_due_date'],
             ['invoice_number']
@@ -85,7 +90,7 @@ class InvoiceController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Invoice\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_INVOICES)) {
             abort(403);
@@ -93,12 +98,11 @@ class InvoiceController extends Controller
 
         $invoice = app(DraftInvoice::class)->handle($this->invoiceData($request), Auth::user());   // ENG-9
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\InvoiceResource::make($invoice->load(['case', 'client']))->resolve(), 201);
+        return $this->response(true, 'success', InvoiceResource::make($invoice->load(['case', 'client']))->resolve(), 201);
     }
 
     /**
      * Display the specified resource.
-     *
      */
     public function show($id): JsonResponse
     {
@@ -136,7 +140,7 @@ class InvoiceController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\Invoice\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_INVOICES)) {
             abort(403);
@@ -150,11 +154,11 @@ class InvoiceController extends Controller
 
         app(ReviseDraftInvoice::class)->handle($invoice, $this->invoiceData($request), Auth::user());   // ENG-9: drafts only
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\InvoiceResource::make($invoice->fresh(['case', 'client']))->resolve(), 200);
+        return $this->response(true, 'success', InvoiceResource::make($invoice->fresh(['case', 'client']))->resolve(), 200);
     }
 
     /** @return array{case_id: mixed, client_id: mixed, invoice_date: string, invoice_due_date: string} the request in the action's terms (dates Y-m-d) */
-    private function invoiceData(\Illuminate\Http\Request $request): array
+    private function invoiceData(Request $request): array
     {
         return [
             'case_id' => $request->case_id,
@@ -178,7 +182,7 @@ class InvoiceController extends Controller
 
         app(SubmitInvoice::class)->handle($invoice, Auth::user());   // ENG-9
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\InvoiceResource::make($invoice->fresh(['case', 'client']))->resolve(), 200);
+        return $this->response(true, 'success', InvoiceResource::make($invoice->fresh(['case', 'client']))->resolve(), 200);
     }
 
     /**
@@ -188,13 +192,12 @@ class InvoiceController extends Controller
      * only while it is still a draft (not yet submitted) — once submitted,
      * only an admin can void it, preserving an audit trail for anything
      * that has left draft state.
-     *
      */
     public function destroy($id): JsonResponse
     {
         // the route's InvoicePolicy::delete check (authz:policy) already decided; this keeps the action safe on its own
         $invoice = Invoice::findOrFail($id);
-        \Illuminate\Support\Facades\Gate::authorize('delete', $invoice);
+        Gate::authorize('delete', $invoice);
         app(VoidInvoice::class)->handle($invoice, Auth::user());   // ENG-9
 
         return $this->response(true, 'success', ['id' => (int) $id], 200);
@@ -210,7 +213,7 @@ class InvoiceController extends Controller
      * removed, rather than the whole batch failing over one invoice
      * they didn't have rights to.
      */
-    public function destroyMany(\App\Http\Requests\Invoice\DestroyManyRequest $request): JsonResponse
+    public function destroyMany(DestroyManyRequest $request): JsonResponse
     {
 
         $invoices = Invoice::whereIn('id', $request->input('ids'))->get();
@@ -219,7 +222,7 @@ class InvoiceController extends Controller
         $skipped = [];
 
         foreach ($invoices as $invoice) {
-            if (\Illuminate\Support\Facades\Gate::denies('delete', $invoice)) {   // InvoicePolicy: any invoice with delete-invoice, else own drafts
+            if (Gate::denies('delete', $invoice)) {   // InvoicePolicy: any invoice with delete-invoice, else own drafts
                 $skipped[] = $invoice->id;
 
                 continue;

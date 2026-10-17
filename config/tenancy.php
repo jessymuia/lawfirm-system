@@ -1,5 +1,9 @@
 <?php
 
+use App\Search\SearchPurgeStep;
+use App\Tenancy\Keys\EncryptionKeyPurgeStep;
+use App\Warehouse\WarehousePurgeStep;
+
 return [
     // 'single': self-hosted / current behaviour, one tenant, no resolution.
     // 'multi':  SaaS. Tenant is resolved from the request host (TEN-3) and the
@@ -28,9 +32,9 @@ return [
     // TEN-9: extra deletion steps (classes implementing App\Tenancy\PurgeStep), e.g. destroying a firm's encryption key
     // or expunging its warehouse rows. Run by `tenants:purge` after the database and files are gone.
     'purge_steps' => [
-        \App\Tenancy\Keys\EncryptionKeyPurgeStep::class,   // TEN-13: destroy the firm's data key (crypto-shred)
-        \App\Search\SearchPurgeStep::class,                  // ENG-19 search indexes
-        \App\Warehouse\WarehousePurgeStep::class,            // ENG-26 warehouse rows
+        EncryptionKeyPurgeStep::class,   // TEN-13: destroy the firm's data key (crypto-shred)
+        SearchPurgeStep::class,                  // ENG-19 search indexes
+        WarehousePurgeStep::class,            // ENG-26 warehouse rows
     ],
 
     // TEN-13: per-firm envelope encryption (docs/ops/FIRM_ENCRYPTION.md). With a master key set, every new firm gets its own

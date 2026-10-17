@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Expense\DestroyManyRequest;
+use App\Http\Requests\Expense\StoreRequest;
+use App\Http\Requests\Expense\UpdateRequest;
+use App\Http\Resources\V1\ExpenseResource;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -43,7 +47,7 @@ class ExpenseController extends Controller
         $expenses = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\ExpenseResource::make($row)->resolve(),
+            fn ($row) => ExpenseResource::make($row)->resolve(),
             25,
             ['amount', 'description', 'vendor', 'payment_method', 'invoice_number'],
             ['description', 'vendor', 'invoice_number']
@@ -57,7 +61,7 @@ class ExpenseController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Expense\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_EXPENSES)) {
             abort(403);
@@ -76,7 +80,7 @@ class ExpenseController extends Controller
             'utbms_expense_code' => $request->input('utbms_expense_code'),   // FUN-13
         ]);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseResource::make($expense->load(['categoryName', 'user', 'case']))->resolve(), 201);
+        return $this->response(true, 'success', ExpenseResource::make($expense->load(['categoryName', 'user', 'case']))->resolve(), 201);
     }
 
     /**
@@ -100,7 +104,7 @@ class ExpenseController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\Expense\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_EXPENSES)) {
             abort(403);
@@ -120,13 +124,13 @@ class ExpenseController extends Controller
             'updated_by' => auth()->user()->id,
         ] + ($request->exists('utbms_expense_code') ? $request->only('utbms_expense_code') : []));   // FUN-13: only when sent
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\ExpenseResource::make($expense->fresh(['categoryName', 'user', 'case']))->resolve(), 200);
+        return $this->response(true, 'success', ExpenseResource::make($expense->fresh(['categoryName', 'user', 'case']))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
@@ -147,7 +151,7 @@ class ExpenseController extends Controller
      * UI-20: bulk delete — see CasesController::destroyMany for the
      * general pattern this mirrors.
      */
-    public function destroyMany(\App\Http\Requests\Expense\DestroyManyRequest $request)
+    public function destroyMany(DestroyManyRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_EXPENSES)) {
             abort(403);

@@ -8,6 +8,7 @@ use App\Tenancy\TenantLifecycle;
 class TenantsResume extends TenantsLifecycleCommand
 {
     protected $signature = 'tenants:resume {slug}';
+
     protected $description = 'Re-enable a suspended tenant';
 
     protected function apply(TenantLifecycle $l, Tenant $t): string

@@ -7,6 +7,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /** FUN-16: one calendar connection brought in step (see CalendarSync). Runs in the firm it was dispatched from (TEN-3). */
 class SyncCalendarConnection implements ShouldQueue
@@ -28,10 +30,10 @@ class SyncCalendarConnection implements ShouldQueue
     public static function forUsers(array $userIds): void
     {
         $ids = array_values(array_unique(array_filter(array_map('intval', $userIds))));
-        if (! $ids || ! \Illuminate\Support\Facades\Schema::hasTable('calendar_connections')) {
+        if (! $ids || ! Schema::hasTable('calendar_connections')) {
             return;
         }
-        foreach (\Illuminate\Support\Facades\DB::table('calendar_connections')->whereIn('user_id', $ids)->where('state', 'active')->pluck('id') as $id) {
+        foreach (DB::table('calendar_connections')->whereIn('user_id', $ids)->where('state', 'active')->pluck('id') as $id) {
             self::dispatch((int) $id)->afterCommit();
         }
     }

@@ -2,6 +2,8 @@
 
 namespace Tests\Isolation;
 
+use App\Entitlements\Entitlements;
+use App\Entitlements\EntitlementSource;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Hearing;
@@ -10,10 +12,14 @@ use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
 use App\Tenancy\TenantLifecycle;
 use App\Tenancy\TenantManager;
+use Illuminate\Database\Connection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Testing\TestResponse;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /**
@@ -27,7 +33,7 @@ use Tests\TestCase;
  * Sizes differ on purpose (A: 2 clients, B: 5): ids that exist only in B must be unreachable from A, and ids that exist in both must
  * still return the caller's own row.
  */
-abstract class IsolationTestCase extends TestCase implements \Tests\OwnsTenancy
+abstract class IsolationTestCase extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -63,7 +69,7 @@ abstract class IsolationTestCase extends TestCase implements \Tests\OwnsTenancy
     }
 
     /** A connection to the MySQL server itself (phpunit.xml's DB_DATABASE is SQLite's ':memory:'). */
-    protected function mysqlServer(): \Illuminate\Database\Connection
+    protected function mysqlServer(): Connection
     {
         config(['database.connections.isolation_server' => ['database' => 'information_schema'] + (array) config('database.connections.mysql')]);
 
@@ -106,8 +112,8 @@ abstract class IsolationTestCase extends TestCase implements \Tests\OwnsTenancy
         }
         config(['tenancy.mode' => 'multi']);   // from here on every request is resolved by host, fail-closed
         // chosen at boot from the mode: rebuild now that the mode is multi (as the deployment would have booted)
-        $this->app->forgetInstance(\App\Entitlements\EntitlementSource::class);
-        $this->app->forgetInstance(\App\Entitlements\Entitlements::class);
+        $this->app->forgetInstance(EntitlementSource::class);
+        $this->app->forgetInstance(Entitlements::class);
         app(TenantManager::class)->failClosed();
         foreach (array_keys($this->firm) as $slug) {
             $this->firm[$slug]['cookies'] = $this->login($slug);
@@ -119,7 +125,7 @@ abstract class IsolationTestCase extends TestCase implements \Tests\OwnsTenancy
         // files written to the real storage directories under these two firm keys
         foreach (['a', 'b'] as $k) {
             foreach ([storage_path("app/tenants/{$k}"), storage_path("framework/cache/data/{$k}")] as $d) {
-                is_dir($d) && \Illuminate\Support\Facades\File::deleteDirectory($d);
+                is_dir($d) && File::deleteDirectory($d);
             }
         }
         DB::setDefaultConnection($this->originalDefault);
@@ -203,7 +209,7 @@ abstract class IsolationTestCase extends TestCase implements \Tests\OwnsTenancy
     }
 
     /** A multipart upload as a browser would send it. */
-    protected function upload(string $slug, string $uri, array $fields, string $field, \Illuminate\Http\UploadedFile $file, ?string $cookiesOf = null): TestResponse
+    protected function upload(string $slug, string $uri, array $fields, string $field, UploadedFile $file, ?string $cookiesOf = null): TestResponse
     {
         $this->freshProcess();
         $host = $this->firm[$slug]['host'];

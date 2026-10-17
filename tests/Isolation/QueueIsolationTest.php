@@ -4,6 +4,7 @@ namespace Tests\Isolation;
 
 use App\Models\Client;
 use App\Tenancy\TenantContext;
+use App\Tenancy\TenantLifecycle;
 use App\Tenancy\TenantManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 /**
  * TEN-10: queued jobs. A job carries the firm that dispatched it; a worker whose own context is some other firm (or none) must run it
@@ -42,12 +44,16 @@ class QueueIsolationTest extends IsolationTestCase
             $t->unsignedInteger('created_at');
         });
         IsolationProbeJob::$ran = [];
-        $this->app->forgetInstance('queue'); $this->app->forgetInstance('queue.connection'); \Illuminate\Support\Facades\Queue::clearResolvedInstances();
+        $this->app->forgetInstance('queue');
+        $this->app->forgetInstance('queue.connection');
+        Queue::clearResolvedInstances();
     }
 
     private function work(): void
     {
-        $this->app->forgetInstance('queue'); $this->app->forgetInstance('queue.connection'); \Illuminate\Support\Facades\Queue::clearResolvedInstances();
+        $this->app->forgetInstance('queue');
+        $this->app->forgetInstance('queue.connection');
+        Queue::clearResolvedInstances();
         // --memory: the worker stops after a job once the process passes its ceiling (128 MB by default), which a long test run can reach
         Artisan::call('queue:work', ['connection' => 'central', '--stop-when-empty' => true, '--tries' => 1, '--sleep' => 0, '--memory' => 4096]);
     }
@@ -148,7 +154,7 @@ class QueueIsolationTest extends IsolationTestCase
     {
         $this->dispatchAs('a', 'from-a');
         $this->dispatchAs('b', 'from-b');
-        app(\App\Tenancy\TenantLifecycle::class)->suspend($this->firm['b']['tenant']);
+        app(TenantLifecycle::class)->suspend($this->firm['b']['tenant']);
 
         $this->work();
 
@@ -165,7 +171,7 @@ class QueueIsolationTest extends IsolationTestCase
     private function pushRawWithoutTenant(?string $tenant = null): void
     {
         $cmd = new IsolationProbeJob('forged');
-        $payload = ['uuid' => (string) \Illuminate\Support\Str::uuid(), 'displayName' => IsolationProbeJob::class, 'job' => 'Illuminate\Queue\CallQueuedHandler@call', 'maxTries' => 1,
+        $payload = ['uuid' => (string) Str::uuid(), 'displayName' => IsolationProbeJob::class, 'job' => 'Illuminate\Queue\CallQueuedHandler@call', 'maxTries' => 1,
             'data' => ['commandName' => IsolationProbeJob::class, 'command' => serialize($cmd)]];
         if ($tenant !== null) {
             $payload['tenant'] = $tenant;
@@ -181,9 +187,7 @@ class IsolationProbeJob implements ShouldQueue
     /** @var array<int,array<string,mixed>> */
     public static array $ran = [];
 
-    public function __construct(public string $label, public bool $writes = false)
-    {
-    }
+    public function __construct(public string $label, public bool $writes = false) {}
 
     public function handle(): void
     {

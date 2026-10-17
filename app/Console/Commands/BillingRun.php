@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Billing\Autopay;
 use App\Billing\Billing;
 use App\Tenancy\TenantManager;
 use Illuminate\Console\Command;
@@ -22,7 +23,7 @@ class BillingRun extends Command
         }
 
         $this->info('Invoices created: '.$billing->runDue());
-        $a = app(\App\Billing\Autopay::class)->chargeDue();   // PLAT-4: saved cards, before any reminder goes out
+        $a = app(Autopay::class)->chargeDue();   // PLAT-4: saved cards, before any reminder goes out
         $this->info("Automatic payments: {$a['charged']} charged, {$a['failed']} declined, {$a['skipped']} waiting to retry.");
         $d = $billing->dun();
         $this->info("Dunning: {$d['reminders']} reminder(s), {$d['past_due']} newly past due, {$d['suspended']} suspended.");

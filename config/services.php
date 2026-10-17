@@ -44,7 +44,6 @@ return [
         'checksum_manifest_path' => env('MIGRATION_CHECKSUM_MANIFEST_PATH'),
     ],
 
-
     // FUN-11: online payment of the firm's invoices by its clients. A firm's own values (Settings -> integrations,
     // encrypted) win over these deployment defaults. Self-hosted installs set them here.
     'mpesa_collect' => [

@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Audit\AuditPartitions;
+use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantManager;
 use Illuminate\Console\Command;
 
 /**
@@ -15,7 +17,7 @@ class AuditsPartition extends Command
 
     protected $description = 'Show or enable monthly partitions on the audit table';
 
-    public function handle(AuditPartitions $partitions, \App\Tenancy\TenantManager $tenants): int
+    public function handle(AuditPartitions $partitions, TenantManager $tenants): int
     {
         $go = function () use ($partitions): int {
             if (! $partitions->supported()) {
@@ -33,7 +35,7 @@ class AuditsPartition extends Command
         };
 
         if ($slug = $this->option('tenant')) {
-            $tenant = \App\Tenancy\Models\Tenant::where('slug', $slug)->firstOrFail();
+            $tenant = Tenant::where('slug', $slug)->firstOrFail();
 
             return $tenants->runIn($tenant, $go, allowInactive: true);
         }

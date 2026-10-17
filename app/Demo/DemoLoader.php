@@ -3,6 +3,7 @@
 namespace App\Demo;
 
 use App\Billing\Billing;
+use App\Billing\PlanStore;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
 use App\Tenancy\Models\Identity;
@@ -80,7 +81,7 @@ class DemoLoader
 
     public function guard(): void
     {
-        $this->tenants->requireMulti(\App\Tenancy\TenantManager::MULTI_HINT);
+        $this->tenants->requireMulti(TenantManager::MULTI_HINT);
         if (app()->isProduction()) {
             throw new RuntimeException('Demo data is for local and test installs only; this is a production environment.');
         }
@@ -105,7 +106,7 @@ class DemoLoader
         $pdo = new \PDO(sprintf('mysql:host=%s;port=%s', $c['host'], $c['port']), (string) $c['username'], (string) $c['password']);
         $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
         \Artisan::call('migrate', ['--database' => config('tenancy.control_connection'), '--path' => 'database/migrations/control', '--force' => true]);
-        \App\Billing\PlanStore::seedIfEmpty();
+        PlanStore::seedIfEmpty();
     }
 
     /** @return array{name: string, email: string, password: string, role: string} */

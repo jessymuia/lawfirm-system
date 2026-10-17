@@ -47,7 +47,7 @@ class EmailFilingTest extends TestCase
         $pdf = base64_encode("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF");
 
         return "Return-Path: <wanjiru@firm.test>\r\nFrom: {$from}\r\nTo: Opposing Counsel <counsel@other.test>\r\nCc: {$to}\r\n"
-            ."Subject: =?UTF-8?B?".base64_encode('Re: Settlement – without prejudice')."?=\r\nDate: Mon, 05 Oct 2026 09:15:00 +0300\r\n"
+            .'Subject: =?UTF-8?B?'.base64_encode('Re: Settlement – without prejudice')."?=\r\nDate: Mon, 05 Oct 2026 09:15:00 +0300\r\n"
             ."Message-ID: <{$id}>\r\nIn-Reply-To: <first@mail.other.test>\r\nReferences: <first@mail.other.test>\r\n{$extra}MIME-Version: 1.0\r\n"
             ."Content-Type: multipart/mixed; boundary=\"outer\"\r\n\r\nThis is a multi-part message.\r\n--outer\r\n"
             ."Content-Type: multipart/alternative; boundary=\"inner\"\r\n\r\n--inner\r\nContent-Type: text/plain; charset=\"utf-8\"\r\n"

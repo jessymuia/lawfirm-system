@@ -2,8 +2,8 @@
 
 namespace App\Compliance\RecordClasses;
 
-use App\Compliance\LegalHolds;
 use App\Compliance\LegalHoldException;
+use App\Compliance\LegalHolds;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 

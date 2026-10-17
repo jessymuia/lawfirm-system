@@ -3,7 +3,6 @@
 namespace App\Capacity;
 
 use Illuminate\Database\Connection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * ENG-27: how a database server behaves as firm databases accumulate on it (database-per-firm, TEN-4). Creates scratch
@@ -25,19 +24,19 @@ class Soak
      * then a dashboard's worth of reads: 17 tables, about what a typical page touches.
      */
     private const REQUEST = [
-        "select u.id from `{db}`.`users` u left join `{db}`.`user_mfa` m on m.user_id = u.id where u.deleted_at is null limit 1",
-        "select p.name from `{db}`.`model_has_roles` mr join `{db}`.`role_has_permissions` rp on rp.role_id = mr.role_id join `{db}`.`permissions` p on p.id = rp.permission_id limit 50",
-        "select r.name from `{db}`.`roles` r limit 10",
-        "select `value` from `{db}`.`firm_settings` limit 20",
-        "select id from `{db}`.`ethical_screens` where lifted_at is null limit 20",
-        "select count(*) from `{db}`.`clients` where deleted_at is null",
+        'select u.id from `{db}`.`users` u left join `{db}`.`user_mfa` m on m.user_id = u.id where u.deleted_at is null limit 1',
+        'select p.name from `{db}`.`model_has_roles` mr join `{db}`.`role_has_permissions` rp on rp.role_id = mr.role_id join `{db}`.`permissions` p on p.id = rp.permission_id limit 50',
+        'select r.name from `{db}`.`roles` r limit 10',
+        'select `value` from `{db}`.`firm_settings` limit 20',
+        'select id from `{db}`.`ethical_screens` where lifted_at is null limit 20',
+        'select count(*) from `{db}`.`clients` where deleted_at is null',
         "select count(*) from `{db}`.`cases` where lifecycle_status = 'open' and deleted_at is null",
-        "select h.id from `{db}`.`hearings` h join `{db}`.`cases` c on c.id = h.case_id join `{db}`.`courts` ct on ct.id = h.court_id where h.hearing_date >= current_date order by h.hearing_date limit 10",
+        'select h.id from `{db}`.`hearings` h join `{db}`.`cases` c on c.id = h.case_id join `{db}`.`courts` ct on ct.id = h.court_id where h.hearing_date >= current_date order by h.hearing_date limit 10',
         "select id from `{db}`.`tasks` where task_status <> 'completed' and deleted_at is null order by due_date limit 10",
-        "select sum(hours) from `{db}`.`time_entries` where billable = 1 and billed = 0 and deleted_at is null",
+        'select sum(hours) from `{db}`.`time_entries` where billable = 1 and billed = 0 and deleted_at is null',
         "select sum(total_amount - amount_paid) from `{db}`.`invoices` where workflow_status = 'submitted' and deleted_at is null",
-        "select sum(amount) from `{db}`.`payments` where deleted_at is null",
-        "select id from `{db}`.`documents` where is_current = 1 and deleted_at is null order by id desc limit 10",
+        'select sum(amount) from `{db}`.`payments` where deleted_at is null',
+        'select id from `{db}`.`documents` where is_current = 1 and deleted_at is null order by id desc limit 10',
     ];
 
     public function __construct(private Connection $db, private string $prefix = 'capsoak_') {}

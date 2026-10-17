@@ -3,16 +3,19 @@
 namespace Tests\Feature;
 
 use App\Platform\PlatformAudit;
+use App\Platform\PlatformAuth;
 use App\Platform\PlatformStaff;
 use App\Security\Totp;
+use App\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** SEC-12: platform-staff second factor (control plane), and the "required" rollout mode. */
-class PlatformMfaTest extends TestCase implements \Tests\OwnsTenancy
+class PlatformMfaTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -27,7 +30,7 @@ class PlatformMfaTest extends TestCase implements \Tests\OwnsTenancy
     protected function tearDown(): void
     {
         DB::setDefaultConnection($this->originalDefault);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         parent::tearDown();
     }
 
@@ -149,7 +152,7 @@ class PlatformMfaTest extends TestCase implements \Tests\OwnsTenancy
         $this->api('/mfa/disable', ['password' => self::PW, 'code' => Totp::code($secret, Totp::currentStep() + 1)], $tok)->assertForbidden();
         config(['tenancy.platform_mfa' => 'optional']);
         $this->api('/mfa/disable', ['password' => self::PW, 'code' => Totp::code($secret, Totp::currentStep() + 1)], $tok)->assertOk();
-        $this->assertFalse(app(\App\Platform\PlatformAuth::class)->mfa()->enabled($s->id));
+        $this->assertFalse(app(PlatformAuth::class)->mfa()->enabled($s->id));
         $this->assertSame(1, PlatformAudit::where('action', 'mfa.disabled')->count());
     }
 
@@ -160,7 +163,7 @@ class PlatformMfaTest extends TestCase implements \Tests\OwnsTenancy
         $this->withToken($tok)->getJson(self::HOST.'/api/platform/me')->assertOk();
 
         $this->artisan('platform:staff', ['action' => 'mfa-reset', 'email' => $s->email])->assertSuccessful();
-        $this->assertFalse(app(\App\Platform\PlatformAuth::class)->mfa()->enabled($s->id));
+        $this->assertFalse(app(PlatformAuth::class)->mfa()->enabled($s->id));
         $this->withToken($tok)->getJson(self::HOST.'/api/platform/me')->assertUnauthorized();
         $this->assertSame(1, PlatformAudit::where('action', 'staff.mfa-reset')->count());
         $this->artisan('platform:staff', ['action' => 'mfa-reset', 'email' => 'ghost@platform.test'])->assertFailed();

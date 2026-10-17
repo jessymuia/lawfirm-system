@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\EthicalScreen;
 use App\Models\EthicalScreenAttempt;
 use App\Models\Hearing;
+use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -101,7 +103,7 @@ class EthicalWallTest extends TestCase
         $this->assertContains('Globex Ltd', $clients);
         $this->getJson("/api/v1/clients/{$this->acme->id}")->assertNotFound();
 
-        $this->assertSame(0, \App\Models\Invoice::count(), 'invoices of walled matters are hidden');
+        $this->assertSame(0, Invoice::count(), 'invoices of walled matters are hidden');
         $this->assertNull(Hearing::find($h->id));
 
         // a matter opened for the walled client AFTER the wall is covered too
@@ -185,8 +187,8 @@ class EthicalWallTest extends TestCase
 
         $this->artisan('hearings:send-reminders')->assertExitCode(0);
 
-        Bus::assertDispatched(\App\Jobs\SendSmsJob::class, fn ($j) => $this->jobPhone($j) === '254700000002');
-        Bus::assertNotDispatched(\App\Jobs\SendSmsJob::class, fn ($j) => $this->jobPhone($j) === '254700000001');
+        Bus::assertDispatched(SendSmsJob::class, fn ($j) => $this->jobPhone($j) === '254700000002');
+        Bus::assertNotDispatched(SendSmsJob::class, fn ($j) => $this->jobPhone($j) === '254700000001');
         $this->assertSame('notification', EthicalScreenAttempt::first()?->surface);
     }
 

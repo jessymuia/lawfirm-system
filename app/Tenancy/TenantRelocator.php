@@ -22,9 +22,7 @@ use Throwable;
  */
 class TenantRelocator
 {
-    public function __construct(private CellRegistry $cells, private TenantLifecycle $lifecycle, private TenantMigrator $migrator, private PortabilityRunner $portability)
-    {
-    }
+    public function __construct(private CellRegistry $cells, private TenantLifecycle $lifecycle, private TenantMigrator $migrator, private PortabilityRunner $portability) {}
 
     /** @return array{from:string, to:string, old_database:string, new_database:string, tables:int, old_dropped:bool} */
     public function relocate(Tenant $tenant, string $toCell, bool $dropOld = false, bool $ignoreCapacity = false): array

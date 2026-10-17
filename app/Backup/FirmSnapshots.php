@@ -6,6 +6,7 @@ use App\Tenancy\CellRegistry;
 use App\Tenancy\Keys\BackupCipher;
 use App\Tenancy\Keys\FirmKeys;
 use App\Tenancy\Models\Tenant;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -111,7 +112,7 @@ class FirmSnapshots
     }
 
     /** A Laravel connection to $conn, for reading counts and references. */
-    public function probe(array $conn): \Illuminate\Database\Connection
+    public function probe(array $conn): Connection
     {
         config(['database.connections.backup_probe' => $conn]);
         DB::purge('backup_probe');
@@ -120,7 +121,7 @@ class FirmSnapshots
     }
 
     /** @return array<string, int> table => rows */
-    public function counts(\Illuminate\Database\Connection $db): array
+    public function counts(Connection $db): array
     {
         $out = [];
         // this database's tables only (on MySQL the listing would otherwise cover every database on the server)

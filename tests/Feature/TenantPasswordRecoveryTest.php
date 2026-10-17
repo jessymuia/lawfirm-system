@@ -14,10 +14,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-5: password recovery for control-plane identities in multi-tenant mode. */
-class TenantPasswordRecoveryTest extends TestCase implements \Tests\OwnsTenancy
+class TenantPasswordRecoveryTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 

@@ -3,21 +3,27 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Enums\InvoiceWorkflow;
+use App\Enums\PaymentStatus;
+use App\Matters\MatterScoped;
+use App\Models\Concerns\ConstrainedToEnums;
+use App\Models\Concerns\HasPublicId;
+use App\Models\Concerns\InsertsInsideTransaction;
+use App\Money\Money;
+use App\Services\SequenceService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 
 class Invoice extends DefaultAppModel
 {
-    use \App\Models\Concerns\ConstrainedToEnums;
+    use ConstrainedToEnums;
 
     /** DATA-12: columns that only ever hold one of their enum's values */
-    public const ENUM_COLUMNS = ['workflow_status' => \App\Enums\InvoiceWorkflow::class, 'payment_status' => \App\Enums\PaymentStatus::class];
+    public const ENUM_COLUMNS = ['workflow_status' => InvoiceWorkflow::class, 'payment_status' => PaymentStatus::class];
 
-    use \App\Matters\MatterScoped;
-    use \App\Models\Concerns\HasPublicId;
-
-    use \App\Models\Concerns\InsertsInsideTransaction;
+    use HasPublicId;
+    use InsertsInsideTransaction;
+    use MatterScoped;
 
     protected $fillable = [
         'invoice_number',
@@ -52,7 +58,7 @@ class Invoice extends DefaultAppModel
     /** DATA-14: an amount of this invoice in the firm's base currency, at the rate it fixed; null when it has none. */
     public function inBase(float $amount): ?float
     {
-        $base = app(\App\Money\Money::class)->baseCurrency();
+        $base = app(Money::class)->baseCurrency();
         $rate = $this->fx_rate !== null ? (float) $this->fx_rate : ((! $this->currency || strtoupper($this->currency) === $base) ? 1.0 : null);
 
         return $rate === null ? null : round($amount * $rate, 2);
@@ -91,7 +97,7 @@ class Invoice extends DefaultAppModel
      */
     public static function nextInvoiceNumber(): string
     {
-        return app(\App\Services\SequenceService::class)->nextFormatted('invoice', 'INV', 'invoices', 'invoice_number');
+        return app(SequenceService::class)->nextFormatted('invoice', 'INV', 'invoices', 'invoice_number');
     }
 
     /**
@@ -115,7 +121,7 @@ class Invoice extends DefaultAppModel
 
     public function refreshPaymentStatus(): void
     {
-        $paymentStatus = \App\Enums\PaymentStatus::for((float) $this->total_amount, (float) $this->amount_paid)->value;   // DATA-12
+        $paymentStatus = PaymentStatus::for((float) $this->total_amount, (float) $this->amount_paid)->value;   // DATA-12
 
         if ($paymentStatus !== $this->payment_status) {
             $this->update(['payment_status' => $paymentStatus]);

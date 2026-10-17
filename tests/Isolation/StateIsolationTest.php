@@ -2,11 +2,14 @@
 
 namespace Tests\Isolation;
 
+use App\Entitlements\Entitlements;
 use App\Models\User;
+use App\Tenancy\IdentityService;
 use App\Tenancy\Models\Tenant;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -37,7 +40,7 @@ class StateIsolationTest extends IsolationTestCase
     /** A store that is physically shared (as Redis or a central database is) can only be separated by the key prefix. */
     public function test_a_physically_shared_cache_store_is_separated_by_prefix(): void
     {
-        \Illuminate\Support\Facades\Schema::connection('control')->create('shared_cache', function ($t) {
+        Schema::connection('control')->create('shared_cache', function ($t) {
             $t->string('key')->primary();
             $t->mediumText('value');
             $t->integer('expiration');
@@ -50,7 +53,7 @@ class StateIsolationTest extends IsolationTestCase
         $this->assertNull($this->inFirm('b', fn () => Cache::get('k')), 'B read A\'s entry from a shared store');
         $this->inFirm('b', fn () => Cache::put('k', 'value-of-B', 600));
         $this->assertSame('value-of-A', $this->inFirm('a', fn () => Cache::get('k')));
-        $this->assertSame(2, \Illuminate\Support\Facades\DB::connection('control')->table('shared_cache')->count(), 'two firms, two distinct rows in the one shared table');
+        $this->assertSame(2, DB::connection('control')->table('shared_cache')->count(), 'two firms, two distinct rows in the one shared table');
     }
 
     public function test_cache_locks_and_counters_are_per_firm(): void
@@ -70,11 +73,11 @@ class StateIsolationTest extends IsolationTestCase
     {
         $this->persistentCache();
         // In multi mode a login is a control-plane identity with a membership per firm: one person who belongs to both firms.
-        [$identity] = app(\App\Tenancy\IdentityService::class)->registerOrReuse('shared@x.test', 'Shared-pass-1');
+        [$identity] = app(IdentityService::class)->registerOrReuse('shared@x.test', 'Shared-pass-1');
         foreach (['a', 'b'] as $slug) {
             $this->inFirm($slug, function () use ($identity, $slug) {
                 $u = User::factory()->create(['email' => 'shared@x.test']);
-                app(\App\Tenancy\IdentityService::class)->link($identity, $this->firm[$slug]['tenant'], $u);
+                app(IdentityService::class)->link($identity, $this->firm[$slug]['tenant'], $u);
             });
         }
         for ($i = 0; $i < 5; $i++) {
@@ -129,7 +132,7 @@ class StateIsolationTest extends IsolationTestCase
     {
         Tenant::where('slug', 'a')->update(['plan' => 'trial']);
         Tenant::where('slug', 'b')->update(['plan' => 'professional']);
-        app(\App\Entitlements\Entitlements::class)->forget();   // the plan was changed behind the process's back (as the platform console would, from another process)
+        app(Entitlements::class)->forget();   // the plan was changed behind the process's back (as the platform console would, from another process)
         foreach (range(1, 3) as $_) {
             $a = $this->api('a', 'GET', '/entitlements')->assertOk();
             $b = $this->api('b', 'GET', '/entitlements')->assertOk();

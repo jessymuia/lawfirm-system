@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Billing\Billing;
 use App\Constants\ModulePermissions as P;
+use App\Entitlements\Entitlements;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Tenancy\TenantManager;
@@ -43,7 +44,7 @@ class SubscriptionAndOnboardingTest extends TestCase
 
         // the trial ends: reads work, writes are refused with their own code, choosing a plan still works
         $tenant->update(['trial_ends_at' => now()->subMinute()]);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $this->getJson('/api/v1/clients?page=1')->assertOk()->assertHeader('X-License-Notice');
         $this->postJson('/api/v1/clients', $client)->assertForbidden()->assertJsonPath('code', 'trial_expired');
         $this->getJson('/api/v1/subscription')->assertOk()->assertJsonPath('data.trial_expired', true);

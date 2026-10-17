@@ -3,8 +3,8 @@
 namespace App\Compliance\RecordClasses;
 
 use App\Compliance\ClientAnonymiser;
-use App\Compliance\LegalHolds;
 use App\Compliance\LegalHoldException;
+use App\Compliance\LegalHolds;
 use App\Models\Client;
 use Illuminate\Support\Facades\DB;
 

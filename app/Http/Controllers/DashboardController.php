@@ -9,6 +9,7 @@ use App\Models\Hearing;
 use App\Models\Invoice;
 use App\Models\Task;
 use App\Models\TimeEntry;
+use App\Money\Money;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -181,12 +182,11 @@ class DashboardController extends Controller
             'unbilled_by_case' => $unbilledByCase,
             'outstanding_invoices' => $outstandingInvoices->values(),
             'outstanding_total' => round($outstandingTotal, 2),
-            'currency' => app(\App\Money\Money::class)->baseCurrency(),   // DATA-14: what the totals above are in
+            'currency' => app(Money::class)->baseCurrency(),   // DATA-14: what the totals above are in
             'recent_cases' => $recentCases,
             'cases_trend' => $casesTrend,
             'billing_trend' => $billingTrend,
             'is_admin' => $isAdmin,
         ], 200);
     }
-
 }

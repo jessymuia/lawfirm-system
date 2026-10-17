@@ -17100,6 +17100,203 @@
                 }
             }
         },
+        "/security/integrations": {
+            "get": {
+                "operationId": "integrationCredentialsIndex",
+                "tags": [
+                    "IntegrationCredentials"
+                ],
+                "x-authz": "permission,manage-security-settings",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ApiResponse"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "description": "See the endpoint"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not signed in"
+                    },
+                    "403": {
+                        "description": "Not allowed (x-authz)"
+                    },
+                    "422": {
+                        "description": "Invalid input or refused action (see `code`)"
+                    }
+                }
+            }
+        },
+        "/security/integrations/mail/test": {
+            "post": {
+                "operationId": "integrationCredentialsTestMail",
+                "tags": [
+                    "IntegrationCredentials"
+                ],
+                "x-authz": "permission,manage-security-settings",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ApiResponse"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "description": "See the endpoint"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not signed in"
+                    },
+                    "403": {
+                        "description": "Not allowed (x-authz)"
+                    },
+                    "422": {
+                        "description": "Invalid input or refused action (see `code`)"
+                    }
+                }
+            }
+        },
+        "/security/integrations/{provider}": {
+            "get": {
+                "operationId": "integrationCredentialsShow",
+                "tags": [
+                    "IntegrationCredentials"
+                ],
+                "x-authz": "permission,manage-security-settings",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ApiResponse"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "description": "See the endpoint"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not signed in"
+                    },
+                    "403": {
+                        "description": "Not allowed (x-authz)"
+                    },
+                    "422": {
+                        "description": "Invalid input or refused action (see `code`)"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "integrationCredentialsUpdate",
+                "tags": [
+                    "IntegrationCredentials"
+                ],
+                "x-authz": "permission,manage-security-settings",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ApiResponse"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "description": "See the endpoint"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not signed in"
+                    },
+                    "403": {
+                        "description": "Not allowed (x-authz)"
+                    },
+                    "422": {
+                        "description": "Invalid input or refused action (see `code`)"
+                    }
+                }
+            }
+        },
         "/security/policy": {
             "get": {
                 "operationId": "mfaPolicy",

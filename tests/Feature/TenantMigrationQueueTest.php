@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\BuildFirmExport;
 use App\Jobs\MigrateTenant;
 use App\Jobs\RunTenantBackup;
 use App\Jobs\RunTenantEject;
@@ -17,10 +18,11 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-7: the fleet migration as a resumable queue of per-firm jobs, one run per firm at a time. */
-class TenantMigrationQueueTest extends TestCase implements \Tests\OwnsTenancy
+class TenantMigrationQueueTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -131,7 +133,7 @@ class TenantMigrationQueueTest extends TestCase implements \Tests\OwnsTenancy
         MigrateTenant::dispatch('a');   // sync: runs inside "the request" of firm b
 
         $this->assertSame('b', app(TenantManager::class)->current()?->slug, 'the request still has its firm');
-        $this->assertSame('b', app(\App\Tenancy\TenantContext::class)->key());
+        $this->assertSame('b', app(TenantContext::class)->key());
         $this->assertSame(TenantManager::TENANT_CONNECTION, DB::getDefaultConnection());
         $this->assertSame('ok', Tenant::where('slug', 'a')->value('migration_status'));
     }
@@ -140,7 +142,7 @@ class TenantMigrationQueueTest extends TestCase implements \Tests\OwnsTenancy
     {
         config(['tenancy.mode' => 'multi']);
         $forged = ['platform' => true, 'tenant' => null, 'job' => 'Illuminate\\Queue\\CallQueuedHandler@call',
-            'data' => ['commandName' => \App\Jobs\BuildFirmExport::class, 'command' => '']];
+            'data' => ['commandName' => BuildFirmExport::class, 'command' => '']];
 
         $this->expectExceptionMessage('Queued job has no tenant');
         event(new JobProcessing('sync', new SyncJob(app(), json_encode($forged), 'sync', 'default')));
@@ -190,6 +192,6 @@ class TenantMigrationQueueTest extends TestCase implements \Tests\OwnsTenancy
         foreach ([MigrateTenant::class, RunTenantBackup::class, RunTenantEject::class] as $job) {
             $this->assertTrue(is_subclass_of($job, PlatformJob::class), $job);
         }
-        $this->assertFalse(is_subclass_of(\App\Jobs\BuildFirmExport::class, PlatformJob::class));
+        $this->assertFalse(is_subclass_of(BuildFirmExport::class, PlatformJob::class));
     }
 }

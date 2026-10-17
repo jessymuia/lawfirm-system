@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Platform;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 /** ENG-8: the signed-in operator changes their own password. */
 class ChangePasswordRequest extends FormRequest
@@ -17,7 +18,7 @@ class ChangePasswordRequest extends FormRequest
     {
         return [
             'current_password' => 'required|string',
-            'password' => ['required', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::min(12)->mixedCase()->numbers()],
+            'password' => ['required', 'string', 'confirmed', Password::min(12)->mixedCase()->numbers()],
         ];
     }
 }

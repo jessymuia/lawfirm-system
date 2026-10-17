@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Entitlements\Entitlements;
 use App\Entitlements\EntitlementException;
+use App\Entitlements\Entitlements;
+use App\Exceptions\Handler;
+use App\Models\Client;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
@@ -67,7 +70,7 @@ class EntitlementsTest extends TestCase
     {
         $this->usePlan('professional');
         $user = $this->userWithPermissions(['list-trust-transactions']);
-        $client = \App\Models\Client::factory()->create();
+        $client = Client::factory()->create();
 
         $this->actingAs($user)->getJson('/api/v1/trust-transactions?client_id='.$client->id)->assertOk();
     }
@@ -85,7 +88,7 @@ class EntitlementsTest extends TestCase
         config(['entitlements.plans.starter.limits.users' => 2]);
         $this->usePlan('starter');
         $admin = $this->userWithPermissions(['create-users']);   // seat 1
-        \App\Models\User::factory()->create();                   // seat 2
+        User::factory()->create();                   // seat 2
 
         $this->actingAs($admin)->postJson('/api/v1/users', [])
             ->assertStatus(403)
@@ -97,7 +100,7 @@ class EntitlementsTest extends TestCase
         config(['entitlements.plans.starter.limits.users' => 3]);
         $this->usePlan('starter');
         $admin = $this->userWithPermissions(['create-users']);
-        \App\Models\User::factory()->create();
+        User::factory()->create();
 
         $code = $this->actingAs($admin)->postJson('/api/v1/users', [])->json('code');
 
@@ -109,7 +112,7 @@ class EntitlementsTest extends TestCase
         config(['entitlements.plans.starter.limits.users' => 2]);
         $this->usePlan('starter');
         $admin = $this->userWithPermissions(['create-users']);
-        \App\Models\User::factory()->create()->delete();
+        User::factory()->create()->delete();
 
         $this->assertTrue(app(Entitlements::class)->within('users'));
     }
@@ -189,7 +192,7 @@ class EntitlementsTest extends TestCase
 
     public function test_entitlement_denials_are_not_reported_as_errors(): void
     {
-        $this->assertFalse(app(\App\Exceptions\Handler::class)->shouldReport(EntitlementException::feature('x')));
-        $this->assertTrue(app(\App\Exceptions\Handler::class)->shouldReport(new \RuntimeException('real error')));
+        $this->assertFalse(app(Handler::class)->shouldReport(EntitlementException::feature('x')));
+        $this->assertTrue(app(Handler::class)->shouldReport(new \RuntimeException('real error')));
     }
 }

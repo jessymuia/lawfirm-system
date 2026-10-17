@@ -11,7 +11,7 @@ class UpdateRequest extends FormRequest
 {
     use CatalogUpdateRules;
 
-    protected string $recordModel = \App\Models\CourtType::class;
+    protected string $recordModel = CourtType::class;
 
     protected string $recordParameter = 'courttype';
 

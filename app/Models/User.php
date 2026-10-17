@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements Auditable
@@ -102,7 +104,7 @@ class User extends Authenticatable implements Auditable
         // "delete") that are not permission names. An unknown name is simply "not held" (deny), never an error.
         try {
             return $this->hasPermissionTo($permission);
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist) {
+        } catch (PermissionDoesNotExist) {
             return false;
         }
     }
@@ -110,9 +112,9 @@ class User extends Authenticatable implements Auditable
     /**
      * FUN-18
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Office, $this>
+     * @return BelongsTo<Office, $this>
      */
-    public function office(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function office(): BelongsTo
     {
         return $this->belongsTo(Office::class);
     }
@@ -120,9 +122,9 @@ class User extends Authenticatable implements Auditable
     /**
      * FUN-18
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<PracticeGroup, $this>
+     * @return BelongsTo<PracticeGroup, $this>
      */
-    public function practiceGroup(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function practiceGroup(): BelongsTo
     {
         return $this->belongsTo(PracticeGroup::class);
     }

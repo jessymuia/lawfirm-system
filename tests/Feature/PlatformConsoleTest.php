@@ -7,16 +7,21 @@ use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
+use App\Tenancy\TenantManager;
+use App\Tenancy\TenantMigrator;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-7: platform-staff console. Real control-plane DB and real SQLite tenant databases. */
-class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
+class PlatformConsoleTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -62,7 +67,7 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
         parent::tearDown();
     }
 
-    private function staff(string $role = 'admin', string $email = null): PlatformStaff
+    private function staff(string $role = 'admin', ?string $email = null): PlatformStaff
     {
         return PlatformStaff::create(['name' => ucfirst($role), 'email' => $email ?? "{$role}@platform.test", 'password' => Hash::make('correct-horse-battery'), 'role' => $role]);
     }
@@ -198,7 +203,7 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_a_tenant_user_token_is_not_a_platform_token(): void
     {
-        $plain = '1|'.\Illuminate\Support\Str::random(40);   // the shape of a tenant (Sanctum) token
+        $plain = '1|'.Str::random(40);   // the shape of a tenant (Sanctum) token
         $this->withToken($plain)->getJson(self::HOST.'/api/platform/tenants')->assertUnauthorized();
     }
 
@@ -319,7 +324,7 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
     {
         config(['cache.default' => 'file']);
         $t = $this->tenant('plat7-busy', ['migration_status' => 'pending']);
-        $held = app(\App\Tenancy\TenantManager::class)->runIn($t, fn () => tap(\Illuminate\Support\Facades\Cache::lock('tenant-migrate', 60))->get());
+        $held = app(TenantManager::class)->runIn($t, fn () => tap(Cache::lock('tenant-migrate', 60))->get());
 
         try {
             $this->api('POST', '/tenants/plat7-busy/migrate')->assertStatus(409)->assertJsonPath('code', 'migration_running');
@@ -332,7 +337,7 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_the_fleet_view_shows_where_firms_stand_against_this_release(): void
     {
-        $latest = \App\Tenancy\TenantMigrator::latestVersion();
+        $latest = TenantMigrator::latestVersion();
         $this->tenant('current', ['schema_version' => $latest]);
         $this->tenant('old');
         $this->tenant('fresh', ['schema_version' => null, 'migration_status' => 'pending']);
@@ -388,7 +393,8 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertSame(1, PlatformAudit::where('action', 'tenant.backup.requested')->count());
 
         foreach ([0 => 'ok', 1 => 'failed'] as $exit => $expected) {
-            Artisan::registerCommand(new class($exit) extends Command {
+            Artisan::registerCommand(new class($exit) extends Command
+            {
                 protected $signature = 'backup:run {--tenant=} {--dry-run}';
 
                 public function __construct(private int $exit)
@@ -502,7 +508,7 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_a_firm_is_flagged_for_updates_when_it_is_behind_or_its_last_update_failed(): void
     {
-        $latest = \App\Tenancy\TenantMigrator::latestVersion();
+        $latest = TenantMigrator::latestVersion();
         $this->tenant('plat7-current', ['schema_version' => $latest, 'migration_status' => 'ok']);
         $this->tenant('plat7-behind', ['schema_version' => '2020_01_01_000000_old', 'migration_status' => 'ok']);
         $this->tenant('plat7-never', ['schema_version' => null, 'migration_status' => 'pending']);
@@ -528,7 +534,7 @@ class PlatformConsoleTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertSame(0, $this->api('GET', '/fleet')->json('data.behind'));
         $row = collect($this->api('GET', '/tenants')->json('data'))->firstWhere('slug', 'plat7-behind');
         $this->assertFalse($row['update_needed']);
-        $this->assertSame(\App\Tenancy\TenantMigrator::latestVersion(), $row['schema_version']);
+        $this->assertSame(TenantMigrator::latestVersion(), $row['schema_version']);
     }
 
     public function test_updating_one_firm_after_another_as_the_overview_button_does(): void

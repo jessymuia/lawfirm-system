@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Constants\ModulePermissions as P;
+use App\Jobs\ExtractDocumentText;
 use App\Models\Cases;
 use App\Models\Document;
 use App\Models\User;
@@ -29,7 +30,7 @@ class DirectUploadsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Bus::fake([\App\Jobs\ExtractDocumentText::class]);
+        Bus::fake([ExtractDocumentText::class]);
         config([
             'filesystems.disks.s3' => ['driver' => 's3', 'key' => 'AKIATEST', 'secret' => 'secret', 'region' => 'eu-west-1', 'bucket' => 'firm-files',
                 'endpoint' => 'https://s3.example.test', 'use_path_style_endpoint' => true, 'throw' => false],
@@ -80,7 +81,7 @@ class DirectUploadsTest extends TestCase
         $this->assertSame(['Witness statement', 's3', $path, hash('sha256', self::PDF), 'application/pdf', strlen(self::PDF), 'pdf', 1],
             [$d->title, $d->disk, $d->full_path, $d->checksum, $d->mimetype, (int) $d->filesize, $d->extension, (int) $d->version]);
         $this->assertSame($d->id, (int) $d->document_group_id);
-        Bus::assertDispatched(\App\Jobs\ExtractDocumentText::class, fn ($j) => true);   // searchable like any upload (FUN-8)
+        Bus::assertDispatched(ExtractDocumentText::class, fn ($j) => true);   // searchable like any upload (FUN-8)
 
         $this->postJson("/api/v1/documents/uploads/{$u['id']}/complete")->assertNotFound();   // once only
 

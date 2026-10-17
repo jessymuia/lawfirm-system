@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SupportAccess\RedeemRequest;
+use App\Http\Requests\SupportAccess\UpdatePolicyRequest;
 use App\Models\SupportAccessSession;
 use App\SupportAccess\SupportAccessService;
 use App\SupportAccess\SupportPolicy;
@@ -55,7 +57,7 @@ class SupportAccessController extends Controller
         return $this->response(true, 'success', SupportPolicy::for($this->tenant()), 200);
     }
 
-    public function updatePolicy(\App\Http\Requests\SupportAccess\UpdatePolicyRequest $r): JsonResponse
+    public function updatePolicy(UpdatePolicyRequest $r): JsonResponse
     {
         $d = $r->validated();
         $tenant = $this->tenant();
@@ -91,7 +93,7 @@ class SupportAccessController extends Controller
     }
 
     /** Public, throttled: trades the one-time code from platform staff for a normal session on this firm's host. */
-    public function redeem(\App\Http\Requests\SupportAccess\RedeemRequest $r): JsonResponse
+    public function redeem(RedeemRequest $r): JsonResponse
     {
         $d = $r->validated();
         $user = $this->service->redeem($d['code'], $this->tenant());

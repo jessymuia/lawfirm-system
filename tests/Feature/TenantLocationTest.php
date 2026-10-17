@@ -2,20 +2,27 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\BackfillPublicIds;
+use App\Jobs\SendSmsJob;
+use App\Models\Cases;
+use App\Models\User;
 use App\Tenancy\FirmStorage;
 use App\Tenancy\Models\Cell;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
 use App\Tenancy\TenantLifecycle;
 use App\Tenancy\TenantManager;
+use App\Tenancy\TenantRelocator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-2: a firm's registry row says where its data, files and background work live, and the app follows it. */
-class TenantLocationTest extends TestCase implements \Tests\OwnsTenancy
+class TenantLocationTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -88,16 +95,16 @@ class TenantLocationTest extends TestCase implements \Tests\OwnsTenancy
 
         $manager->activate($eu);
         $this->assertSame('eu-bucket', FirmStorage::disk());
-        dispatch(new \App\Jobs\SendSmsJob('0700000000', 'x'));
+        dispatch(new SendSmsJob('0700000000', 'x'));
         $this->assertSame('eu', $queueOf(), "the firm's background work goes to its lane");
-        dispatch(new \App\Jobs\BackfillPublicIds);
+        dispatch(new BackfillPublicIds);
         $this->assertSame('eu-bulk', $queueOf(), 'and its heavy work to the bulk lane next to it (ENG-20)');
 
         $manager->activate($home);
         $this->assertSame(FirmStorage::defaultDisk(), FirmStorage::disk());
-        dispatch(new \App\Jobs\SendSmsJob('0700000000', 'x'));
+        dispatch(new SendSmsJob('0700000000', 'x'));
         $this->assertSame('default', $queueOf());
-        dispatch(new \App\Jobs\BackfillPublicIds);
+        dispatch(new BackfillPublicIds);
         $this->assertSame('bulk', $queueOf());
 
         $manager->activate($eu);
@@ -113,13 +120,13 @@ class TenantLocationTest extends TestCase implements \Tests\OwnsTenancy
         config(['tenancy.mode' => 'multi', 'tenancy.base_domain' => 'app.test']);
         $firm->domains()->create(['domain' => 'eurofirm.app.test']);
         $manager = app(TenantManager::class);
-        $user = $manager->runIn($firm, fn () => \App\Models\User::first());
-        $case = $manager->runIn($firm, fn () => \App\Models\Cases::factory()->create());
+        $user = $manager->runIn($firm, fn () => User::first());
+        $case = $manager->runIn($firm, fn () => Cases::factory()->create());
 
         $this->actingAsOnHost($user, 'eurofirm.app.test');
         $id = $this->postJson('http://eurofirm.app.test/api/v1/documents', [
             'title' => 'Engagement letter', 'case_id' => $case->id,
-            'file' => \Illuminate\Http\UploadedFile::fake()->create('letter.pdf', 10, 'application/pdf'),
+            'file' => UploadedFile::fake()->create('letter.pdf', 10, 'application/pdf'),
         ])->assertSuccessful()->json('data.id');
 
         $doc = $manager->runIn($firm, fn () => DB::table('documents')->find($id));
@@ -136,7 +143,7 @@ class TenantLocationTest extends TestCase implements \Tests\OwnsTenancy
         app(TenantManager::class)->useControlPlaneQueue();
         $firm = $this->provision('mover', ['cell' => 'eu-1']);
 
-        app(\App\Tenancy\TenantRelocator::class)->relocate($firm->fresh(), 'eu-2');
+        app(TenantRelocator::class)->relocate($firm->fresh(), 'eu-2');
         $firm->refresh();
         $this->assertSame(['eu-2', 'eu-2', 'eu-bucket'], [$firm->cell, $firm->queue, $firm->files_disk]);
 

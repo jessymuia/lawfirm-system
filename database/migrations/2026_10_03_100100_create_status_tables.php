@@ -12,7 +12,7 @@ return new class extends Migration
         if (config('tenancy.mode') !== 'single') {
             return;   // tenant databases do not carry platform status data
         }
-        $s = Schema::connection(config("database.default"));
+        $s = Schema::connection(config('database.default'));
         $s->create('health_probes', function (Blueprint $t) {
             $t->id();
             $t->string('component', 32);
@@ -47,7 +47,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        $s = Schema::connection(config("database.default"));
+        $s = Schema::connection(config('database.default'));
         $s->dropIfExists('status_incident_updates');
         $s->dropIfExists('status_incidents');
         $s->dropIfExists('health_probes');

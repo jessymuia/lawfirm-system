@@ -9,10 +9,11 @@ use App\Tenancy\TenantLifecycle;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** DATA-13: migrations are timed against volume before they ship, and one over its budget fails. */
-class MigrationRehearsalTest extends TestCase implements \Tests\OwnsTenancy
+class MigrationRehearsalTest extends TestCase implements OwnsTenancy
 {
     public function test_the_newest_migrations_run_against_synthetic_volume_and_are_timed(): void
     {
@@ -20,7 +21,7 @@ class MigrationRehearsalTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertSame(0, Artisan::call('migrations:rehearse', ['--synthetic' => 50, '--last' => 3, '--budget' => 60]));
         $out = Artisan::output();
         $this->assertStringContainsString('Rehearsing 3 migration(s) against', $out);
-        $this->assertStringContainsString('2026_10_23_100000_generalise_retention_disposals', $out);
+        $this->assertStringContainsString('2026_10_28_100000_add_saml_to_sso_providers', $out);
         $this->assertSame($before, glob(sys_get_temp_dir().'/rehearsal_*.sqlite'), 'the scratch database is dropped');
     }
 

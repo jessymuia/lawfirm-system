@@ -42,7 +42,7 @@ class PortalAuth
             'created_at' => now(), 'updated_at' => now(),
         ]);
         $to = (string) DB::table('clients')->where('id', $clientId)->value('phone_number');
-        SendSmsJob::dispatch($to, "Your sign-in code for the ".config('app.name')." client portal is {$code}. It expires in ".self::CODE_MINUTES.' minutes. Do not share it.');
+        SendSmsJob::dispatch($to, 'Your sign-in code for the '.config('app.name')." client portal is {$code}. It expires in ".self::CODE_MINUTES.' minutes. Do not share it.');
     }
 
     /** @return array{token: string, expires_at: string}|null a new session, or null when the code is wrong, used up or expired */

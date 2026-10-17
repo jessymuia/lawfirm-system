@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Cases;
 
-use App\Models\Cases;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for CasesController::store(). Authorization is declared on the route (authz:*), not here. */

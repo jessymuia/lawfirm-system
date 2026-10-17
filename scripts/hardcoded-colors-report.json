@@ -2425,76 +2425,6 @@
     ]
   },
   {
-    "file": "views/dashboard.vue",
-    "hits": [
-      {
-        "line": 338,
-        "color": "#64748b",
-        "text": "color: var(--text-secondary, #64748b);"
-      },
-      {
-        "line": 352,
-        "color": "#eee",
-        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
-      },
-      {
-        "line": 352,
-        "color": "#f5f5f5",
-        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
-      },
-      {
-        "line": 352,
-        "color": "#eee",
-        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
-      },
-      {
-        "line": 365,
-        "color": "#6b7280",
-        "text": "color: #6b7280;"
-      },
-      {
-        "line": 428,
-        "color": "#fff",
-        "text": "background: var(--background, #fff);"
-      },
-      {
-        "line": 437,
-        "color": "#e7515a",
-        "text": "color: #e7515a;"
-      },
-      {
-        "line": 457,
-        "color": "#6b7280",
-        "text": "color: #6b7280;"
-      },
-      {
-        "line": 468,
-        "color": "#fff",
-        "text": "background: var(--background, #fff);"
-      },
-      {
-        "line": 485,
-        "color": "#6b7280",
-        "text": "color: #6b7280;"
-      },
-      {
-        "line": 493,
-        "color": "#6b7280",
-        "text": "color: #6b7280;"
-      },
-      {
-        "line": 539,
-        "color": "#6b7280",
-        "text": "color: #6b7280;"
-      },
-      {
-        "line": 556,
-        "color": "#b91c1c",
-        "text": "color: #b91c1c;"
-      }
-    ]
-  },
-  {
     "file": "views/menu/cases/tabs/activity-tab.vue",
     "hits": [
       {
@@ -2986,6 +2916,51 @@
         "line": 259,
         "color": "#64748b",
         "text": "span { font-size: 12px; color: var(--text-secondary, #64748b); } b { font-size: 20px; } small { font"
+      }
+    ]
+  },
+  {
+    "file": "views/dashboard.vue",
+    "hits": [
+      {
+        "line": 338,
+        "color": "#64748b",
+        "text": "color: var(--text-secondary, #64748b);"
+      },
+      {
+        "line": 352,
+        "color": "#eee",
+        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
+      },
+      {
+        "line": 352,
+        "color": "#f5f5f5",
+        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
+      },
+      {
+        "line": 352,
+        "color": "#eee",
+        "text": "background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);"
+      },
+      {
+        "line": 428,
+        "color": "#fff",
+        "text": "background: var(--background, #fff);"
+      },
+      {
+        "line": 437,
+        "color": "#e7515a",
+        "text": "color: #e7515a;"
+      },
+      {
+        "line": 468,
+        "color": "#fff",
+        "text": "background: var(--background, #fff);"
+      },
+      {
+        "line": 557,
+        "color": "#b91c1c",
+        "text": "color: #b91c1c;"
       }
     ]
   },

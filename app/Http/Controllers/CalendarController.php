@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Tenancy\Keys\FirmCrypt;
 use App\Calendar\CalendarItems;
 use App\Calendar\CalendarSync;
 use App\Calendar\Ics;
@@ -13,6 +12,7 @@ use App\Jobs\SyncCalendarConnection;
 use App\Matters\MatterAccess;
 use App\Models\User;
 use App\Security\SecurityPolicy;
+use App\Tenancy\Keys\FirmCrypt;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

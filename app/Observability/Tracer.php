@@ -2,6 +2,7 @@
 
 namespace App\Observability;
 
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -183,7 +184,7 @@ class Tracer
     private function context(): array
     {
         return array_filter([
-            'tenant' => app(\App\Tenancy\TenantContext::class)->key(),
+            'tenant' => app(TenantContext::class)->key(),
             'request_id' => Context::get('request_id'),
             'enduser.id' => auth()->hasUser() ? (int) auth()->id() : null,
         ], fn ($v) => $v !== null);

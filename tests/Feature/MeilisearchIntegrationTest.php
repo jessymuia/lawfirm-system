@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Constants\ModulePermissions as P;
+use App\Matters\MatterAccess;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\User;
 use App\Search\SearchEngine;
+use App\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +47,7 @@ class MeilisearchIntegrationTest extends TestCase
     protected function tearDown(): void
     {
         if (config('search.engine') === 'meilisearch') {
-            app(SearchEngine::class)->dropFirm(app(\App\Tenancy\TenantContext::class)->key());
+            app(SearchEngine::class)->dropFirm(app(TenantContext::class)->key());
         }
         parent::tearDown();
     }
@@ -91,7 +93,7 @@ class MeilisearchIntegrationTest extends TestCase
         // a grant opens the other one; a wall on a client hides it
         DB::table('matter_access_grants')->insert(['case_id' => $theirs->id, 'user_id' => $me->id, 'reason' => 'cover', 'created_at' => now(), 'updated_at' => now()]);
         DB::table('ethical_screens')->insert(['user_id' => $me->id, 'client_id' => $walled->id, 'reason' => 'conflict', 'created_at' => now(), 'updated_at' => now()]);
-        \App\Matters\MatterAccess::walls()->flush();
+        MatterAccess::walls()->flush();
         $this->assertEqualsCanonicalizing(['HCCC 1/2026', 'HCCC 2/2026'], array_column($this->actingAs($me)->getJson('/api/v1/search?q=negligence')->json('data.cases'), 'title'));
         $this->assertNotContains('Wanjiru Traders', array_column($this->actingAs($me)->getJson('/api/v1/search?q=wanjiru')->json('data.clients'), 'title'));
 

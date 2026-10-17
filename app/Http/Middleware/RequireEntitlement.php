@@ -13,9 +13,7 @@ use Illuminate\Http\Request;
  */
 class RequireEntitlement
 {
-    public function __construct(protected Entitlements $entitlements)
-    {
-    }
+    public function __construct(protected Entitlements $entitlements) {}
 
     public function handle(Request $request, Closure $next, string $feature)
     {

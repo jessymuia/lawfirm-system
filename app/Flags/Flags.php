@@ -15,9 +15,7 @@ class Flags
     /** @var array<string,array<string,array{value:bool,source:string}>> */
     private array $memo = [];
 
-    public function __construct(private FlagOverrides $overrides, private Entitlements $entitlements, private TenantContext $tenant)
-    {
-    }
+    public function __construct(private FlagOverrides $overrides, private Entitlements $entitlements, private TenantContext $tenant) {}
 
     public function forget(): void
     {

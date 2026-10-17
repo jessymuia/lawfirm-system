@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PlatformSupport\RequestRequest;
 use App\Models\SupportAccessSession;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
@@ -38,7 +39,7 @@ class PlatformSupportController extends Controller
         return response()->json(['policy' => SupportPolicy::for($tenant), 'data' => $rows]);
     }
 
-    public function request(\App\Http\Requests\PlatformSupport\RequestRequest $r, string $slug): JsonResponse
+    public function request(RequestRequest $r, string $slug): JsonResponse
     {
         $d = $r->validated();
         $tenant = $this->tenant($slug);

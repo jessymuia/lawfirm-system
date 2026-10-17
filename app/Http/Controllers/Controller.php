@@ -9,6 +9,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Controller extends BaseController
@@ -64,13 +65,13 @@ class Controller extends BaseController
      * @param  Builder<TModel>  $query
      * @param  callable(TModel): string  $label
      */
-    protected function optionsResponse(Request $request, Builder $query, callable $label, int $cap = 500): \Illuminate\Http\JsonResponse
+    protected function optionsResponse(Request $request, Builder $query, callable $label, int $cap = 500): JsonResponse
     {
         if ($request->filled('search')) {
             $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], (string) $request->input('search')).'%';
             $model = $query->getModel();
             $query->where(fn ($q) => $q->where('name', 'like', $term)
-                ->when(\Illuminate\Support\Facades\Schema::hasColumn($model->getTable(), 'alias'), fn ($q) => $q->orWhere('alias', 'like', $term)));
+                ->when(Schema::hasColumn($model->getTable(), 'alias'), fn ($q) => $q->orWhere('alias', 'like', $term)));
         }
         $rows = $query->orderBy('name')->limit($cap + 1)->get();
 

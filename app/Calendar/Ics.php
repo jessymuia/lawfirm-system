@@ -2,6 +2,8 @@
 
 namespace App\Calendar;
 
+use Carbon\CarbonImmutable;
+
 /**
  * FUN-16: an iCalendar (RFC 5545) document of calendar items, for subscription in Google Calendar, Outlook or Apple
  * Calendar. Times are written in UTC; all-day entries as dates. Text is escaped and long lines folded as the RFC requires.
@@ -25,7 +27,7 @@ class Ics
                 $lines[] = 'DTSTART:'.$i['start']->utc()->format('Ymd\THis\Z');
                 $lines[] = 'DTEND:'.$i['end']->utc()->format('Ymd\THis\Z');
             } else {
-                $day = \Carbon\CarbonImmutable::parse($i['date']);
+                $day = CarbonImmutable::parse($i['date']);
                 $lines[] = 'DTSTART;VALUE=DATE:'.$day->format('Ymd');
                 $lines[] = 'DTEND;VALUE=DATE:'.$day->addDay()->format('Ymd');
                 $lines[] = 'TRANSP:TRANSPARENT';
@@ -46,7 +48,7 @@ class Ics
     /** RFC 5545 §3.3.11: backslash, semicolon, comma and new lines are escaped. */
     private function text(string $s): string
     {
-        return str_replace(["\\", ';', ',', "\r\n", "\n", "\r"], ['\\\\', '\;', '\,', '\n', '\n', ''], $s);
+        return str_replace(['\\', ';', ',', "\r\n", "\n", "\r"], ['\\\\', '\;', '\,', '\n', '\n', ''], $s);
     }
 
     /** RFC 5545 §3.1: lines longer than 75 octets continue on the next line after a space, never inside a UTF-8 character. */

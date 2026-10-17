@@ -62,7 +62,7 @@ class TypeScriptClient
             $content = $op['requestBody']['content'];
             $schema = $content['application/json']['schema'] ?? $content['multipart/form-data']['schema'];
             $bodyType = Str::studly($name).'Body';
-            $lines[] = "export type {$bodyType} = ".self::ts($schema, '').";";
+            $lines[] = "export type {$bodyType} = ".self::ts($schema, '').';';
             $args[] = isset($content['multipart/form-data']) ? "body: {$bodyType} | FormData" : 'body'.($op['requestBody']['required'] ? '' : '?').": {$bodyType}";
         } elseif ($method === 'get') {
             $args[] = 'params?: Query';

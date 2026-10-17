@@ -4,13 +4,14 @@ namespace App\Http\Requests\RolesManagement;
 
 use App\Http\Requests\Concerns\RouteRecord;
 use Illuminate\Foundation\Http\FormRequest;
+use Spatie\Permission\Models\Role;
 
 /** ENG-8: input rules for RolesManagementController::update(). Authorization is declared on the route (authz:*), not here. */
 class UpdateRequest extends FormRequest
 {
     use RouteRecord;
 
-    protected string $recordModel = \Spatie\Permission\Models\Role::class;
+    protected string $recordModel = Role::class;
 
     protected string $recordParameter = 'role';
 

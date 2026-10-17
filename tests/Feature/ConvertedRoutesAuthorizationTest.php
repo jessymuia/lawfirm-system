@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -80,7 +81,7 @@ class ConvertedRoutesAuthorizationTest extends TestCase
     public function test_gate_is_declared_on_the_route_itself(string $method, string $uri, string $perm): void
     {
         $route = app('router')->getRoutes()->match(
-            \Illuminate\Http\Request::create("/api/v1/{$uri}", $method)
+            Request::create("/api/v1/{$uri}", $method)
         );
 
         $this->assertContains("authz:permission,{$perm}", $route->gatherMiddleware());

@@ -11,7 +11,7 @@ class UpdateRequest extends FormRequest
 {
     use CatalogUpdateRules;
 
-    protected string $recordModel = \App\Models\HearingType::class;
+    protected string $recordModel = HearingType::class;
 
     protected string $recordParameter = 'hearingtype';
 

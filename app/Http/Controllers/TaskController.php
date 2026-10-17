@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
+use App\Http\Requests\Task\DestroyManyRequest;
+use App\Http\Requests\Task\StoreRequest;
+use App\Http\Requests\Task\UpdateRequest;
+use App\Http\Resources\V1\TaskResource;
 use App\Jobs\SendSmsJob;
 use App\Mail\AssignedTask;
 use App\Mail\ReassignedTask;
@@ -34,7 +38,7 @@ class TaskController extends Controller
         $tasks = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\TaskResource::make($row)->resolve(),
+            fn ($row) => TaskResource::make($row)->resolve(),
             25,
             ['title', 'due_date', 'priority'],
             ['title', 'description']
@@ -48,7 +52,7 @@ class TaskController extends Controller
      *
      * @return Response
      */
-    public function store(\App\Http\Requests\Task\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_TASK)) {
             abort(403);
@@ -71,14 +75,13 @@ class TaskController extends Controller
             }
         }
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\TaskResource::make($task->fresh('assignee'))->resolve(), 201);
+        return $this->response(true, 'success', TaskResource::make($task->fresh('assignee'))->resolve(), 201);
     }
 
     /**
      * Update the specified resource in storage.
-     *
      */
-    public function update(\App\Http\Requests\Task\UpdateRequest $request, $id): JsonResponse
+    public function update(UpdateRequest $request, $id): JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_TASK)) {
             abort(403);
@@ -114,13 +117,13 @@ class TaskController extends Controller
             }
         }
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\TaskResource::make($task->fresh('assignee'))->resolve(), 200);
+        return $this->response(true, 'success', TaskResource::make($task->fresh('assignee'))->resolve(), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
@@ -141,7 +144,7 @@ class TaskController extends Controller
      * UI-20: bulk delete — see CasesController::destroyMany for the
      * general pattern this mirrors.
      */
-    public function destroyMany(\App\Http\Requests\Task\DestroyManyRequest $request)
+    public function destroyMany(DestroyManyRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::DELETE_TASK)) {
             abort(403);

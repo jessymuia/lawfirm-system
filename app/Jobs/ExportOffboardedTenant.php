@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Portability\PortabilityRunner;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\PlatformJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
  * PLAT-9 bundle) is exported once and kept through the retention window, so it can be handed over and nothing is
  * deleted that was never exported. Purge refuses a firm without one unless told otherwise, and deletes it last.
  */
-class ExportOffboardedTenant implements \App\Tenancy\PlatformJob, ShouldQueue
+class ExportOffboardedTenant implements PlatformJob, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 

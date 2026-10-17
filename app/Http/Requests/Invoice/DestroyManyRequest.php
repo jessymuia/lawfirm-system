@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Invoice;
 
-use App\Models\Invoice;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for InvoiceController::destroyMany(). Authorization is declared on the route (authz:*), not here. */

@@ -2,10 +2,35 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ApiKeyAuth;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\AuthorizeRoute;
+use App\Http\Middleware\CountApiCall;
+use App\Http\Middleware\DeprecatedApiVersion;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnforceMfaPolicy;
+use App\Http\Middleware\LogWallAttempts;
+use App\Http\Middleware\PlatformAuthenticate;
+use App\Http\Middleware\PlatformHost;
+use App\Http\Middleware\PortalSession;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
+use App\Http\Middleware\ReadFromReplica;
+use App\Http\Middleware\ReadOnlyWhenUnlicensed;
+use App\Http\Middleware\RecordDocumentAccessDenial;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\RejectRevokedSession;
+use App\Http\Middleware\RequestContext;
+use App\Http\Middleware\RequireAuthzDeclaration;
+use App\Http\Middleware\RequireEntitlement;
+use App\Http\Middleware\RequireEntitlementWithin;
+use App\Http\Middleware\RequireFlag;
+use App\Http\Middleware\ResolveTenant;
+use App\Http\Middleware\ScimTokenAuth;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SignupHost;
+use App\Http\Middleware\StartSessionForSso;
+use App\Http\Middleware\SupportSessionGuard;
+use App\Http\Middleware\TraceRequests;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\VerifyCsrfToken;
@@ -38,16 +63,16 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         // TEN-3: must run before routing and before anything touches the DB.
-        \App\Http\Middleware\ResolveTenant::class,
+        ResolveTenant::class,
         // ENG-24: request id + tenant on every log line; per-tenant API call counter.
-        \App\Http\Middleware\RequestContext::class,
-        \App\Http\Middleware\SecurityHeaders::class,   // SEC-14: HSTS, CSP (report-only by default), nosniff, framing
-        \App\Http\Middleware\TraceRequests::class,   // ENG-24: a trace per request, firm-tagged (after RequestContext)
-        \App\Http\Middleware\CountApiCall::class,
+        RequestContext::class,
+        SecurityHeaders::class,   // SEC-14: HSTS, CSP (report-only by default), nosniff, framing
+        TraceRequests::class,   // ENG-24: a trace per request, firm-tagged (after RequestContext)
+        CountApiCall::class,
         // PLAT-2: expired/missing license => read-only (never destructive).
-        \App\Http\Middleware\ReadOnlyWhenUnlicensed::class,
+        ReadOnlyWhenUnlicensed::class,
         // SEC-11: terminable; records attempts by screened users to reach walled material.
-        \App\Http\Middleware\LogWallAttempts::class,
+        LogWallAttempts::class,
         // \App\Http\Middleware\TrustHosts::class,
         TrustProxies::class,
         HandleCors::class,
@@ -67,7 +92,7 @@ class Kernel extends HttpKernel
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
             StartSession::class,
-            \App\Http\Middleware\RejectRevokedSession::class,   // SEC-4
+            RejectRevokedSession::class,   // SEC-4
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
@@ -75,7 +100,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             EnsureFrontendRequestsAreStateful::class,
-            \App\Http\Middleware\RejectRevokedSession::class,   // SEC-4: after the session has started (stateful SPA requests)
+            RejectRevokedSession::class,   // SEC-4: after the session has started (stateful SPA requests)
             'throttle:api',
             SubstituteBindings::class,
         ],
@@ -91,26 +116,26 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // SEC-12: firm-required two-factor
         // PLAT-11: api.key:<scope> for the public API
-        'sso.session' => \App\Http\Middleware\StartSessionForSso::class,
-        'api.key' => \App\Http\Middleware\ApiKeyAuth::class,
+        'sso.session' => StartSessionForSso::class,
+        'api.key' => ApiKeyAuth::class,
         // SEC-12: scim.token authenticates the identity provider's provisioning calls
-        'scim.token' => \App\Http\Middleware\ScimTokenAuth::class,
-        'mfa.policy' => \App\Http\Middleware\EnforceMfaPolicy::class,
-        'support.session' => \App\Http\Middleware\SupportSessionGuard::class,
-        'platform.host' => \App\Http\Middleware\PlatformHost::class,
-        'signup.host' => \App\Http\Middleware\SignupHost::class,   // PLAT-13
-        'platform.auth' => \App\Http\Middleware\PlatformAuthenticate::class,
+        'scim.token' => ScimTokenAuth::class,
+        'mfa.policy' => EnforceMfaPolicy::class,
+        'support.session' => SupportSessionGuard::class,
+        'platform.host' => PlatformHost::class,
+        'signup.host' => SignupHost::class,   // PLAT-13
+        'platform.auth' => PlatformAuthenticate::class,
         // PLAT-1: plan gating. entitled:<feature> | entitled.limit:<limit>
-        'entitled' => \App\Http\Middleware\RequireEntitlement::class,
-        'portal.session' => \App\Http\Middleware\PortalSession::class,   // FUN-10
+        'entitled' => RequireEntitlement::class,
+        'portal.session' => PortalSession::class,   // FUN-10
         // PLAT-3: flag:<name> (404 when off)
-        'flag' => \App\Http\Middleware\RequireFlag::class,
-        'entitled.limit' => \App\Http\Middleware\RequireEntitlementWithin::class,
-        'authz' => \App\Http\Middleware\AuthorizeRoute::class,
-        'replica' => \App\Http\Middleware\ReadFromReplica::class,   // ENG-23: read-only routes read from the replica
-        'audit.document-denial' => \App\Http\Middleware\RecordDocumentAccessDenial::class,
-        'authz.guard' => \App\Http\Middleware\RequireAuthzDeclaration::class,
-        'api.deprecated' => \App\Http\Middleware\DeprecatedApiVersion::class,
+        'flag' => RequireFlag::class,
+        'entitled.limit' => RequireEntitlementWithin::class,
+        'authz' => AuthorizeRoute::class,
+        'replica' => ReadFromReplica::class,   // ENG-23: read-only routes read from the replica
+        'audit.document-denial' => RecordDocumentAccessDenial::class,
+        'authz.guard' => RequireAuthzDeclaration::class,
+        'api.deprecated' => DeprecatedApiVersion::class,
         'auth' => Authenticate::class,
         'auth.basic' => AuthenticateWithBasicAuth::class,
         'auth.session' => AuthenticateSession::class,

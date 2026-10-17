@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TrustReconciliation\ClearRequest;
+use App\Http\Requests\TrustReconciliation\ItemRequest;
+use App\Http\Requests\TrustReconciliation\PolicyRequest;
+use App\Http\Requests\TrustReconciliation\SignOffRequest;
+use App\Http\Requests\TrustReconciliation\StoreRequest;
 use App\Jobs\SendSmsJob;
 use App\Models\Client;
 use App\Models\TrustTransaction;
@@ -32,7 +37,7 @@ class TrustReconciliationController extends Controller
         return $this->response(true, 'success', $rows, 200);
     }
 
-    public function store(\App\Http\Requests\TrustReconciliation\StoreRequest $r): JsonResponse
+    public function store(StoreRequest $r): JsonResponse
     {
         $d = $r->validated();
         $q = DB::table('trust_reconciliations')->whereNull('deleted_at');
@@ -60,7 +65,7 @@ class TrustReconciliationController extends Controller
     }
 
     /** Tick (or untick) ledger entries that appear on the bank statement. */
-    public function clear(\App\Http\Requests\TrustReconciliation\ClearRequest $r, int $id): JsonResponse
+    public function clear(ClearRequest $r, int $id): JsonResponse
     {
         $rec = $this->draft($id);
         $d = $r->validated();
@@ -82,7 +87,7 @@ class TrustReconciliationController extends Controller
         return $this->response(true, 'success', $this->view($id), 200);
     }
 
-    public function addItem(\App\Http\Requests\TrustReconciliation\ItemRequest $r, int $id): JsonResponse
+    public function addItem(ItemRequest $r, int $id): JsonResponse
     {
         $this->draft($id);
         DB::table('trust_reconciliation_items')->insert(['trust_reconciliation_id' => $id, 'kind' => 'bank_adjustment'] + $r->validated()
@@ -99,7 +104,7 @@ class TrustReconciliationController extends Controller
         return $this->response(true, 'success', $this->view($id), 200);
     }
 
-    public function signOff(\App\Http\Requests\TrustReconciliation\SignOffRequest $r, int $id): JsonResponse
+    public function signOff(SignOffRequest $r, int $id): JsonResponse
     {
         $this->draft($id);
         try {
@@ -166,7 +171,7 @@ class TrustReconciliationController extends Controller
         return $this->response(true, 'success', $this->replenishment(false), 200);
     }
 
-    public function savePolicy(\App\Http\Requests\TrustReconciliation\PolicyRequest $r): JsonResponse
+    public function savePolicy(PolicyRequest $r): JsonResponse
     {
         $d = $r->validated();
         DB::table('trust_retainer_policies')->updateOrInsert(['client_id' => $d['client_id']], [
@@ -199,7 +204,7 @@ class TrustReconciliationController extends Controller
         $c = Client::findOrFail($client);
         $amount = number_format($row['amount_needed'], 2);
         $message = "Dear {$c->name}, your retainer held in our client account is ".number_format($row['balance'], 2)
-            ." against an agreed minimum of ".number_format($row['minimum_balance'], 2).". Kindly deposit {$amount} to restore it. Thank you.";
+            .' against an agreed minimum of '.number_format($row['minimum_balance'], 2).". Kindly deposit {$amount} to restore it. Thank you.";
         SendSmsJob::dispatch((string) $c->phone_number, $message);
         DB::table('trust_replenishment_requests')->insert([
             'client_id' => $client, 'balance' => $row['balance'], 'amount_requested' => $row['amount_needed'], 'channel' => 'sms',

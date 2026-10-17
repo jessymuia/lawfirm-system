@@ -3,13 +3,12 @@
 namespace App\Entitlements;
 
 use App\Tenancy\TenantManager;
+use Carbon\CarbonImmutable;
 
 /** SaaS: the active tenant's plan from the control-plane registry, plus its per-tenant overrides. */
 class TenantPlanSource implements EntitlementSource
 {
-    public function __construct(private TenantManager $tenants, private PlanCatalog $catalog)
-    {
-    }
+    public function __construct(private TenantManager $tenants, private PlanCatalog $catalog) {}
 
     public function resolve(): EntitlementSet
     {
@@ -33,8 +32,8 @@ class TenantPlanSource implements EntitlementSource
         if (! $endsAt) {
             return $set;
         }
-        $now = \Carbon\CarbonImmutable::instance($now ?? now());
-        $ends = \Carbon\CarbonImmutable::instance($endsAt);
+        $now = CarbonImmutable::instance($now ?? now());
+        $ends = CarbonImmutable::instance($endsAt);
         $date = $ends->format('j M Y');
 
         if ($now->gte($ends)) {

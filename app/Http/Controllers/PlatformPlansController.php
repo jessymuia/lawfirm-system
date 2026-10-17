@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Billing\PlanStore;
+use App\Http\Requests\Platform\PlanRequest;
+use App\Http\Requests\Platform\ReasonRequest;
 use App\Platform\PlatformAudit;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -47,7 +48,7 @@ class PlatformPlansController extends Controller
         ]]);
     }
 
-    public function store(\App\Http\Requests\Platform\PlanRequest $r): JsonResponse
+    public function store(PlanRequest $r): JsonResponse
     {
         PlanStore::seedIfEmpty();
         $d = $r->validated();
@@ -68,7 +69,7 @@ class PlatformPlansController extends Controller
         return response()->json(['data' => $this->one($d['code'])], 201);
     }
 
-    public function update(\App\Http\Requests\Platform\PlanRequest $r, string $code): JsonResponse
+    public function update(PlanRequest $r, string $code): JsonResponse
     {
         $this->find($code);
         $d = $r->validated();
@@ -89,17 +90,17 @@ class PlatformPlansController extends Controller
         return response()->json(['data' => $this->one($code)]);
     }
 
-    public function archive(\App\Http\Requests\Platform\ReasonRequest $r, string $code): JsonResponse
+    public function archive(ReasonRequest $r, string $code): JsonResponse
     {
         return $this->setArchived($r, $code, true);
     }
 
-    public function restore(\App\Http\Requests\Platform\ReasonRequest $r, string $code): JsonResponse
+    public function restore(ReasonRequest $r, string $code): JsonResponse
     {
         return $this->setArchived($r, $code, false);
     }
 
-    private function setArchived(\App\Http\Requests\Platform\ReasonRequest $r, string $code, bool $archived): JsonResponse
+    private function setArchived(ReasonRequest $r, string $code, bool $archived): JsonResponse
     {
         $this->find($code);
         $d = $r->validated();
@@ -113,7 +114,7 @@ class PlatformPlansController extends Controller
         return response()->json(['data' => $this->one($code)]);
     }
 
-    public function destroy(\App\Http\Requests\Platform\ReasonRequest $r, string $code): JsonResponse
+    public function destroy(ReasonRequest $r, string $code): JsonResponse
     {
         $this->find($code);
         $d = $r->validated();

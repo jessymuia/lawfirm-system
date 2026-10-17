@@ -2,6 +2,4 @@
 
 namespace App\Status;
 
-class StatusException extends \RuntimeException
-{
-}
+class StatusException extends \RuntimeException {}

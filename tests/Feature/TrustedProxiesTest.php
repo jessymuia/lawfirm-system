@@ -2,8 +2,9 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 /** PLAT-5: behind a TLS proxy the app must see https, but only when told to trust that proxy. */
@@ -14,7 +15,7 @@ class TrustedProxiesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Route::middleware('api')->get('/api/v1/__scheme', fn (\Illuminate\Http\Request $r) => response()->json(['secure' => $r->isSecure(), 'host' => $r->getHost()]));
+        Route::middleware('api')->get('/api/v1/__scheme', fn (Request $r) => response()->json(['secure' => $r->isSecure(), 'host' => $r->getHost()]));
     }
 
     private function viaProxy()

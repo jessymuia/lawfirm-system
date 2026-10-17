@@ -4,6 +4,7 @@ namespace Tests\Isolation;
 
 use App\Models\Document;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 
 /** TEN-10 / TEN-12: stored documents are namespaced per firm and unreachable from another firm. */
 class FilesIsolationTest extends IsolationTestCase
@@ -32,7 +33,7 @@ class FilesIsolationTest extends IsolationTestCase
 
         // the files that exist under a firm's prefix are exactly the files its own rows point to
         foreach (['a', 'b'] as $slug) {
-            $onDisk = collect(\Illuminate\Support\Facades\File::allFiles(storage_path("app/tenants/{$slug}")))->map(fn ($f) => 'tenants/'.$slug.'/'.str_replace(storage_path("app/tenants/{$slug}/"), '', $f->getPathname()))->sort()->values()->all();
+            $onDisk = collect(File::allFiles(storage_path("app/tenants/{$slug}")))->map(fn ($f) => 'tenants/'.$slug.'/'.str_replace(storage_path("app/tenants/{$slug}/"), '', $f->getPathname()))->sort()->values()->all();
             $rows = $this->inFirm($slug, fn () => Document::pluck('filepath')->sort()->values()->all());
             $this->assertSame($rows, $onDisk, "firm {$slug}: files on disk and rows must match");
         }
@@ -51,7 +52,7 @@ class FilesIsolationTest extends IsolationTestCase
             $this->api('a', 'DELETE', "/documents/{$id}")->assertNotFound();
         }
         $this->inFirm('b', fn () => $this->assertSame(2, Document::count()));
-        $this->assertCount(2, \Illuminate\Support\Facades\File::allFiles(storage_path('app/tenants/b')));
+        $this->assertCount(2, File::allFiles(storage_path('app/tenants/b')));
     }
 
     public function test_the_same_document_id_serves_the_callers_own_file(): void

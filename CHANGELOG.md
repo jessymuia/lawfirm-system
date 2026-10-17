@@ -58,6 +58,11 @@ Upgrade notes for each release are in `docs/upgrade/`.
 - Accessibility pass and automated axe checks (UI-15).
 - Monthly restore drill (CARRY-7).
 
+### Breaking
+- Platform staff MFA is required by default (`PLATFORM_MFA=required`); set `PLATFORM_MFA=optional` to postpone it.
+- Bulk delete of clients and matters is all-or-nothing: if any selected record fails a check, nothing is deleted.
+- List endpoints always paginate (ENG-16): a call without `?page=` returns page 1 instead of every row.
+
 ### Changed
 - Password resets need at least 10 characters with letters and numbers (SEC-14).
 - Laravel moves to 12.69.3.
@@ -66,7 +71,6 @@ Upgrade notes for each release are in `docs/upgrade/`.
 
 ## [1.0.0-rc.1]
 
-### Added
 - First release candidate of the multi-firm platform: database per firm, control plane, platform console, entitlements,
   licensing, support access, trial signup, client portal, online payments, trust reconciliation, document assembly,
   email filing, calendar sync, partner reports and the installable web app.

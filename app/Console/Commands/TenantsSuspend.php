@@ -8,6 +8,7 @@ use App\Tenancy\TenantLifecycle;
 class TenantsSuspend extends TenantsLifecycleCommand
 {
     protected $signature = 'tenants:suspend {slug}';
+
     protected $description = 'Block a tenant without destroying data';
 
     protected function apply(TenantLifecycle $l, Tenant $t): string

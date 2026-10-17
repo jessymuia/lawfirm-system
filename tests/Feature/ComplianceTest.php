@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Compliance\LegalHoldException;
 use App\Compliance\LegalHolds;
 use App\Models\Cases;
 use App\Models\Client;
@@ -107,7 +108,7 @@ class ComplianceTest extends TestCase
     {
         $case = $this->matter();
         $this->hold('case', $case->id)->assertCreated();
-        $this->expectException(\App\Compliance\LegalHoldException::class);
+        $this->expectException(LegalHoldException::class);
         $case->forceDelete();
     }
 

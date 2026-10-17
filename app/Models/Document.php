@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Jobs\ExtractDocumentText;
+use App\Matters\MatterScoped;
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Document extends DefaultAppModel
 {
-    use \App\Matters\MatterScoped;
-    use \App\Models\Concerns\HasPublicId;
+    use HasPublicId;
+    use MatterScoped;
 
     protected $fillable = [
         'case_id',
@@ -42,7 +45,7 @@ class Document extends DefaultAppModel
         parent::booted();   // keeps the created_by stamp
         static::created(function (Document $doc) {
             if (config('documents.text.enabled')) {
-                \App\Jobs\ExtractDocumentText::dispatch((int) $doc->id)->afterCommit();
+                ExtractDocumentText::dispatch((int) $doc->id)->afterCommit();
             }
         });
     }

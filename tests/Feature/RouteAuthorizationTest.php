@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\AuthorizeRoute;
 use App\Http\Middleware\RequireAuthzDeclaration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -41,7 +42,6 @@ class RouteAuthorizationTest extends TestCase
         // FUN-10: client portal sign-in (a code texted to the client's phone; throttled, no enumeration)
         'POST api/v1/portal/login', 'POST api/v1/portal/verify',
     ];
-
 
     /** @return array<int, array{key:string, method:string, uri:string, mw:array}> */
     private function v1Routes(): array
@@ -142,7 +142,7 @@ class RouteAuthorizationTest extends TestCase
         $request->setUserResolver(fn () => $this->userWithPermissions([]));
 
         $this->expectException(\LogicException::class);
-        (new \App\Http\Middleware\AuthorizeRoute)->handle($request, fn () => response('should not run'), 'typo');
+        (new AuthorizeRoute)->handle($request, fn () => response('should not run'), 'typo');
     }
 
     /** @return array<string, array{0:string,1:string,2:string,3:string}> */

@@ -3,6 +3,7 @@
 namespace App\Calendar\Providers;
 
 use App\Secrets\IntegrationCredentials;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
@@ -47,7 +48,7 @@ class MicrosoftCalendar implements CalendarProvider
     public function upsert(string $token, string $calendarId, array $item, ?string $externalId): string
     {
         $allDay = ! $item['start'];
-        $day = \Carbon\CarbonImmutable::parse($item['date']);
+        $day = CarbonImmutable::parse($item['date']);
         $body = [
             'subject' => $item['title'], 'body' => ['contentType' => 'text', 'content' => $item['description']],
             'location' => ['displayName' => (string) $item['location']], 'isAllDay' => $allDay, 'showAs' => $allDay ? 'free' : 'busy',

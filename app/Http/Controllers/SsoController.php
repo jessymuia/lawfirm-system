@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Constants\ModulePermissions;
+use App\Http\Requests\Sso\UpdateRequest;
 use App\Security\SecurityPolicy;
 use App\Sso\SsoException;
 use App\Sso\SsoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -109,7 +110,7 @@ class SsoController extends Controller
     }
 
     /** What the firm gives its identity provider: entity ID and sign-in (ACS) URL. Nothing private. */
-    public function samlMetadata(Request $r): \Illuminate\Http\Response
+    public function samlMetadata(Request $r): Response
     {
         return response(SsoService::samlMetadata($r->getSchemeAndHttpHost()), 200, ['Content-Type' => 'application/samlmetadata+xml']);
     }
@@ -121,7 +122,7 @@ class SsoController extends Controller
         return $this->response(true, 'success', SsoService::view($this->sso->provider(false)), 200);
     }
 
-    public function update(\App\Http\Requests\Sso\UpdateRequest $r): JsonResponse
+    public function update(UpdateRequest $r): JsonResponse
     {
         $d = $r->validated();
         $before = SsoService::view($this->sso->provider(false));

@@ -9,9 +9,7 @@ use Illuminate\Http\Request;
 /** ENG-24: per-tenant API call counter; runs in terminate(), after the response is sent. */
 class CountApiCall
 {
-    public function __construct(private UsageMetrics $metrics)
-    {
-    }
+    public function __construct(private UsageMetrics $metrics) {}
 
     public function handle(Request $request, Closure $next)
     {

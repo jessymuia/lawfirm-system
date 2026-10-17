@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ModulePermissions;
-use Carbon\Carbon;
+use App\Http\Requests\RolesManagement\StoreRequest;
+use App\Http\Requests\RolesManagement\UpdateRequest;
+use App\Http\Resources\V1\RoleResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -30,7 +31,7 @@ class RolesManagementController extends Controller
         $roles = $this->paginatedOrFull(
             request(),
             $query,
-            fn ($row) => \App\Http\Resources\V1\RoleResource::make($row)->resolve(),
+            fn ($row) => RoleResource::make($row)->resolve(),
             25,
             ['name', 'created_at', 'updated_at'],
             ['name']
@@ -50,7 +51,7 @@ class RolesManagementController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(\App\Http\Requests\RolesManagement\StoreRequest $request)
+    public function store(StoreRequest $request)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_ROLES)) {
             return $this->unauthorizedError();
@@ -65,7 +66,7 @@ class RolesManagementController extends Controller
             $role->syncPermissions($permissions);
         }
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\RoleResource::make($role->fresh())->resolve(), 201);
+        return $this->response(true, 'success', RoleResource::make($role->fresh())->resolve(), 201);
     }
 
     /**
@@ -87,7 +88,7 @@ class RolesManagementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(\App\Http\Requests\RolesManagement\UpdateRequest $request, string $id)
+    public function update(UpdateRequest $request, string $id)
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_ROLES)) {
             return $this->unauthorizedError();
@@ -100,7 +101,7 @@ class RolesManagementController extends Controller
         $role->save();
         $role->syncPermissions($data['permissions'] ?? []);
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\RoleResource::make($role->fresh())->resolve(), 200);
+        return $this->response(true, 'success', RoleResource::make($role->fresh())->resolve(), 200);
     }
 
     /**

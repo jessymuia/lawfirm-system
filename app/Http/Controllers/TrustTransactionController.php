@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Actions\Trust\PostTrustEntry;
 use App\Actions\Trust\VoidTrustEntry;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\TrustTransaction\IndexRequest;
+use App\Http\Requests\TrustTransaction\StoreRequest;
 use App\Models\TrustTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class TrustTransactionController extends Controller
      * balance. A client_id is required — trust funds are always tracked
      * per client, never as one firm-wide pool.
      */
-    public function index(\App\Http\Requests\TrustTransaction\IndexRequest $request): Response|JsonResponse
+    public function index(IndexRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::LIST_TRUST_TRANSACTIONS)) {
             abort(403);
@@ -50,7 +52,7 @@ class TrustTransactionController extends Controller
         ], 200);
     }
 
-    public function store(\App\Http\Requests\TrustTransaction\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_TRUST_TRANSACTIONS)) {
             abort(403);

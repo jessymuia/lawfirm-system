@@ -16,9 +16,9 @@ class RecordPayment
     public const TOLERANCE = 0.01;
 
     /**
-     * @param array{amount: float|int|string, payment_date: string, method: string, reference_number?: ?string, notes?: ?string} $data payment_date as Y-m-d
-     * @param bool $capAtBalance online payments (FUN-11): the money is already taken, so it is never refused: what is owed is
-     *                           recorded (the caller notes any excess for a manual refund), whatever happened to the invoice since
+     * @param  array{amount: float|int|string, payment_date: string, method: string, reference_number?: ?string, notes?: ?string}  $data  payment_date as Y-m-d
+     * @param  bool  $capAtBalance  online payments (FUN-11): the money is already taken, so it is never refused: what is owed is
+     *                              recorded (the caller notes any excess for a manual refund), whatever happened to the invoice since
      */
     public function handle(Invoice $invoice, array $data, ?int $receivedBy, bool $capAtBalance = false): ?Payment
     {

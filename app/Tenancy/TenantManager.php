@@ -2,6 +2,7 @@
 
 namespace App\Tenancy;
 
+use App\Secrets\FirmMail;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\Models\TenantDomain;
 use Closure;
@@ -20,11 +21,10 @@ class TenantManager
     private ?Tenant $current = null;
 
     public const UNRESOLVED = 'tenant_unresolved';
+
     public const TENANT_CONNECTION = 'tenant';
 
-    public function __construct(private TenantContext $context)
-    {
-    }
+    public function __construct(private TenantContext $context) {}
 
     /** The tenant resolved for this request/job, if any. */
     public function current(): ?Tenant
@@ -91,7 +91,7 @@ class TenantManager
         $this->routeQueue($tenant->queue);
 
         // the firm's own outgoing mail (falls back to the platform's when it has none)
-        \App\Secrets\FirmMail::apply();
+        FirmMail::apply();
     }
 
     /** @var array{0: string, 1: mixed}|null the default queue connection and its own queue name, before any firm */
@@ -196,7 +196,7 @@ class TenantManager
         if ($tenant !== null || $this->baseQueue !== null) {
             $this->routeQueue($tenant?->queue);
         }
-        $tenant !== null ? \App\Secrets\FirmMail::apply() : \App\Secrets\FirmMail::reset();
+        $tenant !== null ? FirmMail::apply() : FirmMail::reset();
     }
 
     /** Make every default-connection query throw until a tenant is activated. */
@@ -208,7 +208,7 @@ class TenantManager
             $this->routeQueue(null);
         }
         DB::setDefaultConnection(self::UNRESOLVED);
-        \App\Secrets\FirmMail::reset();   // no firm: the platform's own mail
+        FirmMail::reset();   // no firm: the platform's own mail
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Jobs\SendSmsJob;
 use App\Models\Client;
 use App\Models\TrustTransaction;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,7 @@ class TrustReconciliationTest extends TestCase
     /** Post a ledger entry on a given day (the ledger is append-only, so the clock is moved rather than the row). */
     private function entry(string $day, Client $c, string $type, float $amount): TrustTransaction
     {
-        $this->travelTo(\Carbon\Carbon::parse($day.' 10:00:00'));
+        $this->travelTo(Carbon::parse($day.' 10:00:00'));
         $t = TrustTransaction::post($c->id, null, $type, $amount, ucfirst($type), 'REF-'.uniqid(), $this->u->id);
         $this->travelBack();
 
@@ -140,7 +141,7 @@ class TrustReconciliationTest extends TestCase
         $this->putJson("/api/v1/trust/reconciliations/{$id}/cleared", ['transaction_ids' => [$june->id], 'cleared' => true])->assertUnprocessable();
 
         // an entry voided in June still counts at the end of May
-        $this->travelTo(\Carbon\Carbon::parse('2026-06-15'));
+        $this->travelTo(Carbon::parse('2026-06-15'));
         DB::table('trust_transactions')->where('id', $t['b2']->id)->update(['voided_at' => now(), 'voided_by' => $this->u->id]);
         $this->travelBack();
         $this->getJson("/api/v1/trust/reconciliations/{$id}")->assertJsonPath('data.figures.ledger', 1600);

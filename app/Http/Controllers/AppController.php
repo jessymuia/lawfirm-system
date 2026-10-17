@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Branding\Branding;
+use App\Http\Middleware\PlatformHost;
+use App\Tenancy\LoginPage;
+use Illuminate\Http\Request;
+
 class AppController extends Controller
 {
     /** "/": the operator console's front door on the platform host, the firm app's own page everywhere else. */
-    public function home(\Illuminate\Http\Request $request)
+    public function home(Request $request)
     {
-        return \App\Http\Middleware\PlatformHost::matches($request) ? redirect()->route('platform.console') : $this->index();
+        return PlatformHost::matches($request) ? redirect()->route('platform.console') : $this->index();
     }
 
     public function index()
     {
-        return view('app', app(\App\Tenancy\LoginPage::class)->context(request()) + [
+        return view('app', app(LoginPage::class)->context(request()) + [
             'firmBilling' => (bool) config('tenancy.firm_self_service_billing'),
             'productName' => (string) config('app.name'),
             'productShort' => (string) config('app.short_name'),
@@ -22,7 +27,7 @@ class AppController extends Controller
     /** FUN-19: what makes the web app installable on a phone or desktop, named after the firm. */
     public function manifest()
     {
-        $brand = \App\Branding\Branding::get();   // UI-13: the firm's own name and colour
+        $brand = Branding::get();   // UI-13: the firm's own name and colour
         $name = $brand['name'];
 
         return response()->json([

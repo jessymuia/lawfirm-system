@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Mfa;
 
-use App\Security\Mfa;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for MfaController::enable(). Authorization is declared on the route (authz:*), not here. */

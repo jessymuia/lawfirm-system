@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\Invoices\ChangeInvoiceLines;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\InvoiceItem\StoreRequest;
+use App\Http\Requests\InvoiceItem\UpdateRequest;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Http\JsonResponse;
@@ -12,11 +14,10 @@ use Illuminate\Support\Facades\Auth;
 
 class InvoiceItemController extends Controller
 {
-
     /**
      * Store a newly created resource in storage.
      */
-    public function store(\App\Http\Requests\InvoiceItem\StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_INVOICES)) {
             abort(403);
@@ -33,7 +34,6 @@ class InvoiceItemController extends Controller
 
     /**
      * Display the specified resource.
-     *
      */
     public function show($id): JsonResponse
     {
@@ -51,7 +51,7 @@ class InvoiceItemController extends Controller
      *
      * @return Response
      */
-    public function update(\App\Http\Requests\InvoiceItem\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_INVOICES)) {
             abort(403);
@@ -84,5 +84,4 @@ class InvoiceItemController extends Controller
 
         return $this->response(true, 'success', $items, 200);
     }
-
 }

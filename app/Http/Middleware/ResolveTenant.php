@@ -13,9 +13,7 @@ use Illuminate\Http\Request;
  */
 class ResolveTenant
 {
-    public function __construct(private TenantManager $tenants)
-    {
-    }
+    public function __construct(private TenantManager $tenants) {}
 
     public function handle(Request $request, Closure $next)
     {

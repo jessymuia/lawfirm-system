@@ -7,6 +7,7 @@ use App\Tenancy\TenantContext;
 use App\Tenancy\TenantManager;
 use App\Tenancy\TenantStorageCredentials;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -142,7 +143,7 @@ class DocumentsRelocate extends Command
         $this->line("{$label} -> {$target}");
     }
 
-    private function hash(\Illuminate\Contracts\Filesystem\Filesystem $disk, string $path): string
+    private function hash(Filesystem $disk, string $path): string
     {
         $in = $disk->readStream($path);
         $ctx = hash_init('sha256');

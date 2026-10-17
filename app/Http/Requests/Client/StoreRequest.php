@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Client;
 
-use App\Models\Client;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for ClientController::store(). Authorization is declared on the route (authz:*), not here. */

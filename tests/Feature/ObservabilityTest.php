@@ -2,18 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Observability\UsageMetrics;
+use App\Exceptions\Handler;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantContext;
-use App\Tenancy\TenantManager;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Log\LogManager;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\TestHandler;
-use Monolog\Logger;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -30,7 +31,7 @@ class ObservabilityTest extends TestCase
         parent::setUp();
 
         $this->logs = new TestHandler;
-        Log::swap(new \Illuminate\Log\LogManager($this->app));
+        Log::swap(new LogManager($this->app));
         config(['logging.default' => 'probe', 'logging.channels.probe' => ['driver' => 'monolog', 'handler' => TestHandler::class]]);
         Log::channel('probe')->getLogger()->setHandlers([$this->logs]);
 
@@ -55,7 +56,7 @@ class ObservabilityTest extends TestCase
 
     public function test_a_hostile_inbound_request_id_is_replaced(): void
     {
-        foreach (["bad id with spaces", "x\nInjected: line", str_repeat('a', 500), 'short'] as $bad) {
+        foreach (['bad id with spaces', "x\nInjected: line", str_repeat('a', 500), 'short'] as $bad) {
             $got = $this->getJson('/api/v1/__probe', ['X-Request-Id' => $bad])->headers->get('X-Request-Id');
             $this->assertNotSame($bad, $got);
             $this->assertMatchesRegularExpression('/^[0-9a-f-]{36}$/', $got);
@@ -97,9 +98,9 @@ class ObservabilityTest extends TestCase
     {
         Context::add('request_id', 'err-trace-0001');
 
-        $context = (new \ReflectionMethod(\App\Exceptions\Handler::class, 'context'));
+        $context = (new \ReflectionMethod(Handler::class, 'context'));
         $context->setAccessible(true);
-        $data = $context->invoke(app(\App\Exceptions\Handler::class));
+        $data = $context->invoke(app(Handler::class));
 
         $this->assertSame('err-trace-0001', $data['request_id']);
         $this->assertSame(app(TenantContext::class)->key(), $data['tenant']);
@@ -125,12 +126,10 @@ class ObservabilityTest extends TestCase
     }
 }
 
-class ObservabilityProbeJob implements \Illuminate\Contracts\Queue\ShouldQueue
+class ObservabilityProbeJob implements ShouldQueue
 {
-    use \Illuminate\Bus\Queueable;
-    use \Illuminate\Foundation\Bus\Dispatchable;
+    use Dispatchable;
+    use Queueable;
 
-    public function handle(): void
-    {
-    }
+    public function handle(): void {}
 }

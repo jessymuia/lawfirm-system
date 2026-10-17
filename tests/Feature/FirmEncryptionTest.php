@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Secrets\IntegrationCredentials;
+use App\Secrets\SecretInventory;
 use App\Tenancy\Keys\BackupCipher;
 use App\Tenancy\Keys\FirmCrypt;
 use App\Tenancy\Keys\FirmKeys;
@@ -15,16 +16,19 @@ use Aws\Command;
 use Aws\Exception\AwsException;
 use Aws\Kms\KmsClient;
 use Aws\Result;
+use GuzzleHttp\Promise\Create;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** TEN-13: each firm's data is encrypted with its own key, which can be the firm's own KMS key and is destroyed with the firm. */
-class FirmEncryptionTest extends TestCase implements \Tests\OwnsTenancy
+class FirmEncryptionTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -110,8 +114,8 @@ class FirmEncryptionTest extends TestCase implements \Tests\OwnsTenancy
             return new Result(['Plaintext' => base64_decode($key)]);
         };
         $this->app->instance(KmsClient::class, new KmsClient(['version' => 'latest', 'region' => 'eu-west-1',
-            'credentials' => ['key' => 'k', 'secret' => 's'], 'handler' => fn (Command $cmd) => \GuzzleHttp\Promise\Create::promiseFor($handler($cmd))
-                ->then(fn ($r) => $r instanceof AwsException ? \GuzzleHttp\Promise\Create::rejectionFor($r) : $r)]));
+            'credentials' => ['key' => 'k', 'secret' => 's'], 'handler' => fn (Command $cmd) => Create::promiseFor($handler($cmd))
+                ->then(fn ($r) => $r instanceof AwsException ? Create::rejectionFor($r) : $r)]));
     }
 
     public function test_every_new_firm_gets_its_own_data_key_and_its_secrets_are_sealed_with_it(): void
@@ -128,10 +132,10 @@ class FirmEncryptionTest extends TestCase implements \Tests\OwnsTenancy
         try {
             Crypt::decryptString($sealed);
             $this->fail('the app key must not open a firm\'s secret');
-        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+        } catch (DecryptException) {
         }
         $other = $this->in($b, fn () => FirmCrypt::encrypter());
-        $this->expectException(\Illuminate\Contracts\Encryption\DecryptException::class);
+        $this->expectException(DecryptException::class);
         $other->decryptString($sealed);
     }
 
@@ -164,7 +168,7 @@ class FirmEncryptionTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertSame('sk_live_acme', $this->readSecret($a));
         $this->assertSame('sk_live_acme', $this->in($a, fn () => FirmCrypt::encrypter())->decryptString($new));
         $this->assertSame(['current' => 1, 'previous' => 0, 'broken' => 0],
-            array_intersect_key($this->in($a, fn () => app(\App\Secrets\SecretInventory::class)->check('tenant')), array_flip(['current', 'previous', 'broken'])));
+            array_intersect_key($this->in($a, fn () => app(SecretInventory::class)->check('tenant')), array_flip(['current', 'previous', 'broken'])));
 
         Artisan::call('tenants:keys', ['slug' => 'acme']);
         $this->assertMatchesRegularExpression('/^acme: active, platform, fingerprint [0-9a-f]{16}, usable/', Artisan::output());

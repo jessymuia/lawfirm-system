@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MatterParty\StoreRequest;
 use App\Models\Cases;
 use App\Models\MatterParty;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,7 @@ class MatterPartyController extends Controller
             ->get(['id', 'case_id', 'role', 'name', 'identifier', 'notes', 'from_opposing_party', 'created_at']), 200);
     }
 
-    public function store(\App\Http\Requests\MatterParty\StoreRequest $r, int $case): JsonResponse
+    public function store(StoreRequest $r, int $case): JsonResponse
     {
         $matter = Cases::findOrFail($case);
         $party = MatterParty::create(['case_id' => $matter->id] + $r->validated());
@@ -29,7 +30,7 @@ class MatterPartyController extends Controller
         return $this->response(true, 'success', $party->only(['id', 'case_id', 'role', 'name', 'identifier', 'notes', 'from_opposing_party']), 201);
     }
 
-    public function update(\App\Http\Requests\MatterParty\StoreRequest $r, int $case, int $party): JsonResponse
+    public function update(StoreRequest $r, int $case, int $party): JsonResponse
     {
         $matter = Cases::findOrFail($case);
         $p = MatterParty::where('case_id', $matter->id)->findOrFail($party);

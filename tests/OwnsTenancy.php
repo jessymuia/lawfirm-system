@@ -7,6 +7,4 @@ namespace Tests;
  * TEST_TENANCY_MODE=multi it is not put inside the shared test firm: it runs exactly as in the default mode, because
  * it already decides the mode itself.
  */
-interface OwnsTenancy
-{
-}
+interface OwnsTenancy {}

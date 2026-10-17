@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -88,7 +89,7 @@ class AppInstall extends Command
     private function usersExist(): bool
     {
         try {
-            return \Illuminate\Support\Facades\Schema::hasTable('users') && User::withTrashed()->exists();
+            return Schema::hasTable('users') && User::withTrashed()->exists();
         } catch (\Throwable) {
             return false;
         }

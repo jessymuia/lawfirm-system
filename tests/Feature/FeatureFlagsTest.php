@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Entitlements\Entitlements;
+use App\Flags\FlagOverrides;
 use App\Flags\Flags;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
@@ -12,10 +14,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Route;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-3: feature flags, resolved per tenant and per edition, plus the "flag, never a branch" policy guards. */
-class FeatureFlagsTest extends TestCase implements \Tests\OwnsTenancy
+class FeatureFlagsTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase, \Tests\CreatesTestUsers;
 
@@ -76,11 +81,11 @@ class FeatureFlagsTest extends TestCase implements \Tests\OwnsTenancy
     public function test_edition_decides_by_plan_name(): void
     {
         config(['entitlements.single_tenant_plan' => 'starter']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $this->assertFalse($this->flags()->enabled('pro_only'));
 
         config(['entitlements.single_tenant_plan' => 'professional']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $f = $this->flags();
         $this->assertTrue($f->enabled('pro_only'));
         $this->assertSame('edition', $f->explain('pro_only')['source']);
@@ -89,7 +94,7 @@ class FeatureFlagsTest extends TestCase implements \Tests\OwnsTenancy
     public function test_deployment_override_beats_edition_and_default(): void
     {
         config(['entitlements.single_tenant_plan' => 'professional', 'flags.overrides' => 'pro_only=off, plain=on ,on_by_default=false,garbage,x=maybe']);
-        app(\App\Entitlements\Entitlements::class)->forget();
+        app(Entitlements::class)->forget();
         $f = $this->flags();
         $this->assertFalse($f->enabled('pro_only'));
         $this->assertTrue($f->enabled('plain'));
@@ -135,7 +140,7 @@ class FeatureFlagsTest extends TestCase implements \Tests\OwnsTenancy
     {
         config(['tenancy.mode' => 'multi', 'tenancy.platform_host' => 'admin.platform.test', 'tenancy.base_domain' => 'app.test']);
         // the override source is chosen at container build time, so rebuild it for multi mode
-        app()->forgetInstance(\App\Flags\FlagOverrides::class);
+        app()->forgetInstance(FlagOverrides::class);
         app()->forgetInstance(Flags::class);
         Artisan::call('migrate', ['--database' => 'control', '--path' => 'database/migrations/control', '--force' => true]);
         $staff = PlatformStaff::create(['name' => 'Op', 'email' => 'op@platform.test', 'password' => Hash::make('correct-horse-battery'), 'role' => 'operator']);
@@ -249,7 +254,7 @@ class FeatureFlagsTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_flag_middleware_hides_the_route_when_off(): void
     {
-        \Illuminate\Support\Facades\Route::middleware(['api', 'flag:plain'])->get('/api/_flagprobe', fn () => response()->json(['ok' => true]));
+        Route::middleware(['api', 'flag:plain'])->get('/api/_flagprobe', fn () => response()->json(['ok' => true]));
         $this->getJson('/api/_flagprobe')->assertNotFound();
         config(['flags.overrides' => 'plain=on']);
         app(Flags::class)->forget();
@@ -258,11 +263,11 @@ class FeatureFlagsTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_the_sms_kill_switch_stops_reminders(): void
     {
-        \Illuminate\Support\Facades\Queue::fake();
+        Queue::fake();
         config(['flags.overrides' => 'hearing_sms_reminders=off']);
         app(Flags::class)->forget();
         $this->artisan('hearings:send-reminders')->expectsOutputToContain('hearing_sms_reminders is off')->assertSuccessful();
-        \Illuminate\Support\Facades\Queue::assertNothingPushed();
+        Queue::assertNothingPushed();
     }
 
     // ---- the policy: a flag, never a branch ----------------------------------------------------------------------

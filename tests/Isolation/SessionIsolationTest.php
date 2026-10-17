@@ -2,6 +2,7 @@
 
 namespace Tests\Isolation;
 
+use App\Tenancy\TenantContext;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,10 +32,12 @@ class SessionIsolationTest extends IsolationTestCase
 
     public function test_the_session_cookie_is_not_accepted_under_another_name(): void
     {
+        app(TenantContext::class)->activate('default');
+        $base = config('session.cookie');   // follows APP_NAME, e.g. laravel_session
         $a = $this->firm['a']['cookies'];
-        $sessionA = $a['laravel_session_a'];
-        $this->assertNotSame('laravel_session', array_keys($a)[1] ?? '', 'cookie names are per firm');
-        foreach (['laravel_session', 'laravel_session_b'] as $name) {
+        $sessionA = $a["{$base}_a"];
+        $this->assertNotSame($base, array_keys($a)[1] ?? '', 'cookie names are per firm');
+        foreach ([$base, "{$base}_b"] as $name) {
             $this->http($this->firm['b']['host'], 'GET', '/user', [], [$name => $sessionA])->assertUnauthorized();
         }
     }
@@ -123,19 +126,19 @@ class SessionIsolationTest extends IsolationTestCase
         $this->assertNotSame($a[1], $b[1]);
 
         // a single-firm install runs under the default key: the names are exactly Laravel's, so existing sessions survive the upgrade
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         $this->assertSame(['login_web_'.sha1(SessionGuard::class), 'remember_web_'.sha1(SessionGuard::class)], $name());
     }
 
     public function test_the_session_cookie_name_follows_the_firm_and_returns_to_laravels_own_for_a_single_firm_install(): void
     {
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         $base = config('session.cookie');
         $this->assertStringEndsWith('_session', $base);
         $a = $this->inFirm('a', fn () => config('session.cookie'));
         $b = $this->inFirm('b', fn () => config('session.cookie'));
         $this->assertSame([$base.'_a', $base.'_b'], [$a, $b]);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         $this->assertSame($base, config('session.cookie'));
     }
 }

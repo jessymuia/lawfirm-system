@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Illuminate\Http\Resources\Json\JsonResource;
 use PHPUnit\Framework\TestCase;
 
 /** ENG-10: entity response shapes are API Resources (one per entity, versioned under Resources\V1), never per-controller formatters. */
@@ -25,7 +26,7 @@ class ApiResourcesTest extends TestCase
         $this->assertGreaterThanOrEqual(14, count($files));
         foreach ($files as $file) {
             $class = 'App\\Http\\Resources\\V1\\'.basename($file, '.php');
-            $this->assertTrue(is_subclass_of($class, \Illuminate\Http\Resources\Json\JsonResource::class), $class);
+            $this->assertTrue(is_subclass_of($class, JsonResource::class), $class);
         }
     }
 }

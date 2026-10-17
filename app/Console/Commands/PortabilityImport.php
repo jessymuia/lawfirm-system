@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Portability\Bundle;
-use App\Portability\Importer;
 use App\Portability\PortabilityException;
 use App\Portability\PortabilityRunner;
 use Illuminate\Console\Command;

@@ -8,10 +8,15 @@ use Carbon\CarbonImmutable;
 final class LicenseStatus
 {
     public const VALID = 'valid';            // within its term
+
     public const GRACE = 'grace';            // past expiry, inside grace: everything still works, with a warning
+
     public const EXPIRED = 'expired';        // past grace: read-only
+
     public const MISSING = 'missing';        // none installed: read-only (when a license is required)
+
     public const INVALID = 'invalid';        // unreadable, bad signature, unknown key, tampered: read-only
+
     public const NOT_YET_VALID = 'not_yet_valid';
 
     public function __construct(
@@ -20,8 +25,7 @@ final class LicenseStatus
         public readonly ?CarbonImmutable $expiresAt = null,
         public readonly ?CarbonImmutable $graceEndsAt = null,
         public readonly ?string $reason = null,
-    ) {
-    }
+    ) {}
 
     /** Writes allowed? Only while the license is in term or in grace. */
     public function allowsWrites(): bool

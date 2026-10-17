@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TrustTransaction;
 
-use App\Models\TrustTransaction;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for TrustTransactionController::index(). Authorization is declared on the route (authz:*), not here. */

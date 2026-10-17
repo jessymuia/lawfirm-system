@@ -5,9 +5,9 @@ namespace App\Actions\Invoices;
 use App\Actions\ActionException;
 use App\Actions\Concerns\Stamps;
 use App\Models\Invoice;
+use App\Models\User;
 use App\Money\MissingExchangeRate;
 use App\Money\Money;
-use App\Models\User;
 
 /**
  * ENG-9: issue a draft. From here its lines and totals are frozen (DATA-10) and payments can be recorded against it.

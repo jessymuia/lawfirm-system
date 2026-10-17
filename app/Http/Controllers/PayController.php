@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Branding\Branding;
+use App\Http\Requests\Pay\MpesaRequest;
 use App\Payments\MpesaGateway;
 use App\Payments\OnlinePayments;
 use App\Payments\PaymentGatewayException;
@@ -38,12 +40,12 @@ class PayController extends Controller
             return [
                 'invoice_number' => $inv->invoice_number, 'client' => $inv->client?->name, 'currency' => $inv->currency ?: 'KES',
                 'total' => (float) $inv->total_amount, 'paid' => (float) $inv->amount_paid, 'outstanding' => $due,
-                'due_date' => $inv->invoice_due_date, 'firm' => \App\Branding\Branding::get()['name'], 'methods' => $this->pay->methods(),
+                'due_date' => $inv->invoice_due_date, 'firm' => Branding::get()['name'], 'methods' => $this->pay->methods(),
             ];
         });
     }
 
-    public function mpesa(\App\Http\Requests\Pay\MpesaRequest $r, string $token): JsonResponse
+    public function mpesa(MpesaRequest $r, string $token): JsonResponse
     {
         return $this->answer(function () use ($r, $token) {
             $a = $this->pay->startMpesa($token, $r->validated('phone'), $r->getSchemeAndHttpHost().'/api/v1/pay/callback/mpesa');

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\SupportAccessNotice;
+use App\Models\Client;
 use App\Models\SupportAccessSession;
 use App\Models\User;
 use App\Observability\UsageMetrics;
@@ -18,10 +19,13 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
+use Spatie\Permission\Models\Role;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-8: audited, time-boxed, firm-controlled platform support access. Real control plane, real SQLite tenant databases. */
-class SupportAccessTest extends TestCase implements \Tests\OwnsTenancy
+class SupportAccessTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -314,11 +318,11 @@ class SupportAccessTest extends TestCase implements \Tests\OwnsTenancy
     {
         [, , $principal] = $this->openSession();
         $this->inTenant('acme', fn () => $principal->givePermissionTo(['create-clients', 'delete-cases']));
-        \Illuminate\Support\Facades\Queue::fake();
+        Queue::fake();
 
         $this->firm($principal, 'POST', '/clients', ['name' => 'X', 'phone_number' => '0712345678', 'address' => 'a', 'advocate' => $principal->id])
             ->assertForbidden()->assertJsonPath('code', 'support_read_only');
-        $this->assertSame(0, $this->inTenant('acme', fn () => \App\Models\Client::count()));
+        $this->assertSame(0, $this->inTenant('acme', fn () => Client::count()));
     }
 
     public function test_a_full_session_needs_the_firms_consent_and_still_cannot_touch_access_control_or_exports(): void
@@ -328,7 +332,7 @@ class SupportAccessTest extends TestCase implements \Tests\OwnsTenancy
         [, , $principal] = $this->openSession(['mode' => 'full']);
         // Creating a client sends a welcome SMS. Under the sync test queue that job re-enters the tenant and leaves the process
         // fail-closed for the rest of the request (a test-driver artefact; real queues run it in a worker).
-        \Illuminate\Support\Facades\Queue::fake();
+        Queue::fake();
         $this->assertTrue($principal->hasRole('support-full'));
 
         $this->firm($principal, 'POST', '/clients', ['name' => 'Support Made', 'phone_number' => '0712345678', 'address' => 'Nairobi', 'advocate' => $principal->id])->assertCreated();
@@ -340,7 +344,7 @@ class SupportAccessTest extends TestCase implements \Tests\OwnsTenancy
         $this->assertFalse($principal->checkPermissionTo('manage-license'));
 
         // and the firm's audit log attributes the change to the support principal, not to a real user
-        $created = $this->inTenant('acme', fn () => DB::table('audits')->where('auditable_type', \App\Models\Client::class)->where('event', 'created')->first());
+        $created = $this->inTenant('acme', fn () => DB::table('audits')->where('auditable_type', Client::class)->where('event', 'created')->first());
         $this->assertSame($principal->id, $created->user_id);
     }
 
@@ -405,7 +409,7 @@ class SupportAccessTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_the_tenant_migrator_syncs_new_permissions_into_an_existing_firms_admin_role(): void
     {
-        $this->inTenant('acme', fn () => \Spatie\Permission\Models\Role::findByName('admin')->revokePermissionTo('manage-support-access'));
+        $this->inTenant('acme', fn () => Role::findByName('admin')->revokePermissionTo('manage-support-access'));
         $this->assertFalse($this->inTenant('acme', fn () => User::where('email', 'admin@acme.test')->first()->checkPermissionTo('manage-support-access')));
 
         $this->artisan('tenants:migrate')->assertExitCode(0);

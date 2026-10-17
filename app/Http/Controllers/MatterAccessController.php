@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MatterAccess\StoreRequest;
 use App\Models\Cases;
 use App\Models\MatterAccessGrant;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /** SEC-10: inspect and change who can see one matter. Every change is audited (MatterAccessGrant is an audited model). */
@@ -33,7 +33,7 @@ class MatterAccessController extends Controller
         ], 200);
     }
 
-    public function store(\App\Http\Requests\MatterAccess\StoreRequest $request, Cases $case): JsonResponse
+    public function store(StoreRequest $request, Cases $case): JsonResponse
     {
         $data = $request->validated();
 

@@ -7,20 +7,23 @@ use App\Billing\Billing;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable as C;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as SentRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /**
  * PLAT-4: saved cards and automatic charging of subscription invoices with the platform's Stripe account. Requests are
  * checked against Stripe's documented API (faked HTTP; no live calls here).
  */
-class BillingAutopayTest extends TestCase implements \Tests\OwnsTenancy
+class BillingAutopayTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -50,7 +53,7 @@ class BillingAutopayTest extends TestCase implements \Tests\OwnsTenancy
     protected function tearDown(): void
     {
         DB::setDefaultConnection($this->originalDefault);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         parent::tearDown();
     }
 
@@ -218,7 +221,7 @@ class BillingAutopayTest extends TestCase implements \Tests\OwnsTenancy
 
     public function test_billing_run_charges_saved_cards_before_reminders(): void
     {
-        \Illuminate\Support\Carbon::setTestNow('2026-01-02 03:00:00');
+        Carbon::setTestNow('2026-01-02 03:00:00');
         try {
             [$sub, $inv] = $this->subscribed();
             $this->withCard($sub);
@@ -227,7 +230,7 @@ class BillingAutopayTest extends TestCase implements \Tests\OwnsTenancy
             $this->assertStringContainsString('Automatic payments: 1 charged, 0 declined', Artisan::output());
             $this->assertSame('paid', $this->ctl()->table('billing_invoices')->find($inv->id)->status);
         } finally {
-            \Illuminate\Support\Carbon::setTestNow();
+            Carbon::setTestNow();
         }
     }
 }

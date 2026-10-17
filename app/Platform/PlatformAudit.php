@@ -3,7 +3,6 @@
 namespace App\Platform;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 /** PLAT-7 / PLAT-8: append-only record of everything platform staff do. */
 class PlatformAudit extends Model

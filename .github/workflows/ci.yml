@@ -13,12 +13,19 @@ jobs:
   backend:
     name: backend (SQLite)
     runs-on: ubuntu-latest
+    # ENG-20/TEN-10: RedisIntegrationTest and the tenant-prefixed cache/queue code run against a real Redis
+    services:
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=3s --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite, pdo_mysql
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite, pdo_mysql, redis
           coverage: pcov
       - run: composer install --prefer-dist --no-progress --no-interaction
       - run: cp .env.example .env && php artisan key:generate

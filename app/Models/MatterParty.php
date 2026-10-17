@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
 use App\Conflicts\Names;
+use App\Matters\MatterScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** FUN-9: someone a matter is against or about. Read through matter access like the matter itself. */
 class MatterParty extends DefaultAppModel
 {
-    use \App\Matters\MatterScoped;
+    use MatterScoped;
 
     public const ROLES = ['adverse', 'co_party', 'related', 'opposing_counsel'];
 

@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Billing\Billing;
+use App\Billing\BillingException;
 use App\Billing\Collection;
 use App\Mail\DunningNotice;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformStaff;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable as C;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as SentRequest;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /**
@@ -23,7 +26,7 @@ use Tests\TestCase;
  * M-Pesa STK push and its callback, Daraja C2B registration, and the pay options in reminders. Requests are checked
  * against the providers' documented formats with faked HTTP (no live calls here).
  */
-class BillingCollectionTest extends TestCase implements \Tests\OwnsTenancy
+class BillingCollectionTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -57,7 +60,7 @@ class BillingCollectionTest extends TestCase implements \Tests\OwnsTenancy
     protected function tearDown(): void
     {
         DB::setDefaultConnection($this->originalDefault);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         parent::tearDown();
     }
 
@@ -185,7 +188,7 @@ class BillingCollectionTest extends TestCase implements \Tests\OwnsTenancy
             try {
                 $collection->stkPush($number, $phone);
                 $this->fail("expected a refusal: {$why}");
-            } catch (\App\Billing\BillingException $e) {
+            } catch (BillingException $e) {
                 $this->assertStringContainsString($why, $e->getMessage());
             }
         }
@@ -244,7 +247,7 @@ class BillingCollectionTest extends TestCase implements \Tests\OwnsTenancy
         try {
             $collection->checkout($inv->number);
             $this->fail('a void invoice cannot be paid');
-        } catch (\App\Billing\BillingException $e) {
+        } catch (BillingException $e) {
             $this->assertStringContainsString('void', $e->getMessage());
         }
 

@@ -4,12 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Secrets\IntegrationCredentials;
+use App\Secrets\SecretInventory;
 use App\Security\Mfa;
 use App\Security\Totp;
 use App\Support\SecretFiles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Schema;
 use Tests\CreatesTestUsers;
 use Tests\TestCase;
 
@@ -28,7 +31,7 @@ class SecretsTest extends TestCase
     {
         config(['app.key' => $key, 'app.previous_keys' => $previous]);
         $this->app->forgetInstance('encrypter');
-        \Illuminate\Support\Facades\Facade::clearResolvedInstance('encrypter');
+        Facade::clearResolvedInstance('encrypter');
     }
 
     private function tmp(string $content): string
@@ -216,7 +219,7 @@ class SecretsTest extends TestCase
                 DB::table('user_mfa')->update(['secret' => $fresh]);
             }
         });
-        app(\App\Secrets\SecretInventory::class)->rotate('tenant', true);
+        app(SecretInventory::class)->rotate('tenant', true);
         $this->assertTrue($fired);
         $this->assertSame($fresh, DB::table('user_mfa')->value('secret'));    // the stale pass did not clobber it
     }
@@ -238,7 +241,7 @@ class SecretsTest extends TestCase
 
         foreach (config('secrets.encrypted') as $t) {
             if ($t['scope'] === 'tenant') {
-                $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn($t['table'], $t['column']), "{$t['table']}.{$t['column']} does not exist");
+                $this->assertTrue(Schema::hasColumn($t['table'], $t['column']), "{$t['table']}.{$t['column']} does not exist");
             }
         }
     }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\User;
 
+use App\EBilling\Utbms;
 use App\Http\Requests\Concerns\RouteRecord;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for UserController::update(). Authorization is declared on the route (authz:*), not here. */
@@ -10,7 +12,7 @@ class UpdateRequest extends FormRequest
 {
     use RouteRecord;
 
-    protected string $recordModel = \App\Models\User::class;
+    protected string $recordModel = User::class;
 
     protected string $recordParameter = 'user';
 
@@ -23,7 +25,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'timekeeper_class' => 'nullable|string|in:'.implode(',', array_keys(\App\EBilling\Utbms::TIMEKEEPER_CLASSES)),   // FUN-13
+            'timekeeper_class' => 'nullable|string|in:'.implode(',', array_keys(Utbms::TIMEKEEPER_CLASSES)),   // FUN-13
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
             'email' => 'required|email|max:255|unique:users,email,'.$this->routeId('user'),

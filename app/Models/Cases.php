@@ -3,12 +3,17 @@
 namespace App\Models;
 
 use App\AppUtils\DefaultAppModel;
+use App\Enums\MatterStatus;
+use App\Matters\MatterScoped;
+use App\Models\Concerns\ConstrainedToEnums;
+use App\Models\Concerns\HasCaseType;
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cases extends DefaultAppModel
 {
-    use \App\Models\Concerns\ConstrainedToEnums;
-    use \App\Models\Concerns\HasCaseType;
+    use ConstrainedToEnums;
+    use HasCaseType;
 
     /** @return BelongsTo<CaseType, $this> */
     public function caseType(): BelongsTo
@@ -17,10 +22,10 @@ class Cases extends DefaultAppModel
     }
 
     /** DATA-12: columns that only ever hold one of their enum's values */
-    public const ENUM_COLUMNS = ['lifecycle_status' => \App\Enums\MatterStatus::class];
+    public const ENUM_COLUMNS = ['lifecycle_status' => MatterStatus::class];
 
-    use \App\Models\Concerns\HasPublicId;
-    use \App\Matters\MatterScoped;
+    use HasPublicId;
+    use MatterScoped;
 
     public static function matterColumn(): string
     {
@@ -52,7 +57,7 @@ class Cases extends DefaultAppModel
     /** The allowed lifecycle moves, from App\Enums\MatterStatus (DATA-12): status => statuses it may move to. */
     public static function transitions(): array
     {
-        return collect(\App\Enums\MatterStatus::cases())->mapWithKeys(fn ($s) => [$s->value => array_map(fn ($n) => $n->value, $s->next())])->all();
+        return collect(MatterStatus::cases())->mapWithKeys(fn ($s) => [$s->value => array_map(fn ($n) => $n->value, $s->next())])->all();
     }
 
     public function canTransitionTo(string $newStatus): bool

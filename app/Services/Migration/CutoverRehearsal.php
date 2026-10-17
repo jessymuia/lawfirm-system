@@ -2,10 +2,14 @@
 
 namespace App\Services\Migration;
 
+use App\Models\Cases;
+use App\Models\Invoice;
+use App\Models\User;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Process\Process;
 
 /**
@@ -92,7 +96,7 @@ class CutoverRehearsal
                 config(['database.default' => self::CONNECTION, 'queue.default' => 'sync']);   // backfills run inline, as on a quiet cutover
                 DB::setDefaultConnection(self::CONNECTION);
                 // its own buffer: commands app:upgrade runs inside replace Artisan::output()
-                $buffer = new \Symfony\Component\Console\Output\BufferedOutput;
+                $buffer = new BufferedOutput;
                 $code = Artisan::call('app:upgrade', ['--skip-cache' => true, '--accept-legacy-values' => ! empty($opts['accept_unmapped'])], $buffer);
                 $out = $buffer->fetch();
                 // migrate prints "<migration> .... 74.50ms DONE" or "6s DONE": the schema steps are the downtime; the backfills
@@ -135,9 +139,9 @@ class CutoverRehearsal
                 }
                 $verify['documents_missing'] = $this->missingFiles($db, $filesRoot);
                 try {
-                    \App\Models\User::on(self::CONNECTION)->first();
-                    \App\Models\Cases::on(self::CONNECTION)->with('client')->latest('id')->first();
-                    \App\Models\Invoice::on(self::CONNECTION)->with('items')->latest('id')->first();
+                    User::on(self::CONNECTION)->first();
+                    Cases::on(self::CONNECTION)->with('client')->latest('id')->first();
+                    Invoice::on(self::CONNECTION)->with('items')->latest('id')->first();
                     $verify['app_reads_data'] = true;
                 } catch (\Throwable $e) {
                     $verify['app_reads_data'] = false;

@@ -14,9 +14,7 @@ use Illuminate\Database\Connectors\ConnectionFactory;
  */
 class CellLatency
 {
-    public function __construct(private ConnectionFactory $factory)
-    {
-    }
+    public function __construct(private ConnectionFactory $factory) {}
 
     /**
      * @param  array<string, mixed>  $server  a connection config without a database (CellRegistry::serverConfig)

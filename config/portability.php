@@ -50,6 +50,7 @@ return [
         'sso_providers' => 'holds the IdP client secret encrypted with this deployment\'s key; reconfigure SSO after a move',
         'sso_states' => 'transient login state',
         'sso_links' => 'binds IdP subjects of this deployment\'s provider; they are re-bound on first SSO login after a move',
+        'scim_tokens' => 'SEC-12 provisioning tokens are secrets of this deployment; issue new tokens to the IdP after a move',
         'mfa_challenges' => 'transient login state',
         'health_probes' => 'operational history of this deployment, not firm data',
         'status_incidents' => 'platform status communications of this deployment, not firm data',

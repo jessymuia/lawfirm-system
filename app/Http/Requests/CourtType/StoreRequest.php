@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\CourtType;
 
-use App\Models\CourtType;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** ENG-8: input rules for CourtTypeController::store(). Authorization is declared on the route (authz:*), not here. */

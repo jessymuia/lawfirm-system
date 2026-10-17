@@ -3,6 +3,7 @@
 namespace App\Calendar\Providers;
 
 use App\Secrets\IntegrationCredentials;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
@@ -51,7 +52,7 @@ class GoogleCalendar implements CalendarProvider
             'summary' => $item['title'], 'description' => $item['description'], 'location' => $item['location'],
             'start' => $item['start'] ? ['dateTime' => $item['start']->toIso8601String(), 'timeZone' => $tz] : ['date' => $item['date']],
             'end' => $item['start'] ? ['dateTime' => $item['end']->toIso8601String(), 'timeZone' => $tz]
-                : ['date' => \Carbon\CarbonImmutable::parse($item['date'])->addDay()->toDateString()],
+                : ['date' => CarbonImmutable::parse($item['date'])->addDay()->toDateString()],
             'transparency' => $item['start'] ? 'opaque' : 'transparent',
             'source' => ['title' => config('app.name'), 'url' => $item['url']],
             'extendedProperties' => ['private' => ['lawfirm_uid' => $item['uid']]],

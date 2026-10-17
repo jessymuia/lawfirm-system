@@ -23,7 +23,9 @@ use DOMXPath;
 class SamlValidator
 {
     public const NS_P = 'urn:oasis:names:tc:SAML:2.0:protocol';
+
     public const NS_A = 'urn:oasis:names:tc:SAML:2.0:assertion';
+
     public const NS_DS = 'http://www.w3.org/2000/09/xmldsig#';
 
     private const ALGS = [
@@ -31,17 +33,20 @@ class SamlValidator
         'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384' => OPENSSL_ALGO_SHA384,
         'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512' => OPENSSL_ALGO_SHA512,
     ];
+
     private const DIGESTS = [
         'http://www.w3.org/2001/04/xmlenc#sha256' => 'sha256',
         'http://www.w3.org/2001/04/xmldsig-more#sha384' => 'sha384',
         'http://www.w3.org/2001/04/xmlenc#sha512' => 'sha512',
     ];
+
     private const C14N = [
         'http://www.w3.org/2001/10/xml-exc-c14n#' => [true, false],
         'http://www.w3.org/2001/10/xml-exc-c14n#WithComments' => [true, true],
         'http://www.w3.org/TR/2001/REC-xml-c14n-20010315' => [false, false],
         'http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments' => [false, true],
     ];
+
     private const ENVELOPED = 'http://www.w3.org/2000/09/xmldsig#enveloped-signature';
 
     public const EMAIL_ATTRIBUTES = [
@@ -52,7 +57,7 @@ class SamlValidator
     ];
 
     /**
-     * @param array{idp_entity_id: string, certificates: list<string>, sp_entity_id: string, acs_url: string, request_id: string, leeway?: int, now?: int} $cfg
+     * @param  array{idp_entity_id: string, certificates: list<string>, sp_entity_id: string, acs_url: string, request_id: string, leeway?: int, now?: int}  $cfg
      * @return array{name_id: string, email: string, attributes: array<string, list<string>>, session_index: ?string}
      */
     public function validate(string $xml, array $cfg): array
@@ -67,7 +72,7 @@ class SamlValidator
             throw new SamlException('Response contains a DTD.');
         }
 
-        $doc = new DOMDocument();
+        $doc = new DOMDocument;
         $prev = libxml_use_internal_errors(true);
         $loaded = $doc->loadXML($xml, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_COMPACT);
         libxml_clear_errors();

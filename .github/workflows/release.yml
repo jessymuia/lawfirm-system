@@ -1,4 +1,5 @@
 # Pushing a tag v<semver> verifies the release, then publishes the image, the Helm chart and the bare-metal bundle.
+# scripts/publish-release.sh does the same by hand when this pipeline cannot run.
 name: release
 on:
   push:
@@ -11,19 +12,29 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite, sodium
       - run: composer install --prefer-dist --no-progress --no-interaction
       - run: cp .env.example .env && php artisan key:generate
-      - run: php artisan release:check
       - name: Tag matches VERSION
-        run: test "v$(tr -d '[:space:]' < VERSION)" = "${GITHUB_REF_NAME}"
+        id: version
+        run: |
+          v="$(tr -d '[:space:]' < VERSION)"
+          test "v$v" = "${GITHUB_REF_NAME}"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          case "$v" in *-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;; *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;; esac
+      - run: php artisan release:check
+      - run: php artisan migrations:lint
       - run: php artisan test
 
-  publish:
+  image:
     needs: verify
     runs-on: ubuntu-latest
     steps:
@@ -34,26 +45,64 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Image
-        uses: docker/build-push-action@v6
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          # a pre-release (1.2.0-rc.1) is never tagged :latest
+          tags: |
+            type=raw,value=${{ needs.verify.outputs.version }}
+            type=raw,value=latest,enable=${{ needs.verify.outputs.prerelease == 'false' }}
+      - uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  chart:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: azure/setup-helm@v4
+      - run: helm lint deploy/helm/lawfirm
       - run: helm package deploy/helm/lawfirm --destination dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chart
+          path: dist/
+
+  bundle:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - run: scripts/build-release-bundle.sh dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bundle
+          path: dist/
+
+  publish:
+    needs: [verify, image, chart, bundle]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
       - name: Release notes
+        # exactly this version's section of CHANGELOG.md
         run: |
-          v="${GITHUB_REF_NAME#v}"
-          if [ -f "docs/upgrade/$v.md" ]; then cp "docs/upgrade/$v.md" dist/notes.md; else echo "See CHANGELOG.md" > dist/notes.md; fi
+          awk -v head="## [${{ needs.verify.outputs.version }}]" 'index($0, head) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > notes.md
       - uses: softprops/action-gh-release@v2
         with:
+          body_path: notes.md
+          prerelease: ${{ needs.verify.outputs.prerelease == 'true' }}
           files: |
             dist/*.tgz
             dist/*.tar.gz
             dist/*.sha256
-          body_path: dist/notes.md

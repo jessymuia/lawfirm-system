@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Releases\IndexRequest;
 use App\Releases\ReleaseNotes;
 use App\Releases\Semver;
 use App\Support\ReleaseLog;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /** PLAT-10: the customer changelog and per-version upgrade guides, for any signed-in user. Written for customers: see docs/upgrade/README.md. */
 class ReleasesController extends Controller
@@ -24,7 +24,7 @@ class ReleasesController extends Controller
         return $out;
     }
 
-    public function index(\App\Http\Requests\Releases\IndexRequest $r): JsonResponse
+    public function index(IndexRequest $r): JsonResponse
     {
         $d = $r->validated();
         $n = ReleaseNotes::fromApp();

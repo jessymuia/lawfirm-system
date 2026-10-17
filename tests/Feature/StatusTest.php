@@ -8,15 +8,20 @@ use App\Status\Health;
 use App\Status\Incidents;
 use App\Status\StatusException;
 use App\Tenancy\Models\Tenant;
+use App\Tenancy\TenantContext;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Tests\OwnsTenancy;
 use Tests\TestCase;
 
 /** PLAT-12: health endpoints, probe history, measured availability, the public status page and incident handling. */
-class StatusTest extends TestCase implements \Tests\OwnsTenancy
+class StatusTest extends TestCase implements OwnsTenancy
 {
     use RefreshDatabase;
 
@@ -36,7 +41,7 @@ class StatusTest extends TestCase implements \Tests\OwnsTenancy
     protected function tearDown(): void
     {
         DB::setDefaultConnection($this->originalDefault);
-        app(\App\Tenancy\TenantContext::class)->activate('default');
+        app(TenantContext::class)->activate('default');
         parent::tearDown();
     }
 
@@ -89,7 +94,9 @@ class StatusTest extends TestCase implements \Tests\OwnsTenancy
     public function test_liveness_touches_nothing(): void
     {
         $queries = 0;
-        DB::listen(function () use (&$queries) { $queries++; });
+        DB::listen(function () use (&$queries) {
+            $queries++;
+        });
         $this->getJson('/health/live')->assertOk()->assertExactJson(['status' => 'ok'])->assertHeader('Cache-Control', 'no-store, private');
         $this->assertSame(0, $queries);
     }
@@ -153,18 +160,18 @@ class StatusTest extends TestCase implements \Tests\OwnsTenancy
 
         // A disk that accepts writes without error but keeps nothing (a full or read-only mount behind a non-throwing driver).
         // Built by hand rather than with 'read-only' => true, which needs the optional league/flysystem-read-only package.
-        $blackhole = \Mockery::mock(\Illuminate\Filesystem\FilesystemAdapter::class);
+        $blackhole = \Mockery::mock(FilesystemAdapter::class);
         $blackhole->shouldReceive('put')->andReturn(false);
         $blackhole->shouldReceive('get')->andReturn(null);
         $blackhole->shouldReceive('delete')->andReturn(false);
-        \Illuminate\Support\Facades\Storage::set('blackhole', $blackhole);
+        Storage::set('blackhole', $blackhole);
         config(['status.storage_disk' => 'blackhole']);
         $this->assertSame(['down', 'read-back mismatch'], [$this->health()->check('storage')[0], $this->health()->check('storage')[2]]);
     }
 
     public function test_the_probe_is_scheduled_every_minute(): void
     {
-        $e = collect(app(\Illuminate\Console\Scheduling\Schedule::class)->events())->first(fn ($e) => str_contains($e->command, 'health:probe'));
+        $e = collect(app(Schedule::class)->events())->first(fn ($e) => str_contains($e->command, 'health:probe'));
         $this->assertNotNull($e, 'health:probe is not scheduled');
         $this->assertSame('* * * * *', $e->expression);
         $this->assertTrue($e->withoutOverlapping);

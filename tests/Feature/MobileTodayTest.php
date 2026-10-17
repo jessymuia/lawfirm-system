@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Constants\ModulePermissions as P;
+use App\Jobs\SyncCalendarConnection;
 use App\Models\Cases;
 use App\Models\Client;
 use App\Models\Hearing;
 use App\Models\HearingType;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -28,8 +30,8 @@ class MobileTodayTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Bus::fake([\App\Jobs\SyncCalendarConnection::class]);
-        $this->travelTo(\Carbon\Carbon::parse('2026-10-05 07:30:00', 'Africa/Nairobi'));
+        Bus::fake([SyncCalendarConnection::class]);
+        $this->travelTo(Carbon::parse('2026-10-05 07:30:00', 'Africa/Nairobi'));
         $this->lawyer = $this->userWithPermissions([P::LIST_HEARINGS, P::UPDATE_HEARINGS, P::CREATE_HEARINGS, P::LIST_CASES]);
         $client = Client::factory()->create(['name' => 'Akinyi Odhiambo', 'phone_number' => '0722000111']);
         $this->matter = Cases::factory()->create(['case_number' => 'CMCC 88/2026', 'assigned_to' => $this->lawyer->id, 'client_id' => $client->id]);
@@ -56,7 +58,7 @@ class MobileTodayTest extends TestCase
 
         // the service worker keeps only the hearing-day data offline, and never touches the client-facing pages
         $sw = (string) file_get_contents(public_path('sw.js'));
-        $this->assertStringContainsString("const OFFLINE_DATA = /^\\/api\\/v1\\/(today|court-diary)(\\?|$)/;", $sw);
+        $this->assertStringContainsString('const OFFLINE_DATA = /^\\/api\\/v1\\/(today|court-diary)(\\?|$)/;', $sw);
         foreach (['api', 'portal', 'pay', 'sign', 'calendar', 'sanctum'] as $path) {
             $this->assertMatchesRegularExpression('/NOT_OURS = .*\b'.$path.'\b/', $sw);
         }

@@ -16,7 +16,7 @@ class ReleaseNotes
 
     public function __construct(private string $changelogPath, private string $guideDir, private string $versionFile)
     {
-        $c = new Changelog();
+        $c = new Changelog;
         $this->releases = is_file($changelogPath) ? $c->parse((string) file_get_contents($changelogPath)) : [];
         $this->parseErrors = $c->errors;
     }

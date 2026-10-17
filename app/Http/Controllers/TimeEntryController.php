@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Actions\Time\BillTime;
 use App\Actions\Time\RecordTime;
 use App\Constants\ModulePermissions;
+use App\Http\Requests\TimeEntry\GenerateInvoiceRequest;
+use App\Http\Requests\TimeEntry\StoreRequest;
+use App\Http\Requests\TimeEntry\UpdateRequest;
+use App\Http\Resources\V1\TimeEntryResource;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -48,12 +52,12 @@ class TimeEntryController extends Controller
             $query->where('user_id', auth()->user()->id);
         }
 
-        $entries = $this->paginatedOrFull(request(), $query, fn ($row) => \App\Http\Resources\V1\TimeEntryResource::make($row)->resolve(), 25, ['date', 'hours', 'amount'], ['description']);
+        $entries = $this->paginatedOrFull(request(), $query, fn ($row) => TimeEntryResource::make($row)->resolve(), 25, ['date', 'hours', 'amount'], ['description']);
 
         return $this->response(true, 'success', $entries, 200);
     }
 
-    public function store(\App\Http\Requests\TimeEntry\StoreRequest $request): Response|JsonResponse
+    public function store(StoreRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_TIME_ENTRIES)) {
             abort(403);
@@ -62,10 +66,10 @@ class TimeEntryController extends Controller
         $entry = $this->recordTime->log($this->timeData($request) + ['billable' => $request->boolean('billable', true),
             'utbms_task_code' => $request->input('utbms_task_code'), 'utbms_activity_code' => $request->input('utbms_activity_code')], Auth::user());   // FUN-13
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\TimeEntryResource::make($entry->load(['case', 'user']))->resolve(), 201);
+        return $this->response(true, 'success', TimeEntryResource::make($entry->load(['case', 'user']))->resolve(), 201);
     }
 
-    public function update(\App\Http\Requests\TimeEntry\UpdateRequest $request, $id): Response|JsonResponse
+    public function update(UpdateRequest $request, $id): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::UPDATE_TIME_ENTRIES)) {
             abort(403);
@@ -74,7 +78,7 @@ class TimeEntryController extends Controller
         $entry = $this->recordTime->correct(TimeEntry::findOrFail($id), $this->timeData($request) + ['billable' => $request->boolean('billable', true)]
             + $request->only(array_values(array_filter(['utbms_task_code', 'utbms_activity_code'], fn ($f) => $request->exists($f)))), Auth::user());   // FUN-13: codes only when sent
 
-        return $this->response(true, 'success', \App\Http\Resources\V1\TimeEntryResource::make($entry->fresh(['case', 'user']))->resolve(), 200);
+        return $this->response(true, 'success', TimeEntryResource::make($entry->fresh(['case', 'user']))->resolve(), 200);
     }
 
     public function destroy($id): Response|JsonResponse
@@ -94,7 +98,7 @@ class TimeEntryController extends Controller
      * is marked billed + linked to that line item, so it can never be
      * billed twice.
      */
-    public function generateInvoice(\App\Http\Requests\TimeEntry\GenerateInvoiceRequest $request): Response|JsonResponse
+    public function generateInvoice(GenerateInvoiceRequest $request): Response|JsonResponse
     {
         if (! Auth::user()->checkPermissionTo(ModulePermissions::CREATE_INVOICES)) {
             abort(403);

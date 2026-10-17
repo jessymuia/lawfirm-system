@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Invoice;
+use App\Models\Payment;
+use Illuminate\Contracts\Console\Kernel;
+
 /**
  * Worker for NumberingConcurrencyTest: boots the app in its own process and
  * creates records as fast as it can, so several copies genuinely race.
@@ -10,7 +14,7 @@
 require __DIR__.'/../../vendor/autoload.php';
 
 $app = require __DIR__.'/../../bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app->make(Kernel::class)->bootstrap();
 
 [, $kind, $count, $caseId, $clientId] = $argv;
 $invoiceId = $argv[5] ?? null;
@@ -18,14 +22,14 @@ $invoiceId = $argv[5] ?? null;
 for ($i = 0; $i < (int) $count; $i++) {
     try {
         if ($kind === 'invoice') {
-            $row = App\Models\Invoice::create([
+            $row = Invoice::create([
                 'case_id' => $caseId, 'client_id' => $clientId,
                 'invoice_date' => date('Y-m-d'), 'invoice_due_date' => date('Y-m-d'),
                 'workflow_status' => 'draft',
             ]);
             echo 'OK '.$row->invoice_number."\n";
         } else {
-            $row = App\Models\Payment::create([
+            $row = Payment::create([
                 'invoice_id' => $invoiceId, 'amount' => 1, 'payment_date' => date('Y-m-d'),
                 'method' => 'cash', 'received_by' => 1,
             ]);

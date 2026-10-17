@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\EnforceMfaPolicy;
 use App\Models\User;
 use App\Security\Mfa;
 use App\Security\RecoveryCodes;
 use App\Security\Totp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,7 +23,7 @@ class SecurityMfaTest extends TestCase
 
     private const PASSWORD = 'correct-horse-battery-1';
 
-    private function person(array $perms = [], string $email = null): User
+    private function person(array $perms = [], ?string $email = null): User
     {
         $u = $this->userWithPermissions($perms);
         $u->update(['password' => Hash::make(self::PASSWORD)] + ($email ? ['email' => $email] : []));
@@ -118,7 +121,7 @@ class SecurityMfaTest extends TestCase
             $this->assertStringNotContainsString($c, $row->recovery_codes);
             $this->assertStringNotContainsString(str_replace('-', '', $c), $row->recovery_codes);
         }
-        $this->assertSame($secret, \Illuminate\Support\Facades\Crypt::decryptString($row->secret));
+        $this->assertSame($secret, Crypt::decryptString($row->secret));
     }
 
     public function test_setup_cannot_replace_a_working_device_silently(): void
@@ -350,14 +353,14 @@ class SecurityMfaTest extends TestCase
         DB::table('firm_security_settings')->insert(['require_mfa' => true, 'created_at' => now(), 'updated_at' => now()]);
         $principal = User::factory()->create();
         DB::table('users')->where('id', $principal->id)->update(['platform_staff_id' => 5]);
-        $req = \Illuminate\Http\Request::create('/x');
+        $req = Request::create('/x');
         $req->setUserResolver(fn () => $principal->fresh());
 
-        $this->assertSame('ok', (new \App\Http\Middleware\EnforceMfaPolicy)->handle($req, fn () => response('ok'))->getContent());
+        $this->assertSame('ok', (new EnforceMfaPolicy)->handle($req, fn () => response('ok'))->getContent());
 
         $normal = User::factory()->create();
         $req->setUserResolver(fn () => $normal);
-        $this->assertSame(403, (new \App\Http\Middleware\EnforceMfaPolicy)->handle($req, fn () => response('ok'))->getStatusCode());
+        $this->assertSame(403, (new EnforceMfaPolicy)->handle($req, fn () => response('ok'))->getStatusCode());
     }
 
     // ---- what the web app is told at sign-in ------------------------------------------------------------------------

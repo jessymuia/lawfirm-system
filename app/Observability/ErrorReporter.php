@@ -2,6 +2,8 @@
 
 namespace App\Observability;
 
+use App\Tenancy\TenantContext;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -50,9 +52,9 @@ class ErrorReporter
     /** @return array<string, mixed> */
     public function event(Throwable $e): array
     {
-        $tenant = app(\App\Tenancy\TenantContext::class)->key();
+        $tenant = app(TenantContext::class)->key();
         $route = request()->route();   // only a request being served has one (a console run has an empty request)
-        $request = $route instanceof \Illuminate\Routing\Route ? request() : null;
+        $request = $route instanceof Route ? request() : null;
         $trace = app(Tracer::class)->root();
 
         $exceptions = [];
@@ -77,7 +79,7 @@ class ErrorReporter
             'tags' => array_filter([
                 'tenant' => $tenant,
                 'request_id' => Context::get('request_id'),
-                'route' => $route instanceof \Illuminate\Routing\Route ? '/'.ltrim($route->uri(), '/') : null,
+                'route' => $route instanceof Route ? '/'.ltrim($route->uri(), '/') : null,
                 'http_method' => $request?->method(),
             ]),
             'user' => auth()->hasUser() ? ['id' => (string) auth()->id()] : null,

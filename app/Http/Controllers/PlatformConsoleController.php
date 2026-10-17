@@ -2,17 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\Billing;
+use App\Billing\PlanStore;
+use App\Branding\Branding;
+use App\Flags\Flags;
+use App\Http\Requests\Platform\ChangePasswordRequest;
+use App\Http\Requests\Platform\IntegrationRequest;
+use App\Http\Requests\Platform\UpdateProfileRequest;
+use App\Http\Requests\PlatformConsole\EjectRequest;
+use App\Http\Requests\PlatformConsole\LegalHoldRequest;
+use App\Http\Requests\PlatformConsole\LoginMfaRequest;
+use App\Http\Requests\PlatformConsole\LoginRequest;
+use App\Http\Requests\PlatformConsole\MfaDisableRequest;
+use App\Http\Requests\PlatformConsole\MfaEnableRequest;
+use App\Http\Requests\PlatformConsole\OffboardRequest;
+use App\Http\Requests\PlatformConsole\ProvisionRequest;
+use App\Http\Requests\PlatformConsole\PurgeRequest;
+use App\Http\Requests\PlatformConsole\ReasonRequest;
+use App\Http\Requests\PlatformConsole\SetFlagsRequest;
 use App\Jobs\RunTenantBackup;
+use App\Jobs\RunTenantEject;
+use App\Mail\FirmWelcome;
+use App\Observability\UsageMetrics;
 use App\Platform\PlatformAudit;
 use App\Platform\PlatformAuth;
 use App\Platform\PlatformStaff;
+use App\Secrets\IntegrationCredentials;
+use App\Tenancy\CellRegistry;
+use App\Tenancy\Models\Cell;
 use App\Tenancy\Models\Tenant;
 use App\Tenancy\TenantLifecycle;
+use App\Tenancy\TenantManager;
 use App\Tenancy\TenantMigrator;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * PLAT-7: what platform staff can do to the fleet. Every mutating action is audited (ok, denied or failed), and nothing here
@@ -31,7 +63,7 @@ class PlatformConsoleController extends Controller
 
     // ---- session -----------------------------------------------------------------------------------------------
 
-    public function login(\App\Http\Requests\PlatformConsole\LoginRequest $r, PlatformAuth $auth): JsonResponse
+    public function login(LoginRequest $r, PlatformAuth $auth): JsonResponse
     {
         $d = $r->validated();
         $res = $auth->login($d['email'], $d['password'], $r->ip());
@@ -46,7 +78,7 @@ class PlatformConsoleController extends Controller
     }
 
     /** SEC-12: second login step. */
-    public function loginMfa(\App\Http\Requests\PlatformConsole\LoginMfaRequest $r, PlatformAuth $auth): JsonResponse
+    public function loginMfa(LoginMfaRequest $r, PlatformAuth $auth): JsonResponse
     {
         $d = $r->validated();
         $res = $auth->completeMfa($d['challenge'], $d['code'], $r->ip());
@@ -79,7 +111,7 @@ class PlatformConsoleController extends Controller
         }
     }
 
-    public function mfaEnable(\App\Http\Requests\PlatformConsole\MfaEnableRequest $r, PlatformAuth $auth): JsonResponse
+    public function mfaEnable(MfaEnableRequest $r, PlatformAuth $auth): JsonResponse
     {
         $d = $r->validated();
         $s = $this->staff($r);
@@ -95,14 +127,14 @@ class PlatformConsoleController extends Controller
     }
 
     /** Password and a current code; refused outright when the platform requires two-factor. */
-    public function mfaDisable(\App\Http\Requests\PlatformConsole\MfaDisableRequest $r, PlatformAuth $auth): JsonResponse
+    public function mfaDisable(MfaDisableRequest $r, PlatformAuth $auth): JsonResponse
     {
         $d = $r->validated();
         $s = $this->staff($r);
         if (config('tenancy.platform_mfa') === 'required') {
             return response()->json(['message' => 'Two-factor authentication is required for platform staff.'], 403);
         }
-        if (! \Illuminate\Support\Facades\Hash::check($d['password'], $s->password) || ! $auth->mfa()->verify($s->id, $d['code'])) {
+        if (! Hash::check($d['password'], $s->password) || ! $auth->mfa()->verify($s->id, $d['code'])) {
             return response()->json(['message' => 'Password or code is not right.'], 422);
         }
         $auth->mfa()->disable($s->id);
@@ -126,7 +158,7 @@ class PlatformConsoleController extends Controller
     }
 
     /** The signed-in operator edits their own display name. Email and role stay CLI-managed. */
-    public function updateMe(\App\Http\Requests\Platform\UpdateProfileRequest $r): JsonResponse
+    public function updateMe(UpdateProfileRequest $r): JsonResponse
     {
         $d = $r->validated();
         $s = $this->staff($r);
@@ -137,16 +169,16 @@ class PlatformConsoleController extends Controller
     }
 
     /** Change the signed-in operator's password. Needs the current password; every other session is signed out. */
-    public function changePassword(\App\Http\Requests\Platform\ChangePasswordRequest $r): JsonResponse
+    public function changePassword(ChangePasswordRequest $r): JsonResponse
     {
         $d = $r->validated();
         $s = $this->staff($r);
-        if (! \Illuminate\Support\Facades\Hash::check($d['current_password'], $s->password)) {
+        if (! Hash::check($d['current_password'], $s->password)) {
             PlatformAudit::record($s, 'account.password_changed', null, [], 'denied', 'wrong current password', $r->ip());
 
             return response()->json(['message' => 'Your current password is not right.', 'errors' => ['current_password' => ['Your current password is not right.']]], 422);
         }
-        $s->update(['password' => \Illuminate\Support\Facades\Hash::make($d['password'])]);
+        $s->update(['password' => Hash::make($d['password'])]);
         DB::connection(config('tenancy.control_connection'))->table('platform_tokens')
             ->where('staff_id', $s->id)->where('token_hash', '!=', hash('sha256', (string) $r->bearerToken()))->delete();
         PlatformAudit::record($s, 'account.password_changed', null, [], 'ok', null, $r->ip());
@@ -196,11 +228,11 @@ class PlatformConsoleController extends Controller
     }
 
     /** TEN-4: every cell with its load against capacity; a cell with firms but no row is the template-only default. */
-    public function cells(\App\Tenancy\CellRegistry $registry): JsonResponse
+    public function cells(CellRegistry $registry): JsonResponse
     {
         $load = $registry->load();
         $rows = [];
-        foreach (\App\Tenancy\Models\Cell::orderBy('name')->get() as $c) {
+        foreach (Cell::orderBy('name')->get() as $c) {
             $rows[] = ['name' => $c->name, 'region' => $c->region, 'host' => $c->host, 'capacity' => $c->capacity, 'accepting' => $c->accepting,
                 'firms' => $load[$c->name] ?? 0, 'utilisation' => round(($load[$c->name] ?? 0) / max(1, $c->capacity), 3),
                 'files_disk' => $c->files_disk, 'queue' => $c->queue];
@@ -212,7 +244,7 @@ class PlatformConsoleController extends Controller
         return response()->json(['data' => $rows]);
     }
 
-    public function dashboard(): \Illuminate\Http\Response
+    public function dashboard(): Response
     {
         $nonce = base64_encode(random_bytes(16));
 
@@ -225,7 +257,7 @@ class PlatformConsoleController extends Controller
     }
 
     /** PLAT-7: independent browser console, served only at /console on PLATFORM_ADMIN_HOST. */
-    public function console(): \Illuminate\Http\Response
+    public function console(): Response
     {
         return response(view('platform.console')->render(), 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
@@ -273,10 +305,10 @@ class PlatformConsoleController extends Controller
     public function integrations(string $slug): JsonResponse
     {
         $t = Tenant::with('domains')->where('slug', $slug)->firstOrFail();
-        $data = app(\App\Tenancy\TenantManager::class)->runIn($t, function () {
-            $c = app(\App\Secrets\IntegrationCredentials::class);
+        $data = app(TenantManager::class)->runIn($t, function () {
+            $c = app(IntegrationCredentials::class);
             $out = [];
-            foreach (array_keys(\App\Secrets\IntegrationCredentials::PROVIDERS) as $p) {
+            foreach (array_keys(IntegrationCredentials::PROVIDERS) as $p) {
                 $out[$p] = ['fields' => $c->status($p)] + $c->readiness($p);
             }
 
@@ -290,18 +322,18 @@ class PlatformConsoleController extends Controller
      * The operator enters (or removes) a firm's own credentials after creating it. Write-only, like the firm's own page:
      * values are encrypted into the firm's database and never returned; the audit trail records field names only.
      */
-    public function setIntegration(\App\Http\Requests\Platform\IntegrationRequest $r, string $slug, string $provider): JsonResponse
+    public function setIntegration(IntegrationRequest $r, string $slug, string $provider): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
-        abort_unless(isset(\App\Secrets\IntegrationCredentials::PROVIDERS[$provider]), 404);
+        abort_unless(isset(IntegrationCredentials::PROVIDERS[$provider]), 404);
         $d = $r->validated();
         if ($d === []) {
             return response()->json(['message' => 'Nothing to save.'], 422);
         }
 
         return $this->act($r, 'tenant.integration', $slug, ['provider' => $provider, 'fields' => array_keys($d)], function () use ($t, $provider, $d) {
-            $out = app(\App\Tenancy\TenantManager::class)->runIn($t, function () use ($provider, $d) {
-                $c = app(\App\Secrets\IntegrationCredentials::class);
+            $out = app(TenantManager::class)->runIn($t, function () use ($provider, $d) {
+                $c = app(IntegrationCredentials::class);
                 $c->set($provider, $d, null);
 
                 return ['fields' => $c->status($provider)] + $c->readiness($provider);
@@ -313,11 +345,11 @@ class PlatformConsoleController extends Controller
 
     // ---- operate -----------------------------------------------------------------------------------------------
 
-    public function provision(\App\Http\Requests\PlatformConsole\ProvisionRequest $r): JsonResponse
+    public function provision(ProvisionRequest $r): JsonResponse
     {
         $d = $r->validated();
 
-        return $this->act($r, 'tenant.provision', $d['slug'], \Illuminate\Support\Arr::only($d, ['slug', 'name', 'admin_email', 'plan', 'currency', 'trial_days', 'domain', 'region', 'cell']), function () use ($d, $r) {
+        return $this->act($r, 'tenant.provision', $d['slug'], Arr::only($d, ['slug', 'name', 'admin_email', 'plan', 'currency', 'trial_days', 'domain', 'region', 'cell']), function () use ($d) {
             $res = $this->lifecycle->provision($d);
             $tenant = $res['tenant'];
             $notes = [];
@@ -326,7 +358,7 @@ class PlatformConsoleController extends Controller
             $plan = $d['plan'] ?? null;
             $subscription = null;
             try {
-                $billing = app(\App\Billing\Billing::class);
+                $billing = app(Billing::class);
                 if (! $billing->subscription($tenant)) {
                     $currency = $d['currency'] ?? (string) config('billing.trial.currency', 'KES');
                     $subscription = (! $plan || $plan === 'trial')
@@ -339,7 +371,7 @@ class PlatformConsoleController extends Controller
 
             // the new firm starts under its own name and colour (it can change both in its Branding settings)
             try {
-                app(\App\Tenancy\TenantManager::class)->runIn($tenant, fn () => \App\Branding\Branding::update(array_filter(['name' => $tenant->name, 'color' => $d['brand_color'] ?? null]), null));
+                app(TenantManager::class)->runIn($tenant, fn () => Branding::update(array_filter(['name' => $tenant->name, 'color' => $d['brand_color'] ?? null]), null));
             } catch (\Throwable $e) {
                 $notes[] = 'The firm\'s branding could not be pre-filled: '.$e->getMessage();
             }
@@ -369,27 +401,27 @@ class PlatformConsoleController extends Controller
             $scheme = $app['scheme'] ?? 'https';
             $loginUrl = $domain ? "{$scheme}://{$domain}{$port}/login" : rtrim((string) config('app.url'), '/').'/login';
             $planCode = $tenant->plan ?: 'trial';
-            $planName = (string) (collect(\App\Billing\PlanStore::all())->firstWhere('code', $planCode)['name'] ?? ucfirst($planCode));
-            $trialEnds = $subscription && $subscription->trial_ends_at ? \Carbon\Carbon::parse($subscription->trial_ends_at)->format('d/m/Y') : null;
+            $planName = (string) (collect(PlanStore::all())->firstWhere('code', $planCode)['name'] ?? ucfirst($planCode));
+            $trialEnds = $subscription && $subscription->trial_ends_at ? Carbon::parse($subscription->trial_ends_at)->format('d/m/Y') : null;
 
-            \Illuminate\Support\Facades\Mail::to($d['admin_email'])->send(new \App\Mail\FirmWelcome(
+            Mail::to($d['admin_email'])->send(new FirmWelcome(
                 (string) config('app.name'), $tenant->name, (string) ($d['admin_name'] ?? ''), $d['admin_email'], $loginUrl, $password, $planName, $trialEnds,
             ));
 
             return 'sent';
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('firm welcome email failed', ['tenant' => $tenant->slug, 'error' => $e->getMessage()]);
+            Log::warning('firm welcome email failed', ['tenant' => $tenant->slug, 'error' => $e->getMessage()]);
 
-            return 'The welcome email could not be sent ('.\Illuminate\Support\Str::limit($e->getMessage(), 120).'). Give the administrator their sign-in details yourself.';
+            return 'The welcome email could not be sent ('.Str::limit($e->getMessage(), 120).'). Give the administrator their sign-in details yourself.';
         }
     }
 
-    public function suspend(\App\Http\Requests\PlatformConsole\ReasonRequest $r, string $slug): JsonResponse
+    public function suspend(ReasonRequest $r, string $slug): JsonResponse
     {
         return $this->lifecycleAction($r, $slug, 'tenant.suspend', fn ($t) => $this->lifecycle->suspend($t));
     }
 
-    public function resume(\App\Http\Requests\PlatformConsole\ReasonRequest $r, string $slug): JsonResponse
+    public function resume(ReasonRequest $r, string $slug): JsonResponse
     {
         return $this->lifecycleAction($r, $slug, 'tenant.resume', fn ($t) => $this->lifecycle->resume($t));
     }
@@ -425,7 +457,7 @@ class PlatformConsoleController extends Controller
     // ---- destructive (admin role + typed confirmation) -------------------------------------------------------------
 
     /** PLAT-9: eject a firm's data, documents and audit trail as a bundle. Data leaving the platform: admin only, reason required. */
-    public function eject(\App\Http\Requests\PlatformConsole\EjectRequest $r, string $slug): JsonResponse
+    public function eject(EjectRequest $r, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $d = $r->validated();
@@ -434,19 +466,19 @@ class PlatformConsoleController extends Controller
         }
         $staff = $this->staff($r);
         PlatformAudit::record($staff, 'tenant.eject.requested', $slug, ['reason' => $d['reason']], 'ok', null, $r->ip());
-        \App\Jobs\RunTenantEject::dispatch($slug, $staff->id, $staff->email);
+        RunTenantEject::dispatch($slug, $staff->id, $staff->email);
 
         return response()->json(['message' => 'Eject queued. The bundle path and sha256 are recorded in the audit log (tenant.eject.finished).'], 202);
     }
 
-    public function offboard(\App\Http\Requests\PlatformConsole\OffboardRequest $r, string $slug): JsonResponse
+    public function offboard(OffboardRequest $r, string $slug): JsonResponse
     {
         $d = $r->validated();
 
         return $this->lifecycleAction($r, $slug, 'tenant.offboard', fn ($t) => $this->lifecycle->offboard($t, $d['retention_days'] ?? null), confirm: true);
     }
 
-    public function purge(\App\Http\Requests\PlatformConsole\PurgeRequest $r, string $slug): JsonResponse
+    public function purge(PurgeRequest $r, string $slug): JsonResponse
     {
         $d = $r->validated();
 
@@ -468,7 +500,7 @@ class PlatformConsoleController extends Controller
         return response()->download($path, basename($path), ['X-Content-SHA256' => (string) $t->final_export_sha256]);
     }
 
-    public function legalHold(\App\Http\Requests\PlatformConsole\LegalHoldRequest $r, string $slug): JsonResponse
+    public function legalHold(LegalHoldRequest $r, string $slug): JsonResponse
     {
         $d = $r->validated();
 
@@ -485,11 +517,11 @@ class PlatformConsoleController extends Controller
     }
 
     /** Body {"flags": {"name": true|false|null}}: true/false forces it for this firm, null removes the override. */
-    public function setFlags(\App\Http\Requests\PlatformConsole\SetFlagsRequest $r, string $slug): JsonResponse
+    public function setFlags(SetFlagsRequest $r, string $slug): JsonResponse
     {
         $t = Tenant::where('slug', $slug)->firstOrFail();
         $d = $r->validated();
-        $known = array_keys(\App\Flags\Flags::registry());
+        $known = array_keys(Flags::registry());
         $unknown = array_diff(array_keys($d['flags']), $known);
 
         return $this->act($r, 'tenant.flags', $slug, ['flags' => $d['flags'], 'reason' => $d['reason']], function () use ($t, $d, $unknown) {
@@ -514,7 +546,7 @@ class PlatformConsoleController extends Controller
     {
         $overrides = (array) $t->flags;
         $out = [];
-        foreach (\App\Flags\Flags::registry() as $name => $def) {
+        foreach (Flags::registry() as $name => $def) {
             $out[] = ['flag' => $name, 'type' => $def['type'] ?? null, 'description' => $def['description'] ?? '', 'default' => (bool) ($def['default'] ?? false),
                 'tenant_override' => $overrides[$name] ?? null];
         }
@@ -562,19 +594,19 @@ class PlatformConsoleController extends Controller
     private function lastActiveDays(): array
     {
         return DB::connection(config('tenancy.control_connection'))->table('tenant_usage_daily')
-            ->where('metric', \App\Observability\UsageMetrics::API_CALLS)->where('value', '>', 0)
+            ->where('metric', UsageMetrics::API_CALLS)->where('value', '>', 0)
             ->groupBy('tenant_id')->selectRaw('tenant_id, max(day) as d')->pluck('d', 'tenant_id')->all();
     }
 
     /**
      * @return array<string,array{at:string,result:string}> firm slug => its newest backup: the newest file on the backup disk
-     *         (nightly and manual runs both leave one), or a failed manual run recorded in the audit log if that is newer.
+     *                                                      (nightly and manual runs both leave one), or a failed manual run recorded in the audit log if that is newer.
      */
     private function lastBackups(): array
     {
         $out = [];
         try {
-            $disk = \Illuminate\Support\Facades\Storage::disk(config('backup.disk'));
+            $disk = Storage::disk(config('backup.disk'));
             foreach (Tenant::pluck('slug') as $slug) {
                 $newest = 0;
                 foreach ($disk->allFiles('tenants/'.$slug) as $file) {
