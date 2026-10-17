@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\SequenceService;
+use App\Support\FirmSettings;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -49,6 +50,16 @@ class NumberingTest extends TestCase
         $second = Invoice::create($this->invoiceAttrs());
         $this->assertSame('INV-000002', $second->invoice_number, 'a failed insert left a gap');
         $this->assertSame(2, (int) DB::table('sequences')->where('name', 'invoice')->value('last_value'));
+    }
+
+    public function test_the_firms_own_prefix_is_used_and_an_invalid_one_is_ignored(): void
+    {
+        FirmSettings::set('numbering.prefix.invoice', 'BILL');
+        $this->assertSame('BILL-000001', Invoice::create($this->invoiceAttrs())->invoice_number);
+
+        // the run continues whatever the prefix; a prefix the settings form would refuse falls back to the default
+        FirmSettings::set('numbering.prefix.invoice', 'bad prefix!');
+        $this->assertSame('INV-000002', Invoice::create($this->invoiceAttrs())->invoice_number);
     }
 
     public function test_a_failed_insert_does_not_burn_a_receipt_number(): void
