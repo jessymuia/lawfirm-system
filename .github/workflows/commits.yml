@@ -16,8 +16,10 @@ jobs:
           php-version: '8.3'
       - run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
       - run: cp .env.example .env && php artisan key:generate
+      # Older history may predate the rule (an imported branch), so commit subjects only warn; the PR title is what a
+      # squash merge records on the base branch, and that must be conventional.
       - name: Commit subjects
-        run: git log --no-merges --format=%s origin/${{ github.base_ref }}..HEAD | php artisan release:draft --strict
+        run: git log --no-merges --format=%s origin/${{ github.base_ref }}..HEAD | php artisan release:draft
       - name: Pull request title
         env:
           TITLE: ${{ github.event.pull_request.title }}

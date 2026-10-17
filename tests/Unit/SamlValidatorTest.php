@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * SEC-12: SAML responses are accepted only when signed by the firm's IdP certificate and bound to our request.
- * Fixtures (tests/Fixtures/saml-cases.json) were signed by an independent library (signxml), then forged in the ways that matter.
+ * Fixtures (tests/fixtures/saml-cases.json) were signed by an independent library (signxml), then forged in the ways that matter.
  * `ok_*` cases must verify; every `bad_*` case must be refused. Time is pinned to when the fixtures were made.
  */
 class SamlValidatorTest extends TestCase
@@ -19,7 +19,7 @@ class SamlValidatorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->cases = json_decode((string) file_get_contents(dirname(__DIR__).'/Fixtures/saml-cases.json'), true);
+        $this->cases = json_decode((string) file_get_contents(dirname(__DIR__).'/fixtures/saml-cases.json'), true);
         $m = $this->cases['_meta'];
         unset($this->cases['_meta']);
         $this->cfg = [
@@ -76,7 +76,7 @@ class SamlValidatorTest extends TestCase
 
     public function test_certificates_are_parsed_from_pem_or_bare_base64_and_junk_is_dropped(): void
     {
-        $raw = json_decode((string) file_get_contents(dirname(__DIR__).'/Fixtures/saml-cases.json'), true)['_meta']['certificate'];
+        $raw = json_decode((string) file_get_contents(dirname(__DIR__).'/fixtures/saml-cases.json'), true)['_meta']['certificate'];
         $bare = trim(preg_replace('/-----[A-Z ]+-----|\s+/', '', $raw));
         $this->assertCount(1, SamlValidator::parseCertificates($raw));
         $this->assertCount(1, SamlValidator::parseCertificates($bare));

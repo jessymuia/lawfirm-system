@@ -17,5 +17,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: composer audit
+      - run: composer audit --locked   # reads composer.lock; nothing is installed in this job
       - run: npm audit --audit-level=high
