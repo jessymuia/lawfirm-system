@@ -547,7 +547,8 @@ a.list-main.cross-link {
     white-space: nowrap;
 
     &.default {
-        background: rgba(2, 132, 199, 0.1);
+        // the firm's lightest tint: readable() keeps --primary-600 above 4.5:1 on it for any brand colour
+        background: var(--primary-50);
         color: var(--primary-600);
     }
 
