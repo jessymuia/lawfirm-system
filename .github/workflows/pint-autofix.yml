@@ -1,0 +1,26 @@
+# Temporary: formats the PHP code with Pint once and commits the result. Removed again in the next commit.
+name: pint-autofix
+on:
+  push:
+    branches: [claude/focused-tesla-84epyw]
+
+permissions:
+  contents: write
+
+jobs:
+  pint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+      - run: vendor/bin/pint
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A -- . ':!vendor'
+          git diff --cached --quiet || git commit -m "style: apply Pint formatting"
+          git push
