@@ -55,7 +55,7 @@ test.describe('Delete flows / Audit logging', () => {
     // browser confirm(), so it's a real DOM element to assert against.
     const dialog = page.locator('.swal2-popup');
     await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText('Delete this record?');
+    await expect(dialog).toContainText(`Delete ${standaloneCase.case_number}?`);
 
     await dialog.getByRole('button', { name: 'Delete' }).click();
 

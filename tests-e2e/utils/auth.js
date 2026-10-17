@@ -47,6 +47,10 @@ async function logout(page) {
   // toggle button was clicked.
   await page.getByRole('button', { name: 'Open account menu' }).click();
   await page.locator('.logout-item').click();
+  // signing out asks for confirmation first (use-confirm.js); the server session ends once that request answers
+  const loggedOut = page.waitForResponse((r) => r.url().endsWith('/api/v1/logout'));
+  await page.locator('.swal2-popup').getByRole('button', { name: 'Sign out' }).click();
+  await loggedOut;
   await page.waitForURL((url) => url.pathname.startsWith('/login'), { timeout: 15_000 });
 }
 
