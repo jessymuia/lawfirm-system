@@ -1,0 +1,67 @@
+# ENG-27: capacity soak and k6 load on a runner, run by hand to compare releases (docs/ops/CAPACITY.md). Runner figures
+# are for comparison between runs only; the ceilings come from re-measuring on the real instance class.
+name: loadtest
+on:
+  workflow_dispatch:
+    inputs:
+      firms:
+        description: capacity:soak, scratch firm databases to create
+        default: '100'
+      step:
+        description: capacity:soak, firms added per step
+        default: '50'
+      vus:
+        description: k6, concurrent people
+        default: '5'
+      duration:
+        description: k6, how long at full load
+        default: 1m
+
+jobs:
+  loadtest:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: lawfirm
+          MYSQL_ROOT_PASSWORD: secret
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -psecret" --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      TENANCY_MODE: single
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: lawfirm
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_mysql
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: grafana/setup-k6-action@v1
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: npm ci && npm run build
+      - run: php artisan migrate --force && php artisan db:seed --force
+      - name: Capacity soak
+        run: php artisan capacity:soak --firms=${{ inputs.firms }} --step=${{ inputs.step }} --json --force > soak.json
+      - run: php artisan serve --port=8000 &
+      - name: k6 staff day
+        env:
+          VUS: ${{ inputs.vus }}
+          DURATION: ${{ inputs.duration }}
+        run: k6 run --summary-export=k6-summary.json loadtest/k6/staff-day.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: loadtest-results
+          path: |
+            soak.json
+            k6-summary.json

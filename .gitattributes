@@ -16,8 +16,8 @@
 artisan text eol=lf
 *.sh text eol=lf
 
-/.github export-ignore
-CHANGELOG.md export-ignore
+# The workflows and the changelog belong in every copy of the repository (a GitHub "Download ZIP" uses git archive).
+# What customers receive is trimmed separately, by deploy/dist-excludes.txt.
 
 # Generated files are compared byte for byte in CI (php artisan api:openapi --check): always LF, on every platform.
 docs/openapi.json text eol=lf

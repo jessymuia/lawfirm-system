@@ -13,13 +13,22 @@ jobs:
   backend:
     name: backend (SQLite)
     runs-on: ubuntu-latest
-    # ENG-20/TEN-10: RedisIntegrationTest and the tenant-prefixed cache/queue code run against a real Redis
+    # ENG-20/TEN-10: RedisIntegrationTest and the tenant-prefixed cache/queue code run against a real Redis;
+    # ENG-19: MeilisearchIntegrationTest against a real engine (its default host and key)
     services:
       redis:
         image: redis:7
         ports: ['6379:6379']
         options: >-
           --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=3s --health-retries=10
+      meilisearch:
+        image: getmeili/meilisearch:v1.11.3
+        env:
+          MEILI_MASTER_KEY: test-master-key-1234567890
+          MEILI_NO_ANALYTICS: 'true'
+        ports: ['7700:7700']
+        options: >-
+          --health-cmd="curl -sf http://localhost:7700/health" --health-interval=5s --health-timeout=3s --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -32,10 +41,31 @@ jobs:
       - run: php artisan migrations:lint
       - run: php artisan release:check
       - run: php artisan api:openapi --check
+      # ENG-12: the spec is published with every run
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: docs/openapi.json
       - run: vendor/bin/pint --test
       - run: vendor/bin/phpstan analyse --memory-limit=1G
       - run: php artisan test --coverage-clover build/clover.xml
       - run: php scripts/coverage-floors.php build/clover.xml
+
+  # TEN-17: the same suites inside a provisioned firm, as the SaaS runs them (docs/TESTING_MODES.md)
+  backend-multi:
+    name: backend (multi-tenant)
+    runs-on: ubuntu-latest
+    env:
+      TEST_TENANCY_MODE: multi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, gd, bcmath, pdo_sqlite
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test --testsuite=Unit,Feature --exclude-group=single-mode
 
   backend-mysql:
     name: backend (MySQL 8)
