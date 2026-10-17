@@ -364,6 +364,14 @@ Route::middleware(['auth:sanctum', 'support.session', 'mfa.policy', 'authz.guard
     Route::post('/security/scim-tokens', [\App\Http\Controllers\ScimController::class, 'createToken'])->middleware([$perm($P::MANAGE_SECURITY_SETTINGS), 'entitled:sso']);
     Route::delete('/security/scim-tokens/{id}', [\App\Http\Controllers\ScimController::class, 'revokeToken'])->whereNumber('id')->middleware($perm($P::MANAGE_SECURITY_SETTINGS));
     Route::delete('/security/sso', [\App\Http\Controllers\SsoController::class, 'destroy'])->middleware($perm($P::MANAGE_SECURITY_SETTINGS));
+    // SEC-15: the firm's own third-party credentials (write-only).
+    Route::middleware($perm($P::MANAGE_SECURITY_SETTINGS))->prefix('security/integrations')->group(function () {
+        $IC = \App\Http\Controllers\IntegrationCredentialsController::class;
+        Route::get('/', [$IC, 'index']);
+        Route::post('/mail/test', [$IC, 'testMail']);
+        Route::get('/{provider}', [$IC, 'show']);
+        Route::put('/{provider}', [$IC, 'update']);
+    });
     Route::delete('/users/{user}/mfa', [\App\Http\Controllers\MfaController::class, 'reset'])->middleware($perm($P::MANAGE_SECURITY_SETTINGS));
     // SEC-13: legal holds, retention schedule and data-subject requests.
     Route::middleware($perm($P::MANAGE_COMPLIANCE))->prefix('compliance')->group(function () {
